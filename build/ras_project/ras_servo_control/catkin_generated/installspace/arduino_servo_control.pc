@@ -1,0 +1,8 @@
+prefix=/home/ras19/catkin_ws/install
+
+Name: arduino_servo_control
+Description: Description of arduino_servo_control
+Version: 0.0.0
+Cflags: -I/home/ras19/catkin_ws/install/include
+Libs: -L/home/ras19/catkin_ws/install/lib 
+Requires: 

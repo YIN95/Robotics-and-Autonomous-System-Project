@@ -1,0 +1,1 @@
+/usr/bin/c++  -fPIC   -shared -Wl,-soname,libdistance_sensor_maze.so -o /home/ras19/catkin_ws/devel/lib/libdistance_sensor_maze.so  

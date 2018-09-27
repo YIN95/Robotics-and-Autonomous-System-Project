@@ -1,0 +1,8 @@
+prefix=/home/ras19/catkin_ws/install
+
+Name: ras_lab1_motors
+Description: Description of ras_lab1_motors
+Version: 0.1.0
+Cflags: -I/home/ras19/catkin_ws/install/include
+Libs: -L/home/ras19/catkin_ws/install/lib -lkobuki_motors
+Requires: roscpp geometry_msgs ras_lab1_msgs

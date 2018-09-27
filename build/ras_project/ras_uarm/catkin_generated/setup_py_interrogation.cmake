@@ -1,0 +1,6 @@
+set(uarm_SETUP_PY_VERSION "1.0.1")
+set(uarm_SETUP_PY_SCRIPTS "")
+set(uarm_SETUP_PY_PACKAGES "ros_kth_uarm")
+set(uarm_SETUP_PY_PACKAGE_DIRS "python/ros_kth_uarm")
+set(uarm_SETUP_PY_MODULES "")
+set(uarm_SETUP_PY_MODULE_DIRS "")
