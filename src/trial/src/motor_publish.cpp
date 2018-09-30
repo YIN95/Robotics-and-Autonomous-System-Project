@@ -15,7 +15,7 @@ int main(int argc, char **argv)
 	ros::Publisher pub = nh.advertise<std_msgs::Float32>("/motorcontrol/cmd_vel", 1);
 	
 	std_msgs::Float32 motor_msg;
-	motor_msg.data = 100;
+	motor_msg.data = 30;
 	while (ros::ok()) {
 		pub.publish(motor_msg);
 		rate.sleep();
