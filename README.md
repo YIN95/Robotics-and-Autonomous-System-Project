@@ -9,9 +9,10 @@ RAS-GROUP-9
 and the current laser scan from the laser in rviz. 
 
 *motor control command*
-''' cpp
+
+``` c++
 rosrun phidgets motor _serial:=482685 __name:=motor_left _name:=motor_left   
 rostopic pub -r 10 /motor_left/cmd_vel std_msgs/Float32 "data: 30.0"   
 rosrun phidgets motor _serial:=490601 __name:=motor_right _name:=motor_right   
 rostopic pub -r 10 /motor_right/cmd_vel std_msgs/Float32 "data: 30.0"   
-'''
+```
