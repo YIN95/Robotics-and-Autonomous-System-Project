@@ -133,6 +133,7 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("/home/ras19/catkin_ws/build/ras_lab1/ras_lab1_world/cmake_install.cmake")
   include("/home/ras19/catkin_ws/build/ras_project/ras_uarm/cmake_install.cmake")
   include("/home/ras19/catkin_ws/build/ras_project/ras_phidget/cmake_install.cmake")
+  include("/home/ras19/catkin_ws/build/trial/cmake_install.cmake")
 
 endif()
 

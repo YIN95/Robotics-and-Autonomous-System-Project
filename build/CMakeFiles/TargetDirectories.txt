@@ -367,3 +367,11 @@
 /home/ras19/catkin_ws/build/ras_project/ras_phidget/CMakeFiles/interface_kit_client.dir
 /home/ras19/catkin_ws/build/ras_project/ras_phidget/CMakeFiles/nav_msgs_generate_messages_eus.dir
 /home/ras19/catkin_ws/build/ras_project/ras_phidget/CMakeFiles/install/strip.dir
+/home/ras19/catkin_ws/build/trial/CMakeFiles/list_install_components.dir
+/home/ras19/catkin_ws/build/trial/CMakeFiles/install.dir
+/home/ras19/catkin_ws/build/trial/CMakeFiles/rebuild_cache.dir
+/home/ras19/catkin_ws/build/trial/CMakeFiles/edit_cache.dir
+/home/ras19/catkin_ws/build/trial/CMakeFiles/motor_publish.dir
+/home/ras19/catkin_ws/build/trial/CMakeFiles/install/strip.dir
+/home/ras19/catkin_ws/build/trial/CMakeFiles/install/local.dir
+/home/ras19/catkin_ws/build/trial/CMakeFiles/test.dir

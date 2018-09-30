@@ -3233,6 +3233,19 @@ nav_msgs_generate_messages_eus/fast:
 	$(MAKE) -f ras_project/ras_phidget/CMakeFiles/nav_msgs_generate_messages_eus.dir/build.make ras_project/ras_phidget/CMakeFiles/nav_msgs_generate_messages_eus.dir/build
 .PHONY : nav_msgs_generate_messages_eus/fast
 
+#=============================================================================
+# Target rules for targets named motor_publish
+
+# Build rule for target.
+motor_publish: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 motor_publish
+.PHONY : motor_publish
+
+# fast build rule for target.
+motor_publish/fast:
+	$(MAKE) -f trial/CMakeFiles/motor_publish.dir/build.make trial/CMakeFiles/motor_publish.dir/build
+.PHONY : motor_publish/fast
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -3482,6 +3495,7 @@ help:
 	@echo "... phidgets_genpy"
 	@echo "... interface_kit_client"
 	@echo "... nav_msgs_generate_messages_eus"
+	@echo "... motor_publish"
 .PHONY : help
 
 
