@@ -18,7 +18,6 @@ public: /* ros */
 
 public: /* Functions */
 	/* Constructor Functions */
-	MotorController();
 	MotorController(int control_frequency_);
 
 	/* Functions */

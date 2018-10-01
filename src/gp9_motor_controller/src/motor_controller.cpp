@@ -17,31 +17,6 @@ int main(int argc, char** argv)
 	return 0;
 }
 
-MotorController::MotorController(){		
-	nh = ros::NodeHandle("~");
-	
-	sub_velocity = nh.subscribe<geometry_msgs::Twist>("/motor_controller/velocity", 1, &MotorController::velocityCallback, this);
-	sub_encoder_left = nh.subscribe<phidgets::motor_encoder>("/motor_left/encoder", 1, &MotorController::encoderCallbackLeft, this);
-	sub_encoder_right = nh.subscribe<phidgets::motor_encoder>("/motor_right/encoder", 1, &MotorController::encoderCallbackRight, this);
-
-	pub_left = nh.advertise<std_msgs::Float32>("/motor_left/cmd_vel", 1);
-	pub_right = nh.advertise<std_msgs::Float32>("/motor_right/cmd_vel", 1);
-	
-	int control_frequency = 10;
-	dt = 1.0 / control_frequency;
-			
-	alpha = std::vector<double>(2, 0);
-	beta = std::vector<double>(2, 0);
-	alpha[LEFT] = 10;
-	alpha[RIGHT] = 10;
-	beta[LEFT] = 5;
-	beta[RIGHT] = 5;
-	int_error = std::vector<double>(2, 0);
-	w_desired =	std::vector<double>(2, 0);
-	w_estimate = std::vector<double>(2, 0);
-	delta_encoder =	std::vector<int>(2, 0);
-}
-
 MotorController::MotorController(int control_frequency_) {		
 	nh = ros::NodeHandle("~");
 
@@ -54,6 +29,7 @@ MotorController::MotorController(int control_frequency_) {
 	
 	control_frequency = control_frequency_;
 	dt = 1.0 / control_frequency;
+	
 	
 	alpha = std::vector<double>(2, 0);
 	beta = std::vector<double>(2, 0);
