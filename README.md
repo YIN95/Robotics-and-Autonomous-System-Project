@@ -42,3 +42,7 @@ To change frequency of the encoder publishing by initiating motor node with freq
 ``` c++
 rosrun phidgets motor _serial:=<SERIAL_NUMBER> _name:=<NAME> _frequency:=<FREQUENCY>
 ```
+Also can launch with the launch file
+``` c++
+roslaunch gp9_motor_controller motor_controller.launch 
+```
