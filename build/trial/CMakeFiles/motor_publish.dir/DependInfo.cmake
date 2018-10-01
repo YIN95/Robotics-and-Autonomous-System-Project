@@ -23,6 +23,7 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "/usr/include/eigen3"
   "/usr/include/OGRE/Overlay"
   "/usr/include/OGRE"
+  "/home/ras19/catkin_ws/src/trial/./include/trial"
   )
 
 # Targets to which this target links.

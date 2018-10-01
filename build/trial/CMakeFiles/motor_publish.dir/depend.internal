@@ -3,6 +3,7 @@
 
 trial/CMakeFiles/motor_publish.dir/src/motor_publish.cpp.o
  /home/ras19/catkin_ws/devel/include/phidgets/motor_encoder.h
+ /home/ras19/catkin_ws/src/trial/./include/trial/motor_publish.h
  /home/ras19/catkin_ws/src/trial/src/motor_publish.cpp
  /opt/ros/kinetic/include/geometry_msgs/Twist.h
  /opt/ros/kinetic/include/geometry_msgs/Vector3.h

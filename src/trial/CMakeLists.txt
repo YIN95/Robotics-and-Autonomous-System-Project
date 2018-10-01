@@ -120,6 +120,7 @@ include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
 )
+include_directories(./include/trial/)
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}

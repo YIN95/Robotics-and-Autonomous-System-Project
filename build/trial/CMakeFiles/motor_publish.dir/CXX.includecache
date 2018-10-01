@@ -24,9 +24,9 @@ ros/message_operations.h
 std_msgs/Header.h
 -
 
-/home/ras19/catkin_ws/src/trial/src/motor_publish.cpp
+/home/ras19/catkin_ws/src/trial/./include/trial/motor_publish.h
 ros/ros.h
-/home/ras19/catkin_ws/src/trial/src/ros/ros.h
+/home/ras19/catkin_ws/src/trial/./include/trial/ros/ros.h
 math.h
 -
 vector
@@ -36,7 +36,11 @@ std_msgs/Float32.h
 geometry_msgs/Twist.h
 -
 phidgets/motor_encoder.h
-/home/ras19/catkin_ws/src/trial/src/phidgets/motor_encoder.h
+/home/ras19/catkin_ws/src/trial/./include/trial/phidgets/motor_encoder.h
+
+/home/ras19/catkin_ws/src/trial/src/motor_publish.cpp
+motor_publish.h
+/home/ras19/catkin_ws/src/trial/src/motor_publish.h
 
 /opt/ros/kinetic/include/geometry_msgs/Twist.h
 string
