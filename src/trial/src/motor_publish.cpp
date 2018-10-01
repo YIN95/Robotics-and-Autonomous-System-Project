@@ -26,8 +26,8 @@ class MotorController
 			nh = ros::NodeHandle("~");
 			
 			sub_velocity = nh.subscribe<geometry_msgs::Twist>("/motor_controller/velocity", 1, &MotorController::velocityCallback, this);
-			sub_encoder_left = nh.subscribe<phidgets::motor_encoder>("motor_left/encoder", 1, &MotorController::encoderCallbackLeft, this);
-			sub_encoder_right = nh.subscribe<phidgets::motor_encoder>("motor_right/encoder", 1, &MotorController::encoderCallbackRight, this);
+			sub_encoder_left = nh.subscribe<phidgets::motor_encoder>("/motor_left/encoder", 1, &MotorController::encoderCallbackLeft, this);
+			sub_encoder_right = nh.subscribe<phidgets::motor_encoder>("/motor_right/encoder", 1, &MotorController::encoderCallbackRight, this);
 	
 			pub_left = nh.advertise<std_msgs::Float32>("/motor_left/cmd_vel", 1);
 			pub_right = nh.advertise<std_msgs::Float32>("/motor_right/cmd_vel", 1);
