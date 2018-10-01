@@ -526,7 +526,7 @@ _catkin_empty_exported_target: cmake_check_build_system
 
 # fast build rule for target.
 _catkin_empty_exported_target/fast:
-	$(MAKE) -f ras_lab1/ras_lab1/CMakeFiles/_catkin_empty_exported_target.dir/build.make ras_lab1/ras_lab1/CMakeFiles/_catkin_empty_exported_target.dir/build
+	$(MAKE) -f motor_controller/CMakeFiles/_catkin_empty_exported_target.dir/build.make motor_controller/CMakeFiles/_catkin_empty_exported_target.dir/build
 .PHONY : _catkin_empty_exported_target/fast
 
 #=============================================================================
@@ -3246,6 +3246,19 @@ motor_publish/fast:
 	$(MAKE) -f trial/CMakeFiles/motor_publish.dir/build.make trial/CMakeFiles/motor_publish.dir/build
 .PHONY : motor_publish/fast
 
+#=============================================================================
+# Target rules for targets named velocity_publish
+
+# Build rule for target.
+velocity_publish: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 velocity_publish
+.PHONY : velocity_publish
+
+# fast build rule for target.
+velocity_publish/fast:
+	$(MAKE) -f trial/CMakeFiles/velocity_publish.dir/build.make trial/CMakeFiles/velocity_publish.dir/build
+.PHONY : velocity_publish/fast
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -3496,6 +3509,7 @@ help:
 	@echo "... interface_kit_client"
 	@echo "... nav_msgs_generate_messages_eus"
 	@echo "... motor_publish"
+	@echo "... velocity_publish"
 .PHONY : help
 
 

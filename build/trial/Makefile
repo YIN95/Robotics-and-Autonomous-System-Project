@@ -100,6 +100,17 @@ edit_cache/fast: edit_cache
 
 .PHONY : edit_cache/fast
 
+# Special rule for the target test
+test:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running tests..."
+	/usr/bin/ctest --force-new-ctest-process $(ARGS)
+.PHONY : test
+
+# Special rule for the target test
+test/fast: test
+
+.PHONY : test/fast
+
 # Special rule for the target install/strip
 install/strip: preinstall
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing the project stripped..."
@@ -121,17 +132,6 @@ install/local: preinstall
 install/local/fast: install/local
 
 .PHONY : install/local/fast
-
-# Special rule for the target test
-test:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running tests..."
-	/usr/bin/ctest --force-new-ctest-process $(ARGS)
-.PHONY : test
-
-# Special rule for the target test
-test/fast: test
-
-.PHONY : test/fast
 
 # The main all target
 all: cmake_check_build_system
@@ -180,6 +180,21 @@ motor_publish/fast:
 	cd /home/ras19/catkin_ws/build && $(MAKE) -f trial/CMakeFiles/motor_publish.dir/build.make trial/CMakeFiles/motor_publish.dir/build
 .PHONY : motor_publish/fast
 
+# Convenience name for target.
+trial/CMakeFiles/velocity_publish.dir/rule:
+	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 trial/CMakeFiles/velocity_publish.dir/rule
+.PHONY : trial/CMakeFiles/velocity_publish.dir/rule
+
+# Convenience name for target.
+velocity_publish: trial/CMakeFiles/velocity_publish.dir/rule
+
+.PHONY : velocity_publish
+
+# fast build rule for target.
+velocity_publish/fast:
+	cd /home/ras19/catkin_ws/build && $(MAKE) -f trial/CMakeFiles/velocity_publish.dir/build.make trial/CMakeFiles/velocity_publish.dir/build
+.PHONY : velocity_publish/fast
+
 src/motor_publish.o: src/motor_publish.cpp.o
 
 .PHONY : src/motor_publish.o
@@ -207,6 +222,33 @@ src/motor_publish.cpp.s:
 	cd /home/ras19/catkin_ws/build && $(MAKE) -f trial/CMakeFiles/motor_publish.dir/build.make trial/CMakeFiles/motor_publish.dir/src/motor_publish.cpp.s
 .PHONY : src/motor_publish.cpp.s
 
+src/velocity_publish.o: src/velocity_publish.cpp.o
+
+.PHONY : src/velocity_publish.o
+
+# target to build an object file
+src/velocity_publish.cpp.o:
+	cd /home/ras19/catkin_ws/build && $(MAKE) -f trial/CMakeFiles/velocity_publish.dir/build.make trial/CMakeFiles/velocity_publish.dir/src/velocity_publish.cpp.o
+.PHONY : src/velocity_publish.cpp.o
+
+src/velocity_publish.i: src/velocity_publish.cpp.i
+
+.PHONY : src/velocity_publish.i
+
+# target to preprocess a source file
+src/velocity_publish.cpp.i:
+	cd /home/ras19/catkin_ws/build && $(MAKE) -f trial/CMakeFiles/velocity_publish.dir/build.make trial/CMakeFiles/velocity_publish.dir/src/velocity_publish.cpp.i
+.PHONY : src/velocity_publish.cpp.i
+
+src/velocity_publish.s: src/velocity_publish.cpp.s
+
+.PHONY : src/velocity_publish.s
+
+# target to generate assembly for a file
+src/velocity_publish.cpp.s:
+	cd /home/ras19/catkin_ws/build && $(MAKE) -f trial/CMakeFiles/velocity_publish.dir/build.make trial/CMakeFiles/velocity_publish.dir/src/velocity_publish.cpp.s
+.PHONY : src/velocity_publish.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -217,13 +259,17 @@ help:
 	@echo "... install"
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
+	@echo "... test"
 	@echo "... motor_publish"
+	@echo "... velocity_publish"
 	@echo "... install/strip"
 	@echo "... install/local"
-	@echo "... test"
 	@echo "... src/motor_publish.o"
 	@echo "... src/motor_publish.i"
 	@echo "... src/motor_publish.s"
+	@echo "... src/velocity_publish.o"
+	@echo "... src/velocity_publish.i"
+	@echo "... src/velocity_publish.s"
 .PHONY : help
 
 

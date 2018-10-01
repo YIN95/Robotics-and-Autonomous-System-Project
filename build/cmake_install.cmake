@@ -118,6 +118,7 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
   include("/home/ras19/catkin_ws/build/gtest/cmake_install.cmake")
   include("/home/ras19/catkin_ws/build/ras_project/ras_servo_control/cmake_install.cmake")
+  include("/home/ras19/catkin_ws/build/motor_controller/cmake_install.cmake")
   include("/home/ras19/catkin_ws/build/ras_lab1/ras_lab1/cmake_install.cmake")
   include("/home/ras19/catkin_ws/build/ras_lab1/ras_lab1_launch/cmake_install.cmake")
   include("/home/ras19/catkin_ws/build/ras_project/ras_maze/ras_maze_launch/cmake_install.cmake")

@@ -138,6 +138,9 @@ include_directories(
 add_executable(motor_publish src/motor_publish.cpp)
 target_link_libraries(motor_publish ${catkin_LIBRARIES})
 
+add_executable(velocity_publish src/velocity_publish.cpp)
+target_link_libraries(velocity_publish ${catkin_LIBRARIES})
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
