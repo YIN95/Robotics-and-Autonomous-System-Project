@@ -56,28 +56,6 @@ CMAKE_BINARY_DIR = /home/ras19/catkin_ws/build
 #=============================================================================
 # Targets provided globally by CMake.
 
-# Special rule for the target rebuild_cache
-rebuild_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/usr/bin/cmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
-.PHONY : rebuild_cache
-
-# Special rule for the target rebuild_cache
-rebuild_cache/fast: rebuild_cache
-
-.PHONY : rebuild_cache/fast
-
-# Special rule for the target edit_cache
-edit_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
-	/usr/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
-.PHONY : edit_cache
-
-# Special rule for the target edit_cache
-edit_cache/fast: edit_cache
-
-.PHONY : edit_cache/fast
-
 # Special rule for the target list_install_components
 list_install_components:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Available install components are: \"Unspecified\""
@@ -100,16 +78,38 @@ install/fast: preinstall/fast
 	/usr/bin/cmake -P cmake_install.cmake
 .PHONY : install/fast
 
-# Special rule for the target install/local
-install/local: preinstall
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
-	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
-.PHONY : install/local
+# Special rule for the target rebuild_cache
+rebuild_cache:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
+	/usr/bin/cmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+.PHONY : rebuild_cache
 
-# Special rule for the target install/local
-install/local/fast: install/local
+# Special rule for the target rebuild_cache
+rebuild_cache/fast: rebuild_cache
 
-.PHONY : install/local/fast
+.PHONY : rebuild_cache/fast
+
+# Special rule for the target edit_cache
+edit_cache:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
+	/usr/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
+.PHONY : edit_cache
+
+# Special rule for the target edit_cache
+edit_cache/fast: edit_cache
+
+.PHONY : edit_cache/fast
+
+# Special rule for the target test
+test:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running tests..."
+	/usr/bin/ctest --force-new-ctest-process $(ARGS)
+.PHONY : test
+
+# Special rule for the target test
+test/fast: test
+
+.PHONY : test/fast
 
 # Special rule for the target install/strip
 install/strip: preinstall
@@ -122,16 +122,16 @@ install/strip/fast: install/strip
 
 .PHONY : install/strip/fast
 
-# Special rule for the target test
-test:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running tests..."
-	/usr/bin/ctest --force-new-ctest-process $(ARGS)
-.PHONY : test
+# Special rule for the target install/local
+install/local: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
+	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local
 
-# Special rule for the target test
-test/fast: test
+# Special rule for the target install/local
+install/local/fast: install/local
 
-.PHONY : test/fast
+.PHONY : install/local/fast
 
 # The main all target
 all: cmake_check_build_system
@@ -166,19 +166,88 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
-motor_controller/CMakeFiles/_catkin_empty_exported_target.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 motor_controller/CMakeFiles/_catkin_empty_exported_target.dir/rule
-.PHONY : motor_controller/CMakeFiles/_catkin_empty_exported_target.dir/rule
+motor_controller/CMakeFiles/motor_controller.dir/rule:
+	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 motor_controller/CMakeFiles/motor_controller.dir/rule
+.PHONY : motor_controller/CMakeFiles/motor_controller.dir/rule
 
 # Convenience name for target.
-_catkin_empty_exported_target: motor_controller/CMakeFiles/_catkin_empty_exported_target.dir/rule
+motor_controller: motor_controller/CMakeFiles/motor_controller.dir/rule
 
-.PHONY : _catkin_empty_exported_target
+.PHONY : motor_controller
 
 # fast build rule for target.
-_catkin_empty_exported_target/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f motor_controller/CMakeFiles/_catkin_empty_exported_target.dir/build.make motor_controller/CMakeFiles/_catkin_empty_exported_target.dir/build
-.PHONY : _catkin_empty_exported_target/fast
+motor_controller/fast:
+	cd /home/ras19/catkin_ws/build && $(MAKE) -f motor_controller/CMakeFiles/motor_controller.dir/build.make motor_controller/CMakeFiles/motor_controller.dir/build
+.PHONY : motor_controller/fast
+
+# Convenience name for target.
+motor_controller/CMakeFiles/velocity_controller.dir/rule:
+	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 motor_controller/CMakeFiles/velocity_controller.dir/rule
+.PHONY : motor_controller/CMakeFiles/velocity_controller.dir/rule
+
+# Convenience name for target.
+velocity_controller: motor_controller/CMakeFiles/velocity_controller.dir/rule
+
+.PHONY : velocity_controller
+
+# fast build rule for target.
+velocity_controller/fast:
+	cd /home/ras19/catkin_ws/build && $(MAKE) -f motor_controller/CMakeFiles/velocity_controller.dir/build.make motor_controller/CMakeFiles/velocity_controller.dir/build
+.PHONY : velocity_controller/fast
+
+src/motor_controller.o: src/motor_controller.cpp.o
+
+.PHONY : src/motor_controller.o
+
+# target to build an object file
+src/motor_controller.cpp.o:
+	cd /home/ras19/catkin_ws/build && $(MAKE) -f motor_controller/CMakeFiles/motor_controller.dir/build.make motor_controller/CMakeFiles/motor_controller.dir/src/motor_controller.cpp.o
+.PHONY : src/motor_controller.cpp.o
+
+src/motor_controller.i: src/motor_controller.cpp.i
+
+.PHONY : src/motor_controller.i
+
+# target to preprocess a source file
+src/motor_controller.cpp.i:
+	cd /home/ras19/catkin_ws/build && $(MAKE) -f motor_controller/CMakeFiles/motor_controller.dir/build.make motor_controller/CMakeFiles/motor_controller.dir/src/motor_controller.cpp.i
+.PHONY : src/motor_controller.cpp.i
+
+src/motor_controller.s: src/motor_controller.cpp.s
+
+.PHONY : src/motor_controller.s
+
+# target to generate assembly for a file
+src/motor_controller.cpp.s:
+	cd /home/ras19/catkin_ws/build && $(MAKE) -f motor_controller/CMakeFiles/motor_controller.dir/build.make motor_controller/CMakeFiles/motor_controller.dir/src/motor_controller.cpp.s
+.PHONY : src/motor_controller.cpp.s
+
+src/velocity_controller.o: src/velocity_controller.cpp.o
+
+.PHONY : src/velocity_controller.o
+
+# target to build an object file
+src/velocity_controller.cpp.o:
+	cd /home/ras19/catkin_ws/build && $(MAKE) -f motor_controller/CMakeFiles/velocity_controller.dir/build.make motor_controller/CMakeFiles/velocity_controller.dir/src/velocity_controller.cpp.o
+.PHONY : src/velocity_controller.cpp.o
+
+src/velocity_controller.i: src/velocity_controller.cpp.i
+
+.PHONY : src/velocity_controller.i
+
+# target to preprocess a source file
+src/velocity_controller.cpp.i:
+	cd /home/ras19/catkin_ws/build && $(MAKE) -f motor_controller/CMakeFiles/velocity_controller.dir/build.make motor_controller/CMakeFiles/velocity_controller.dir/src/velocity_controller.cpp.i
+.PHONY : src/velocity_controller.cpp.i
+
+src/velocity_controller.s: src/velocity_controller.cpp.s
+
+.PHONY : src/velocity_controller.s
+
+# target to generate assembly for a file
+src/velocity_controller.cpp.s:
+	cd /home/ras19/catkin_ws/build && $(MAKE) -f motor_controller/CMakeFiles/velocity_controller.dir/build.make motor_controller/CMakeFiles/velocity_controller.dir/src/velocity_controller.cpp.s
+.PHONY : src/velocity_controller.cpp.s
 
 # Help Target
 help:
@@ -186,14 +255,21 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
-	@echo "... rebuild_cache"
-	@echo "... edit_cache"
 	@echo "... list_install_components"
 	@echo "... install"
-	@echo "... _catkin_empty_exported_target"
-	@echo "... install/local"
-	@echo "... install/strip"
+	@echo "... rebuild_cache"
+	@echo "... edit_cache"
 	@echo "... test"
+	@echo "... motor_controller"
+	@echo "... velocity_controller"
+	@echo "... install/strip"
+	@echo "... install/local"
+	@echo "... src/motor_controller.o"
+	@echo "... src/motor_controller.i"
+	@echo "... src/motor_controller.s"
+	@echo "... src/velocity_controller.o"
+	@echo "... src/velocity_controller.i"
+	@echo "... src/velocity_controller.s"
 .PHONY : help
 
 

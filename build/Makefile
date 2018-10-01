@@ -526,7 +526,7 @@ _catkin_empty_exported_target: cmake_check_build_system
 
 # fast build rule for target.
 _catkin_empty_exported_target/fast:
-	$(MAKE) -f motor_controller/CMakeFiles/_catkin_empty_exported_target.dir/build.make motor_controller/CMakeFiles/_catkin_empty_exported_target.dir/build
+	$(MAKE) -f ras_lab1/ras_lab1/CMakeFiles/_catkin_empty_exported_target.dir/build.make ras_lab1/ras_lab1/CMakeFiles/_catkin_empty_exported_target.dir/build
 .PHONY : _catkin_empty_exported_target/fast
 
 #=============================================================================
@@ -3234,6 +3234,32 @@ nav_msgs_generate_messages_eus/fast:
 .PHONY : nav_msgs_generate_messages_eus/fast
 
 #=============================================================================
+# Target rules for targets named motor_controller
+
+# Build rule for target.
+motor_controller: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 motor_controller
+.PHONY : motor_controller
+
+# fast build rule for target.
+motor_controller/fast:
+	$(MAKE) -f gp9_motor_controller/CMakeFiles/motor_controller.dir/build.make gp9_motor_controller/CMakeFiles/motor_controller.dir/build
+.PHONY : motor_controller/fast
+
+#=============================================================================
+# Target rules for targets named velocity_controller
+
+# Build rule for target.
+velocity_controller: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 velocity_controller
+.PHONY : velocity_controller
+
+# fast build rule for target.
+velocity_controller/fast:
+	$(MAKE) -f gp9_motor_controller/CMakeFiles/velocity_controller.dir/build.make gp9_motor_controller/CMakeFiles/velocity_controller.dir/build
+.PHONY : velocity_controller/fast
+
+#=============================================================================
 # Target rules for targets named motor_publish
 
 # Build rule for target.
@@ -3508,6 +3534,8 @@ help:
 	@echo "... phidgets_genpy"
 	@echo "... interface_kit_client"
 	@echo "... nav_msgs_generate_messages_eus"
+	@echo "... motor_controller"
+	@echo "... velocity_controller"
 	@echo "... motor_publish"
 	@echo "... velocity_publish"
 .PHONY : help
