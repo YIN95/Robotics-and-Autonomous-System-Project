@@ -2,7 +2,7 @@
 
 int main(int argc, char** argv) 
 {	
-	const int control_frequency = 10;
+	int control_frequency = 10;
 	
 	ros::init(argc, argv, "motor_publish");
 	MotorController motorController(control_frequency);
@@ -12,14 +12,12 @@ int main(int argc, char** argv)
 		ros::spinOnce();
 		motorController.PI();
 		rate.sleep();
-		ROS_INFO("------------------------------");
+		ROS_INFO("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
 	}
 	return 0;
 }
 
-
-MotorController::MotorController(){
-			
+MotorController::MotorController(){		
 	nh = ros::NodeHandle("~");
 	
 	sub_velocity = nh.subscribe<geometry_msgs::Twist>("/motor_controller/velocity", 1, &MotorController::velocityCallback, this);
@@ -76,12 +74,12 @@ void MotorController::velocityCallback(const geometry_msgs::Twist::ConstPtr &msg
 
 void MotorController::encoderCallbackLeft(const phidgets::motor_encoder::ConstPtr &msg) {
 	delta_encoder[LEFT] = msg->count_change;
-	ROS_INFO("enc left : %i", delta_encoder[LEFT]);
+	ROS_INFO("encoder_left : %i", delta_encoder[LEFT]);
 }
 
 void MotorController::encoderCallbackRight(const phidgets::motor_encoder::ConstPtr &msg) {
 	delta_encoder[RIGHT] = msg->count_change;
-	ROS_INFO("enc right : %i", delta_encoder[RIGHT]);
+	ROS_INFO("encoder_right : %i", delta_encoder[RIGHT]);
 }
 
 void MotorController::updateEstimatedSpeed() {
@@ -89,16 +87,16 @@ void MotorController::updateEstimatedSpeed() {
 	w_estimate[RIGHT] = (delta_encoder[RIGHT] * 2 * M_PI * control_frequency) / ticks_per_rev;
 	w_estimate[RIGHT] *= -1; // compensate for right wheel spinning in wrong direction
 
-	ROS_INFO("w est left : %f", w_estimate[LEFT]);
-	ROS_INFO("w est right: %f", w_estimate[RIGHT]);
+	ROS_INFO("w_estimated_left : %f", w_estimate[LEFT]);
+	ROS_INFO("w_estimated_right: %f", w_estimate[RIGHT]);
 }
 
 void MotorController::updateDesiredSpeed() {
 	w_desired[LEFT] = (v_robot_desired - w_robot_desired * (base / 2)) / wheel_radius;
-	w_desired[RIGHT] = (v_robot_desired + w_robot_desired * (base / 2)) / wheel_radius;
+	w_desired[RIGHT] = (-1*v_robot_desired + w_robot_desired * (base / 2)) / wheel_radius;
 
-	ROS_INFO("w des left : %f", w_desired[LEFT]);
-	ROS_INFO("w des right: %f", w_desired[RIGHT]);
+	ROS_INFO("w_desired_left : %f", w_desired[LEFT]);
+	ROS_INFO("w_desired_right: %f", w_desired[RIGHT]);
 }
 
 void MotorController::setMotorPowers() {

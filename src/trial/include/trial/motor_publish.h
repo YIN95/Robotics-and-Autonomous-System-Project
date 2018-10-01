@@ -41,21 +41,21 @@ private:
 	const static double base = 0.19;
 	const static double wheel_radius = 0.05;
 	const static int ticks_per_rev = 360;
-
-	int control_frequency;
-	double dt;
 	
+    int control_frequency;
+	
+    double dt;
 	double v_robot_desired;
 	double w_robot_desired;
 
 	std_msgs::Float32 left_motor;
 	std_msgs::Float32 right_motor;
 
+    /* Variables for PI controller*/
 	std::vector<double> alpha;
 	std::vector<double> beta;
 	std::vector<double> int_error;
 	std::vector<double> w_desired;
 	std::vector<double> w_estimate;
 	std::vector<int> delta_encoder;
-
 };

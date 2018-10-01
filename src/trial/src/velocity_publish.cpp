@@ -1,7 +1,7 @@
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
 
-double v = 0.1;	
+double v = 0.2;	
 double w = 0;
 
 int main(int argc, char **argv)
