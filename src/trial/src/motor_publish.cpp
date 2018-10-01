@@ -76,8 +76,8 @@ class MotorController
 			beta = std::vector<double>(2, 0);
 			alpha[LEFT] = 20;
 			alpha[RIGHT] = 20;
-			beta[LEFT] = 5;
-			beta[RIGHT] = 5;
+			beta[LEFT] = 0;
+			beta[RIGHT] = 0;
 			int_error = std::vector<double>(2, 0);
 			w_desired =	std::vector<double>(2, 0);
 			w_estimate = std::vector<double>(2, 0);
@@ -92,10 +92,12 @@ class MotorController
 		
 		void encoderCallbackLeft(const phidgets::motor_encoder::ConstPtr &msg) {
 			delta_encoder[LEFT] = msg->count_change;
+			ROS_INFO("enc left : %i", delta_encoder[LEFT]);
 		}
 		
 		void encoderCallbackRight(const phidgets::motor_encoder::ConstPtr &msg) {
 			delta_encoder[RIGHT] = msg->count_change;
+			ROS_INFO("enc right : %i", delta_encoder[RIGHT]);
 		}
 
 		void updateEstimatedSpeed() {
@@ -127,7 +129,7 @@ class MotorController
 			
 			
 			error = w_desired[RIGHT] - w_estimate[RIGHT];
-			int_error[LEFT] += error * dt;
+			int_error[RIGHT] += error * dt;
 			ROS_INFO("error: %f", error);
 			signal = int (alpha[RIGHT] * error + beta[RIGHT] * int_error[RIGHT]);
 			right_motor.data = signal;
@@ -154,7 +156,7 @@ class MotorController
 			setMotorPowers();
 			clipPowerValues();
 			pub_left.publish(left_motor);
-			pub_right.publish(right_motor);
+			//pub_right.publish(right_motor);
 		}
 	
 	private:
