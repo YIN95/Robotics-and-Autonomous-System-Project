@@ -57,8 +57,8 @@ MotorController::MotorController(int control_frequency_) {
 	
 	alpha = std::vector<double>(2, 0);
 	beta = std::vector<double>(2, 0);
-	alpha[LEFT] = 10;
-	alpha[RIGHT] = 10;
+	alpha[LEFT] = 15;
+	alpha[RIGHT] = 15;
 	beta[LEFT] = 5;
 	beta[RIGHT] = 5;
 	int_error = std::vector<double>(2, 0);

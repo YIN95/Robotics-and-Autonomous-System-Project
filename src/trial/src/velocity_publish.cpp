@@ -1,6 +1,8 @@
 #include "velocity_publish.h"
 
-VelocityControler VW(0.2, 0.0);
+VelocityControler VW(0.08, 0);
+// when w > 0, turn left
+// when w < 0 turn right
 
 int main(int argc, char **argv)
 {
@@ -22,6 +24,28 @@ int main(int argc, char **argv)
 	}
 	return 0;
 }
+
+/* Command control */
+void VelocityControler::goForward(){
+	setVW(0.08, 0.0);
+	return;
+}
+
+void VelocityControler::goBackward(){
+	setVW(-0.08, 0.0);
+	return;
+}
+
+void VelocityControler::turnLeft(){
+	setVW(0.08, 0.2);
+	return;
+}
+
+void VelocityControler::turnRight(){
+	setVW(0.08, -0.2);
+	return;
+}
+
 
 /* Velocity Controller*/
 VelocityControler::VelocityControler(){
