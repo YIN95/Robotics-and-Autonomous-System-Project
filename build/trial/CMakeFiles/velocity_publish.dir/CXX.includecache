@@ -6,11 +6,15 @@
 
 #IncludeRegexTransform: 
 
-/home/ras19/catkin_ws/src/trial/src/velocity_publish.cpp
+/home/ras19/catkin_ws/src/trial/./include/trial/velocity_publish.h
 ros/ros.h
 -
 geometry_msgs/Twist.h
 -
+
+/home/ras19/catkin_ws/src/trial/src/velocity_publish.cpp
+velocity_publish.h
+/home/ras19/catkin_ws/src/trial/src/velocity_publish.h
 
 /opt/ros/kinetic/include/geometry_msgs/Twist.h
 string

@@ -57,10 +57,10 @@ MotorController::MotorController(int control_frequency_) {
 	
 	alpha = std::vector<double>(2, 0);
 	beta = std::vector<double>(2, 0);
-	alpha[LEFT] = 20;
-	alpha[RIGHT] = 20;
-	beta[LEFT] = 0;
-	beta[RIGHT] = 0;
+	alpha[LEFT] = 10;
+	alpha[RIGHT] = 10;
+	beta[LEFT] = 5;
+	beta[RIGHT] = 5;
 	int_error = std::vector<double>(2, 0);
 	w_desired =	std::vector<double>(2, 0);
 	w_estimate = std::vector<double>(2, 0);
@@ -79,48 +79,44 @@ void MotorController::encoderCallbackLeft(const phidgets::motor_encoder::ConstPt
 
 void MotorController::encoderCallbackRight(const phidgets::motor_encoder::ConstPtr &msg) {
 	delta_encoder[RIGHT] = msg->count_change;
+	delta_encoder[RIGHT] *= -1;
 	ROS_INFO("encoder_right : %i", delta_encoder[RIGHT]);
 }
 
 void MotorController::updateEstimatedSpeed() {
 	w_estimate[LEFT] = (delta_encoder[LEFT] * 2 * M_PI * control_frequency) / ticks_per_rev;
 	w_estimate[RIGHT] = (delta_encoder[RIGHT] * 2 * M_PI * control_frequency) / ticks_per_rev;
-	w_estimate[RIGHT] *= -1; // compensate for right wheel spinning in wrong direction
-
 	ROS_INFO("w_estimated_left : %f", w_estimate[LEFT]);
 	ROS_INFO("w_estimated_right: %f", w_estimate[RIGHT]);
 }
 
 void MotorController::updateDesiredSpeed() {
 	w_desired[LEFT] = (v_robot_desired - w_robot_desired * (base / 2)) / wheel_radius;
-	w_desired[RIGHT] = (-1*v_robot_desired + w_robot_desired * (base / 2)) / wheel_radius;
-
+	w_desired[RIGHT] = (v_robot_desired + w_robot_desired * (base / 2)) / wheel_radius;
 	ROS_INFO("w_desired_left : %f", w_desired[LEFT]);
 	ROS_INFO("w_desired_right: %f", w_desired[RIGHT]);
 }
 
 void MotorController::setMotorPowers() {
-	double error;
+	double error_left;
+	double error_right;
 	int signal;
 	
-	error = w_desired[LEFT] - w_estimate[LEFT];
-	int_error[LEFT] += error * dt;
-	ROS_INFO("error: %f", error);
-	signal = int (alpha[LEFT] * error + beta[LEFT] * int_error[LEFT]);
+	error_left = w_desired[LEFT] - w_estimate[LEFT];
+	int_error[LEFT] += error_left * dt;
+	ROS_INFO("error_left: %f", error_left);
+	signal = int (alpha[LEFT] * error_left + beta[LEFT] * int_error[LEFT]);
 	left_motor.data = signal;
 	
 	
-	error = w_desired[RIGHT] - w_estimate[RIGHT];
-	int_error[RIGHT] += error * dt;
-	ROS_INFO("error: %f", error);
-	signal = int (alpha[RIGHT] * error + beta[RIGHT] * int_error[RIGHT]);
+	error_right = w_estimate[RIGHT] - w_desired[RIGHT];
+	int_error[RIGHT] += error_right * dt;
+	ROS_INFO("error_right: %f", error_right);
+	signal = int (alpha[RIGHT] * error_right + beta[RIGHT] * int_error[RIGHT]);
 	right_motor.data = signal;
 }
 
 void MotorController::clipPowerValues() {
-	double clip_value = 100;
-
-	// Also clip on negative values
 	double left = std::abs(left_motor.data);
 	double right = std::abs(right_motor.data);
 	double largest = std::max(left, right);

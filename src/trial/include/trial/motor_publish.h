@@ -5,8 +5,7 @@
 #include <geometry_msgs/Twist.h>
 #include "phidgets/motor_encoder.h"
 
-class MotorController 
-{
+class MotorController{
 public: /* ros */
 	ros::NodeHandle nh;
 	/* Subscribers */
@@ -41,7 +40,7 @@ private:
 	const static double base = 0.19;
 	const static double wheel_radius = 0.05;
 	const static int ticks_per_rev = 360;
-	
+	const static double clip_value = 100;
     int control_frequency;
 	
     double dt;

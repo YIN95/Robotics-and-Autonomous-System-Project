@@ -1,11 +1,10 @@
-#include <ros/ros.h>
-#include <geometry_msgs/Twist.h>
+#include "velocity_publish.h"
 
-double v = 0.2;	
-double w = 0;
+VelocityControler VW(0.2, 0.0);
 
 int main(int argc, char **argv)
 {
+	
 	ros::init(argc, argv, "velocity_publish");
 	ros::NodeHandle nh;
 	ros::Rate rate(10);
@@ -14,12 +13,35 @@ int main(int argc, char **argv)
 	
 	geometry_msgs::Twist velocity_msg;
 	
-	velocity_msg.linear.x = v;
-	velocity_msg.angular.z = w;
+	velocity_msg.linear.x = VW.v;
+	velocity_msg.angular.z = VW.w;
 	
-	while (ros::ok()) {
+	while (ros::ok()){
 		rate.sleep();
 		pub.publish(velocity_msg);
 	}
 	return 0;
+}
+
+/* Velocity Controller*/
+VelocityControler::VelocityControler(){
+	v = 0.2;
+	w = 0;
+}
+VelocityControler::VelocityControler(double v_, double w_){
+	v = v_;
+	w = w_;
+}
+void VelocityControler::setV(double v_){
+	v = v_;
+	return;
+}
+void VelocityControler::setW(double w_){
+	w = w_;
+	return;
+}
+void VelocityControler::setVW(double v_, double w_){
+	setV(v_);
+	setW(w_);
+	return;
 }
