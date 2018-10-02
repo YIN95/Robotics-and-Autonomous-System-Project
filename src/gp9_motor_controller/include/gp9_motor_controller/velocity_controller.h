@@ -1,15 +1,16 @@
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
 
-class VelocityControler{
+class VelocityController{
 public:
+    geometry_msgs::Twist velocity_msg;
     double v;
     double w;
 
 public: /* Functions */
 	/* Constructor Functions */
-	VelocityControler();
-	VelocityControler(double v_, double w_);
+	VelocityController();
+	VelocityController(double v_, double w_);
 
     /* velocity setting */
     void setV(double v_);
@@ -21,4 +22,5 @@ public: /* Functions */
     void goBackward();
     void turnLeft();
     void turnRight();
+    void twistCallBack(const geometry_msgs::Twist::ConstPtr& msg);
 };

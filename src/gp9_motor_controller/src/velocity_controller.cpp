@@ -1,6 +1,5 @@
 #include "velocity_controller.h"
 
-VelocityControler VW(0.08, 0);
 // when w > 0, turn left
 // when w < 0 turn right
 
@@ -8,63 +7,66 @@ int main(int argc, char **argv)
 {
 	
 	ros::init(argc, argv, "velocity_publish");
+	VelocityController VW;
 	ros::NodeHandle nh;
 	ros::Rate rate(10);
-	
+
+	ros::Subscriber key_sub = nh.subscribe<geometry_msgs::Twist>("/key_vel", 1, &VelocityController::twistCallBack, &VW);
 	ros::Publisher pub = nh.advertise<geometry_msgs::Twist>("/motor_controller/velocity", 1);
 	
-	geometry_msgs::Twist velocity_msg;
-	
-	velocity_msg.linear.x = VW.v;
-	velocity_msg.angular.z = VW.w;
-	
 	while (ros::ok()){
+		ros::spinOnce();
+		pub.publish(VW.velocity_msg);
 		rate.sleep();
-		pub.publish(velocity_msg);
 	}
 	return 0;
 }
 
 /* Command control */
-void VelocityControler::goForward(){
+void VelocityController::goForward(){
 	setVW(0.08, 0.0);
 	return;
 }
 
-void VelocityControler::goBackward(){
+void VelocityController::goBackward(){
 	setVW(-0.08, 0.0);
 	return;
 }
 
-void VelocityControler::turnLeft(){
+void VelocityController::turnLeft(){
 	setVW(0.0, 0.2);
 	return;
 }
 
-void VelocityControler::turnRight(){
+void VelocityController::turnRight(){
 	setVW(0.0, -0.2);
 	return;
 }
 
+void VelocityController::twistCallBack(const geometry_msgs::Twist::ConstPtr& msg){
+	velocity_msg.linear.x = msg->linear.x;
+	velocity_msg.angular.z = msg->angular.z;
+}
+
 
 /* Velocity Controller*/
-VelocityControler::VelocityControler(){
+VelocityController::VelocityController(){
 	v = 0.2;
 	w = 0;
 }
-VelocityControler::VelocityControler(double v_, double w_){
+VelocityController::VelocityController(double v_, double w_){
 	v = v_;
 	w = w_;
 }
-void VelocityControler::setV(double v_){
+void VelocityController::setV(double v_){
 	v = v_;
 	return;
 }
-void VelocityControler::setW(double w_){
+void VelocityController::setW(double w_){
 	w = w_;
 	return;
 }
-void VelocityControler::setVW(double v_, double w_){
+void VelocityController::setVW(double v_, double w_){
 	setV(v_);
 	setW(w_);
 	return;

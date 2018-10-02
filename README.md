@@ -21,7 +21,7 @@ source ./devel/setup.bash
 run the command in terminal
 ``` c++
 rosrun phidgets motor _serial:=<SERIAL_NUMBER> __name:=<NODE_NAME> _name:=<NAME>
-rosrun phidgets motor _serial:=482685 __name:=motor_left _name:=motor_left   
+rosrun phidgets motor _serial:=482685 __name:=motor_left _name:=motor_left
 rosrun phidgets motor _serial:=490601 __name:=motor_right _name:=motor_right 
 ```
 To rotate motor, can publish /<NAME>/cmd_vel, run following command in terminal:
