@@ -15,6 +15,7 @@ public: /* ros */
 	/* Publishers */
 	ros::Publisher pub_left;
 	ros::Publisher pub_right;
+	ros::Publisher pub_velocity;
 
 public: /* Functions */
 	/* Constructor Functions */
@@ -31,6 +32,7 @@ public: /* Functions */
 	void setMotorPowers();
 	void clipPowerValues();
 	void PI();
+	void publishEstimatedSpeed();
 
 private:
 	/* Variables */
@@ -46,8 +48,13 @@ private:
 	double v_robot_desired;
 	double w_robot_desired;
 
+	double v_robot_estimated;
+	double w_robot_estimated;
+
 	std_msgs::Float32 left_motor;
 	std_msgs::Float32 right_motor;
+
+	geometry_msgs::Twist velocity_estimated;
 
     /* Variables for PI controller*/
 	std::vector<double> alpha;

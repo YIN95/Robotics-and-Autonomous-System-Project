@@ -11,6 +11,7 @@ int main(int argc, char** argv)
 	while (ros::ok()) {
 		ros::spinOnce();
 		motorController.PI();
+		motorController.publishEstimatedSpeed();
 		rate.sleep();
 		ROS_INFO("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
 	}
@@ -26,6 +27,7 @@ MotorController::MotorController(int control_frequency_) {
 
 	pub_left = nh.advertise<std_msgs::Float32>("/motor_left/cmd_vel", 1);
 	pub_right = nh.advertise<std_msgs::Float32>("/motor_right/cmd_vel", 1);
+	pub_velocity = nh.advertise<geometry_msgs::Twist>("/velocity_estimate", 1);
 	
 	control_frequency = control_frequency_;
 	dt = 1.0 / control_frequency;
@@ -64,6 +66,13 @@ void MotorController::updateEstimatedSpeed() {
 	w_estimate[RIGHT] = (delta_encoder[RIGHT] * 2 * M_PI * control_frequency) / ticks_per_rev;
 	ROS_INFO("w_estimated_left : %f", w_estimate[LEFT]);
 	ROS_INFO("w_estimated_right: %f", w_estimate[RIGHT]);
+
+	v_robot_estimated = (w_estimate[RIGHT] + w_estimate[LEFT]) * wheel_radius / 2;
+	w_robot_estimated = (w_estimate[RIGHT] - w_estimate[LEFT]) * wheel_radius / base;
+
+	ROS_INFO("v estimate: %f", v_robot_estimated);
+	ROS_INFO("w estimate: %f", w_robot_estimated);
+
 }
 
 void MotorController::updateDesiredSpeed() {
@@ -113,4 +122,11 @@ void MotorController::PI() {
 	clipPowerValues();
 	pub_left.publish(left_motor);
 	pub_right.publish(right_motor);
+}
+
+void MotorController::publishEstimatedSpeed(){
+	geometry_msgs::Twist msg;
+	msg.linear.x = v_robot_estimated;
+	msg.angular.z = w_robot_estimated;
+	pub_velocity.publish(msg);
 }
