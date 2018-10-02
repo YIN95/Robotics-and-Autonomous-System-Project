@@ -10,7 +10,7 @@ int main(int argc, char **argv)
 	ros::init(argc, argv, "velocity_publish");
 	ros::NodeHandle nh;
 	ros::Rate rate(10);
-
+	
 	ros::Publisher pub = nh.advertise<geometry_msgs::Twist>("/motor_controller/velocity", 1);
 	
 	geometry_msgs::Twist velocity_msg;
@@ -37,12 +37,12 @@ void VelocityControler::goBackward(){
 }
 
 void VelocityControler::turnLeft(){
-	setVW(0.08, 0.2);
+	setVW(0.0, 0.2);
 	return;
 }
 
 void VelocityControler::turnRight(){
-	setVW(0.08, -0.2);
+	setVW(0.0, -0.2);
 	return;
 }
 
