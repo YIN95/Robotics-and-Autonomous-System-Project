@@ -21,10 +21,15 @@ public: /* ros */
 
     /* transformation */
     tf::TransformBroadcaster odom_broadcaster;
+    geometry_msgs::Quaternion odom_quat;
+    geometry_msgs::TransformStamped odom_trans;
+    nav_msgs::Odometry odom;
 
 public: /* Functions */
     Odometry(int control_frequency_);
+    void updateEstimatedPosition();
     void updateEstimatedSpeed();
+    void updateEstimatedOdometry();
     void motorCallbackSpeed(const geometry_msgs::Twist::ConstPtr &msg);
     // void cal
 
@@ -45,7 +50,7 @@ private: /* robot pose */
 
     double rob_x_v; // velocity x v*cos theta
     double rob_y_v; // velocity y v*sin theta
-    double rob_theta_v; // velocity orientation w
+    double rob_w; // velocity orientation w
 
 
 };

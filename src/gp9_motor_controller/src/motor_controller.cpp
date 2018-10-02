@@ -8,7 +8,7 @@ int main(int argc, char** argv)
 	MotorController motorController(control_frequency);
 	ros::Rate rate(control_frequency);
 	
-	while (ros::ok()) {
+	while (motorController.nh.ok()) {
 		ros::spinOnce();
 		motorController.PI();
 		motorController.publishEstimatedSpeed();

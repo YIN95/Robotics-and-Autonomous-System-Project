@@ -14,7 +14,7 @@ int main(int argc, char **argv)
 	ros::Subscriber key_sub = nh.subscribe<geometry_msgs::Twist>("/key_vel", 1, &VelocityController::twistCallBack, &VW);
 	ros::Publisher pub = nh.advertise<geometry_msgs::Twist>("/motor_controller/velocity", 1);
 	
-	while (ros::ok()){
+	while (nh.ok()){
 		ros::spinOnce();
 		pub.publish(VW.velocity_msg);
 		rate.sleep();

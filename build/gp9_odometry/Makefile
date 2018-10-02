@@ -56,6 +56,16 @@ CMAKE_BINARY_DIR = /home/ras19/catkin_ws/build
 #=============================================================================
 # Targets provided globally by CMake.
 
+# Special rule for the target list_install_components
+list_install_components:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Available install components are: \"Unspecified\""
+.PHONY : list_install_components
+
+# Special rule for the target list_install_components
+list_install_components/fast: list_install_components
+
+.PHONY : list_install_components/fast
+
 # Special rule for the target install
 install: preinstall
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
@@ -67,49 +77,6 @@ install/fast: preinstall/fast
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
 	/usr/bin/cmake -P cmake_install.cmake
 .PHONY : install/fast
-
-# Special rule for the target install/local
-install/local: preinstall
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
-	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
-.PHONY : install/local
-
-# Special rule for the target install/local
-install/local/fast: install/local
-
-.PHONY : install/local/fast
-
-# Special rule for the target list_install_components
-list_install_components:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Available install components are: \"Unspecified\""
-.PHONY : list_install_components
-
-# Special rule for the target list_install_components
-list_install_components/fast: list_install_components
-
-.PHONY : list_install_components/fast
-
-# Special rule for the target install/strip
-install/strip: preinstall
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing the project stripped..."
-	/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
-.PHONY : install/strip
-
-# Special rule for the target install/strip
-install/strip/fast: install/strip
-
-.PHONY : install/strip/fast
-
-# Special rule for the target test
-test:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running tests..."
-	/usr/bin/ctest --force-new-ctest-process $(ARGS)
-.PHONY : test
-
-# Special rule for the target test
-test/fast: test
-
-.PHONY : test/fast
 
 # Special rule for the target rebuild_cache
 rebuild_cache:
@@ -132,6 +99,39 @@ edit_cache:
 edit_cache/fast: edit_cache
 
 .PHONY : edit_cache/fast
+
+# Special rule for the target install/strip
+install/strip: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing the project stripped..."
+	/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip
+
+# Special rule for the target install/strip
+install/strip/fast: install/strip
+
+.PHONY : install/strip/fast
+
+# Special rule for the target install/local
+install/local: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
+	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local
+
+# Special rule for the target install/local
+install/local/fast: install/local
+
+.PHONY : install/local/fast
+
+# Special rule for the target test
+test:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running tests..."
+	/usr/bin/ctest --force-new-ctest-process $(ARGS)
+.PHONY : test
+
+# Special rule for the target test
+test/fast: test
+
+.PHONY : test/fast
 
 # The main all target
 all: cmake_check_build_system
@@ -166,154 +166,46 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
-gp9_odometry/CMakeFiles/roscpp_generate_messages_lisp.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 gp9_odometry/CMakeFiles/roscpp_generate_messages_lisp.dir/rule
-.PHONY : gp9_odometry/CMakeFiles/roscpp_generate_messages_lisp.dir/rule
+gp9_odometry/CMakeFiles/odometry.dir/rule:
+	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 gp9_odometry/CMakeFiles/odometry.dir/rule
+.PHONY : gp9_odometry/CMakeFiles/odometry.dir/rule
 
 # Convenience name for target.
-roscpp_generate_messages_lisp: gp9_odometry/CMakeFiles/roscpp_generate_messages_lisp.dir/rule
+odometry: gp9_odometry/CMakeFiles/odometry.dir/rule
 
-.PHONY : roscpp_generate_messages_lisp
+.PHONY : odometry
 
 # fast build rule for target.
-roscpp_generate_messages_lisp/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f gp9_odometry/CMakeFiles/roscpp_generate_messages_lisp.dir/build.make gp9_odometry/CMakeFiles/roscpp_generate_messages_lisp.dir/build
-.PHONY : roscpp_generate_messages_lisp/fast
+odometry/fast:
+	cd /home/ras19/catkin_ws/build && $(MAKE) -f gp9_odometry/CMakeFiles/odometry.dir/build.make gp9_odometry/CMakeFiles/odometry.dir/build
+.PHONY : odometry/fast
 
-# Convenience name for target.
-gp9_odometry/CMakeFiles/roscpp_generate_messages_nodejs.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 gp9_odometry/CMakeFiles/roscpp_generate_messages_nodejs.dir/rule
-.PHONY : gp9_odometry/CMakeFiles/roscpp_generate_messages_nodejs.dir/rule
+src/odometry.o: src/odometry.cpp.o
 
-# Convenience name for target.
-roscpp_generate_messages_nodejs: gp9_odometry/CMakeFiles/roscpp_generate_messages_nodejs.dir/rule
+.PHONY : src/odometry.o
 
-.PHONY : roscpp_generate_messages_nodejs
+# target to build an object file
+src/odometry.cpp.o:
+	cd /home/ras19/catkin_ws/build && $(MAKE) -f gp9_odometry/CMakeFiles/odometry.dir/build.make gp9_odometry/CMakeFiles/odometry.dir/src/odometry.cpp.o
+.PHONY : src/odometry.cpp.o
 
-# fast build rule for target.
-roscpp_generate_messages_nodejs/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f gp9_odometry/CMakeFiles/roscpp_generate_messages_nodejs.dir/build.make gp9_odometry/CMakeFiles/roscpp_generate_messages_nodejs.dir/build
-.PHONY : roscpp_generate_messages_nodejs/fast
+src/odometry.i: src/odometry.cpp.i
 
-# Convenience name for target.
-gp9_odometry/CMakeFiles/roscpp_generate_messages_eus.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 gp9_odometry/CMakeFiles/roscpp_generate_messages_eus.dir/rule
-.PHONY : gp9_odometry/CMakeFiles/roscpp_generate_messages_eus.dir/rule
+.PHONY : src/odometry.i
 
-# Convenience name for target.
-roscpp_generate_messages_eus: gp9_odometry/CMakeFiles/roscpp_generate_messages_eus.dir/rule
+# target to preprocess a source file
+src/odometry.cpp.i:
+	cd /home/ras19/catkin_ws/build && $(MAKE) -f gp9_odometry/CMakeFiles/odometry.dir/build.make gp9_odometry/CMakeFiles/odometry.dir/src/odometry.cpp.i
+.PHONY : src/odometry.cpp.i
 
-.PHONY : roscpp_generate_messages_eus
+src/odometry.s: src/odometry.cpp.s
 
-# fast build rule for target.
-roscpp_generate_messages_eus/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f gp9_odometry/CMakeFiles/roscpp_generate_messages_eus.dir/build.make gp9_odometry/CMakeFiles/roscpp_generate_messages_eus.dir/build
-.PHONY : roscpp_generate_messages_eus/fast
+.PHONY : src/odometry.s
 
-# Convenience name for target.
-gp9_odometry/CMakeFiles/roscpp_generate_messages_cpp.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 gp9_odometry/CMakeFiles/roscpp_generate_messages_cpp.dir/rule
-.PHONY : gp9_odometry/CMakeFiles/roscpp_generate_messages_cpp.dir/rule
-
-# Convenience name for target.
-roscpp_generate_messages_cpp: gp9_odometry/CMakeFiles/roscpp_generate_messages_cpp.dir/rule
-
-.PHONY : roscpp_generate_messages_cpp
-
-# fast build rule for target.
-roscpp_generate_messages_cpp/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f gp9_odometry/CMakeFiles/roscpp_generate_messages_cpp.dir/build.make gp9_odometry/CMakeFiles/roscpp_generate_messages_cpp.dir/build
-.PHONY : roscpp_generate_messages_cpp/fast
-
-# Convenience name for target.
-gp9_odometry/CMakeFiles/rosgraph_msgs_generate_messages_nodejs.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 gp9_odometry/CMakeFiles/rosgraph_msgs_generate_messages_nodejs.dir/rule
-.PHONY : gp9_odometry/CMakeFiles/rosgraph_msgs_generate_messages_nodejs.dir/rule
-
-# Convenience name for target.
-rosgraph_msgs_generate_messages_nodejs: gp9_odometry/CMakeFiles/rosgraph_msgs_generate_messages_nodejs.dir/rule
-
-.PHONY : rosgraph_msgs_generate_messages_nodejs
-
-# fast build rule for target.
-rosgraph_msgs_generate_messages_nodejs/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f gp9_odometry/CMakeFiles/rosgraph_msgs_generate_messages_nodejs.dir/build.make gp9_odometry/CMakeFiles/rosgraph_msgs_generate_messages_nodejs.dir/build
-.PHONY : rosgraph_msgs_generate_messages_nodejs/fast
-
-# Convenience name for target.
-gp9_odometry/CMakeFiles/rosgraph_msgs_generate_messages_eus.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 gp9_odometry/CMakeFiles/rosgraph_msgs_generate_messages_eus.dir/rule
-.PHONY : gp9_odometry/CMakeFiles/rosgraph_msgs_generate_messages_eus.dir/rule
-
-# Convenience name for target.
-rosgraph_msgs_generate_messages_eus: gp9_odometry/CMakeFiles/rosgraph_msgs_generate_messages_eus.dir/rule
-
-.PHONY : rosgraph_msgs_generate_messages_eus
-
-# fast build rule for target.
-rosgraph_msgs_generate_messages_eus/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f gp9_odometry/CMakeFiles/rosgraph_msgs_generate_messages_eus.dir/build.make gp9_odometry/CMakeFiles/rosgraph_msgs_generate_messages_eus.dir/build
-.PHONY : rosgraph_msgs_generate_messages_eus/fast
-
-# Convenience name for target.
-gp9_odometry/CMakeFiles/roscpp_generate_messages_py.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 gp9_odometry/CMakeFiles/roscpp_generate_messages_py.dir/rule
-.PHONY : gp9_odometry/CMakeFiles/roscpp_generate_messages_py.dir/rule
-
-# Convenience name for target.
-roscpp_generate_messages_py: gp9_odometry/CMakeFiles/roscpp_generate_messages_py.dir/rule
-
-.PHONY : roscpp_generate_messages_py
-
-# fast build rule for target.
-roscpp_generate_messages_py/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f gp9_odometry/CMakeFiles/roscpp_generate_messages_py.dir/build.make gp9_odometry/CMakeFiles/roscpp_generate_messages_py.dir/build
-.PHONY : roscpp_generate_messages_py/fast
-
-# Convenience name for target.
-gp9_odometry/CMakeFiles/rosgraph_msgs_generate_messages_cpp.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 gp9_odometry/CMakeFiles/rosgraph_msgs_generate_messages_cpp.dir/rule
-.PHONY : gp9_odometry/CMakeFiles/rosgraph_msgs_generate_messages_cpp.dir/rule
-
-# Convenience name for target.
-rosgraph_msgs_generate_messages_cpp: gp9_odometry/CMakeFiles/rosgraph_msgs_generate_messages_cpp.dir/rule
-
-.PHONY : rosgraph_msgs_generate_messages_cpp
-
-# fast build rule for target.
-rosgraph_msgs_generate_messages_cpp/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f gp9_odometry/CMakeFiles/rosgraph_msgs_generate_messages_cpp.dir/build.make gp9_odometry/CMakeFiles/rosgraph_msgs_generate_messages_cpp.dir/build
-.PHONY : rosgraph_msgs_generate_messages_cpp/fast
-
-# Convenience name for target.
-gp9_odometry/CMakeFiles/rosgraph_msgs_generate_messages_lisp.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 gp9_odometry/CMakeFiles/rosgraph_msgs_generate_messages_lisp.dir/rule
-.PHONY : gp9_odometry/CMakeFiles/rosgraph_msgs_generate_messages_lisp.dir/rule
-
-# Convenience name for target.
-rosgraph_msgs_generate_messages_lisp: gp9_odometry/CMakeFiles/rosgraph_msgs_generate_messages_lisp.dir/rule
-
-.PHONY : rosgraph_msgs_generate_messages_lisp
-
-# fast build rule for target.
-rosgraph_msgs_generate_messages_lisp/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f gp9_odometry/CMakeFiles/rosgraph_msgs_generate_messages_lisp.dir/build.make gp9_odometry/CMakeFiles/rosgraph_msgs_generate_messages_lisp.dir/build
-.PHONY : rosgraph_msgs_generate_messages_lisp/fast
-
-# Convenience name for target.
-gp9_odometry/CMakeFiles/rosgraph_msgs_generate_messages_py.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 gp9_odometry/CMakeFiles/rosgraph_msgs_generate_messages_py.dir/rule
-.PHONY : gp9_odometry/CMakeFiles/rosgraph_msgs_generate_messages_py.dir/rule
-
-# Convenience name for target.
-rosgraph_msgs_generate_messages_py: gp9_odometry/CMakeFiles/rosgraph_msgs_generate_messages_py.dir/rule
-
-.PHONY : rosgraph_msgs_generate_messages_py
-
-# fast build rule for target.
-rosgraph_msgs_generate_messages_py/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f gp9_odometry/CMakeFiles/rosgraph_msgs_generate_messages_py.dir/build.make gp9_odometry/CMakeFiles/rosgraph_msgs_generate_messages_py.dir/build
-.PHONY : rosgraph_msgs_generate_messages_py/fast
+# target to generate assembly for a file
+src/odometry.cpp.s:
+	cd /home/ras19/catkin_ws/build && $(MAKE) -f gp9_odometry/CMakeFiles/odometry.dir/build.make gp9_odometry/CMakeFiles/odometry.dir/src/odometry.cpp.s
+.PHONY : src/odometry.cpp.s
 
 # Help Target
 help:
@@ -321,23 +213,17 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
-	@echo "... install"
-	@echo "... install/local"
 	@echo "... list_install_components"
-	@echo "... install/strip"
-	@echo "... roscpp_generate_messages_lisp"
-	@echo "... test"
-	@echo "... roscpp_generate_messages_nodejs"
-	@echo "... roscpp_generate_messages_eus"
-	@echo "... roscpp_generate_messages_cpp"
+	@echo "... install"
 	@echo "... rebuild_cache"
-	@echo "... rosgraph_msgs_generate_messages_nodejs"
 	@echo "... edit_cache"
-	@echo "... rosgraph_msgs_generate_messages_eus"
-	@echo "... roscpp_generate_messages_py"
-	@echo "... rosgraph_msgs_generate_messages_cpp"
-	@echo "... rosgraph_msgs_generate_messages_lisp"
-	@echo "... rosgraph_msgs_generate_messages_py"
+	@echo "... odometry"
+	@echo "... install/strip"
+	@echo "... install/local"
+	@echo "... test"
+	@echo "... src/odometry.o"
+	@echo "... src/odometry.i"
+	@echo "... src/odometry.s"
 .PHONY : help
 
 
