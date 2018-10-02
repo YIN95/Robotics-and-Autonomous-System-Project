@@ -10,7 +10,7 @@ int main(int argc, char** argv)
 	
 	while (motorController.nh.ok()) {
 		ros::spinOnce();
-		motorController.PI();
+		motorController.PID();
 		motorController.publishEstimatedSpeed();
 		rate.sleep();
 		ROS_INFO("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
@@ -32,13 +32,19 @@ MotorController::MotorController(int control_frequency_) {
 	control_frequency = control_frequency_;
 	dt = 1.0 / control_frequency;
 	
+	v_robot_desired = 0;
+	w_robot_desired = 0;
 	
 	alpha = std::vector<double>(2, 0);
 	beta = std::vector<double>(2, 0);
+	gamma = std::vector<double>(2, 0);
 	alpha[LEFT] = 15;
 	alpha[RIGHT] = 15;
-	beta[LEFT] = 5;
-	beta[RIGHT] = 5;
+	beta[LEFT] = 60;
+	beta[RIGHT] = 60;
+	gamma[LEFT] = 0;
+	gamma[RIGHT] = 0;
+	prev_error = std::vector<double>(2, 0);
 	int_error = std::vector<double>(2, 0);
 	w_desired =	std::vector<double>(2, 0);
 	w_estimate = std::vector<double>(2, 0);
@@ -48,6 +54,8 @@ MotorController::MotorController(int control_frequency_) {
 void MotorController::velocityCallback(const geometry_msgs::Twist::ConstPtr &msg) {
 	v_robot_desired = msg->linear.x;
 	w_robot_desired= msg->angular.z;
+	ROS_INFO("v: %f", v_robot_desired);
+	ROS_INFO("w: %f", w_robot_desired);
 }
 
 void MotorController::encoderCallbackLeft(const phidgets::motor_encoder::ConstPtr &msg) {
@@ -85,20 +93,26 @@ void MotorController::updateDesiredSpeed() {
 void MotorController::setMotorPowers() {
 	double error_left;
 	double error_right;
-	int signal;
+	double derror_left_dt, derror_right_dt;
+	int signal_left, signal_right;
 	
 	error_left = w_desired[LEFT] - w_estimate[LEFT];
-	int_error[LEFT] += error_left * dt;
+	derror_left_dt = (error_left - prev_error[LEFT]) / dt;
+	int_error[LEFT] = int_error[LEFT] + error_left * dt;
 	ROS_INFO("error_left: %f", error_left);
-	signal = int (alpha[LEFT] * error_left + beta[LEFT] * int_error[LEFT]);
-	left_motor.data = signal;
-	
+	ROS_INFO("int error left: %f", int_error[LEFT]);
+	signal_left = int (alpha[LEFT] * error_left + beta[LEFT] * int_error[LEFT] + gamma[LEFT] * derror_left_dt);
+	left_motor.data = signal_left;
+	prev_error[LEFT] = error_left;
 	
 	error_right = w_estimate[RIGHT] - w_desired[RIGHT];
-	int_error[RIGHT] += error_right * dt;
+	derror_right_dt = (error_right - prev_error[RIGHT]) / dt;
+	int_error[RIGHT] = int_error[RIGHT] + error_right * dt;
 	ROS_INFO("error_right: %f", error_right);
-	signal = int (alpha[RIGHT] * error_right + beta[RIGHT] * int_error[RIGHT]);
-	right_motor.data = signal;
+	ROS_INFO("int error right: %f", int_error[RIGHT]);
+	signal_right = int (alpha[RIGHT] * error_right + beta[RIGHT] * int_error[RIGHT] + gamma[RIGHT] * derror_right_dt);
+	right_motor.data = signal_right;
+	prev_error[RIGHT] = error_right;
 }
 
 void MotorController::clipPowerValues() {
@@ -115,7 +129,7 @@ void MotorController::clipPowerValues() {
 	ROS_INFO("signal to right motor: %f", right_motor.data);
 }
 
-void MotorController::PI() {
+void MotorController::PID() {
 	updateDesiredSpeed();
 	updateEstimatedSpeed();
 	setMotorPowers();
@@ -130,3 +144,4 @@ void MotorController::publishEstimatedSpeed(){
 	msg.angular.z = w_robot_estimated;
 	pub_velocity.publish(msg);
 }
+//~MotorController();

@@ -5,11 +5,12 @@
 
 int main(int argc, char **argv)
 {
-	
+	int control_frequency = 10;
+
 	ros::init(argc, argv, "velocity_publish");
 	VelocityController VW;
 	ros::NodeHandle nh;
-	ros::Rate rate(10);
+	ros::Rate rate(control_frequency);
 
 	ros::Subscriber key_sub = nh.subscribe<geometry_msgs::Twist>("/key_vel", 1, &VelocityController::twistCallBack, &VW);
 	ros::Publisher pub = nh.advertise<geometry_msgs::Twist>("/motor_controller/velocity", 1);
@@ -44,8 +45,8 @@ void VelocityController::turnRight(){
 }
 
 void VelocityController::twistCallBack(const geometry_msgs::Twist::ConstPtr& msg){
-	velocity_msg.linear.x = msg->linear.x;
-	velocity_msg.angular.z = msg->angular.z;
+	velocity_msg.linear.x = msg->linear.x / 2;
+	velocity_msg.angular.z = 2 * msg->angular.z;
 }
 
 

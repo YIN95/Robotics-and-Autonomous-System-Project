@@ -20,6 +20,7 @@ public: /* ros */
 public: /* Functions */
 	/* Constructor Functions */
 	MotorController(int control_frequency_);
+	//~MotorController();
 
 	/* Functions */
 	void velocityCallback(const geometry_msgs::Twist::ConstPtr &msg);
@@ -31,7 +32,7 @@ public: /* Functions */
 
 	void setMotorPowers();
 	void clipPowerValues();
-	void PI();
+	void PID();
 	void publishEstimatedSpeed();
 
 private:
@@ -57,9 +58,11 @@ private:
 	geometry_msgs::Twist velocity_estimated;
 
     /* Variables for PI controller*/
-	std::vector<double> alpha;
-	std::vector<double> beta;
+	std::vector<double> alpha;	// P gain
+	std::vector<double> beta;	// I gain
+	std::vector<double> gamma;	// D gain
 	std::vector<double> int_error;
+	std::vector<double> prev_error;
 	std::vector<double> w_desired;
 	std::vector<double> w_estimate;
 	std::vector<int> delta_encoder;
