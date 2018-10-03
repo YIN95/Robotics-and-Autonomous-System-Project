@@ -29,17 +29,26 @@ public: /* Functions */
     Odometry(int control_frequency_);
     void updateEstimatedPosition();
     void updateEstimatedSpeed();
+    void updateEstimatedDelta();
     void updateEstimatedOdometry();
     void motorCallbackSpeed(const geometry_msgs::Twist::ConstPtr &msg);
     // void cal
 
 private: /* robot pose */
+    const static double rob_map_x = 0.1;
+    const static double rob_map_y = 0.1;
+    const static double rob_map_theta = 0;
+
     int control_frequency;
     double dt;
 
     double rob_x;   // position x
     double rob_y;   // position y
     double rob_theta;   // orientation
+
+    double rob_x_on_map;
+    double rob_y_on_map;
+    double rob_theta_on_map;
 
     double rob_x_delta;
     double rob_y_delta;
