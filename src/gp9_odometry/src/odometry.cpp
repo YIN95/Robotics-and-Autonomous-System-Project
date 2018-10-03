@@ -55,14 +55,39 @@ void Odometry::updateEstimatedOdometry(){
     odom.header.stamp = current_time;
     odom.header.frame_id = "odom";
     
+    //set the position
+    odom.pose.pose.position.x = rob_x;
+    odom.pose.pose.position.y = rob_y;
+    odom.pose.pose.position.z = 0.0;
+    odom.pose.pose.orientation = odom_quat;
+
+    //set the velocity
+    odom.child_frame_id = "base_link";
+    odom.twist.twist.linear.x = rob_x_v;
+    odom.twist.twist.linear.y = rob_y_v;
+    odom.twist.twist.angular.z = rob_w;
+
+    //publish the message
+    odom_pub.publish(odom);
+    last_time = current_time;
+    r.sleep();
+    
     return;
 }
 
 void Odometry::updateEstimatedPosition(){
-    rob_x = rob_x + rob_x_v * dt;
-    rob_y = rob_y + rob_y_v * dt;
-    rob_theta = rob_theta + rob_w * dt;
+    rob_x = rob_x + rob_x_delta;
+    rob_y = rob_y + rob_y_delta;
+    rob_theta = rob_theta + rob_theta_delta;
     
+    return;
+}
+
+void Odometry::updateEstimatedDelta(){
+    rob_x_delta = rob_x_v * dt;
+    rob_y_delta = rob_y_v * dt;
+    rob_theta_delta = rob_w * dt;
+
     return;
 }
 
@@ -70,6 +95,8 @@ void Odometry::updateEstimatedSpeed(){
     rob_x_v = estimated_v * cos(rob_theta); 
     rob_y_v = estimated_v * sin(rob_theta); 
     rob_w = estimated_w;
+    
+    return;
 }
 
 void Odometry::motorCallbackSpeed(const geometry_msgs::Twist::ConstPtr &msg){
@@ -77,5 +104,6 @@ void Odometry::motorCallbackSpeed(const geometry_msgs::Twist::ConstPtr &msg){
     estimated_w = msg->angular.z;
     ROS_INFO("estimated_v : %f", estimated_v);
     ROS_INFO("estimated_w : %f", estimated_w);
+    
     return;
 }
