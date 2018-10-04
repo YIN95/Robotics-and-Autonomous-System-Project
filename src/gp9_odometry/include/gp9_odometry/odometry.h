@@ -6,6 +6,7 @@
 #include "phidgets/motor_encoder.h"
 #include <nav_msgs/Odometry.h>
 #include <tf/transform_broadcaster.h>
+#include <tf/transform_listener.h>
 
 class Odometry{
 public: /* ros */
@@ -14,8 +15,8 @@ public: /* ros */
     ros::Time last_time;
 
 	/* Publishers */
-	ros::Publisher odom_pub;    // publish the odometry
-    
+	ros::Publisher pub_odom;    // publish the odometry
+
     /* Subscribers */
 	ros::Subscriber estimatedSpeed;
 
@@ -27,6 +28,7 @@ public: /* ros */
 
 public: /* Functions */
     Odometry(int control_frequency_);
+    // void transformPoint(const )
     void updateEstimatedPosition();
     void updateEstimatedSpeed();
     void updateEstimatedDelta();
@@ -35,16 +37,15 @@ public: /* Functions */
     // void cal
 
 private: /* robot pose */
-    const static double rob_map_x = 0.1;
-    const static double rob_map_y = 0.1;
-    const static double rob_map_theta = 0;
-
-    int control_frequency;
-    double dt;
-
+    // the odometry of robot relative map
+    
+    // the odometry of robot relative to robot
     double rob_x;   // position x
     double rob_y;   // position y
     double rob_theta;   // orientation
+
+    int control_frequency;
+    double dt;
 
     double rob_x_on_map;
     double rob_y_on_map;
