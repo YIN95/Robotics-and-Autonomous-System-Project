@@ -33,7 +33,6 @@ int main(int argc, char** argv){
           boost::ref(TF.robot_base_point), boost::ref(TF.robot_map_point), boost::ref(TF.robot_on_map_odom), boost::ref(TF.pub_rob_odom_on_map)));
   
   ros::spin();
-
   return 0;
  
 }
