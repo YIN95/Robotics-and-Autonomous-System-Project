@@ -3,8 +3,8 @@
 #include <vector>
 #include <std_msgs/Float32.h>
 #include <geometry_msgs/Twist.h>
+#include <geometry_msgs/Pose2D.h>
 #include "phidgets/motor_encoder.h"
-#include <nav_msgs/Odometry.h>
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
 
@@ -15,16 +15,12 @@ public: /* ros */
     ros::Time last_time;
 
 	/* Publishers */
-	ros::Publisher pub_odom;    // publish the odometry
+    ros::Publisher pub_pose;
 
     /* Subscribers */
 	ros::Subscriber estimatedSpeed;
 
-    /* transformation */
-    tf::TransformBroadcaster odom_broadcaster;
-    geometry_msgs::Quaternion odom_quat;
-    geometry_msgs::TransformStamped odom_trans;
-    nav_msgs::Odometry odom;
+    geometry_msgs::Pose2D pose;
 
 public: /* Functions */
     Odometry(int control_frequency_);

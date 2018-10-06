@@ -1,0 +1,6 @@
+<launch>
+    <include file="$(find rplidar_ros)/launch/rplidar.launch" />
+    <node pkg="transforms" name="tf_robot_laser" type="tf_robot_laser"/>
+    <node pkg="transforms" name="tf_global_robot" type="tf_global_robot"/>
+ 
+</launch>

@@ -35,9 +35,3 @@ include_directories(./include/gp9_odometry/)
 
 add_executable(odometry src/odometry.cpp)
 target_link_libraries(odometry ${catkin_LIBRARIES})
-
-add_executable(tf_boardcaster src/tf_boardcaster.cpp)
-target_link_libraries(tf_boardcaster ${catkin_LIBRARIES})
-
-add_executable(tf_listener_robot src/tf_listener_robot.cpp)
-target_link_libraries(tf_listener_robot ${catkin_LIBRARIES})

@@ -41,7 +41,7 @@ private:
 	const static int RIGHT = 1;	// RIGHT SIDE
 	const static double base = 0.19;
 	const static double wheel_radius = 0.05;
-	const static int ticks_per_rev = 360;
+	const static int ticks_per_rev = 360; // 898
 	const static double clip_value = 100;
     int control_frequency;
 	

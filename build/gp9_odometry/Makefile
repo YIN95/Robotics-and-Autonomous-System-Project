@@ -100,17 +100,6 @@ edit_cache/fast: edit_cache
 
 .PHONY : edit_cache/fast
 
-# Special rule for the target install/local
-install/local: preinstall
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
-	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
-.PHONY : install/local
-
-# Special rule for the target install/local
-install/local/fast: install/local
-
-.PHONY : install/local/fast
-
 # Special rule for the target install/strip
 install/strip: preinstall
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing the project stripped..."
@@ -121,6 +110,17 @@ install/strip: preinstall
 install/strip/fast: install/strip
 
 .PHONY : install/strip/fast
+
+# Special rule for the target install/local
+install/local: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
+	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local
+
+# Special rule for the target install/local
+install/local/fast: install/local
+
+.PHONY : install/local/fast
 
 # Special rule for the target test
 test:
@@ -180,36 +180,6 @@ odometry/fast:
 	cd /home/ras19/catkin_ws/build && $(MAKE) -f gp9_odometry/CMakeFiles/odometry.dir/build.make gp9_odometry/CMakeFiles/odometry.dir/build
 .PHONY : odometry/fast
 
-# Convenience name for target.
-gp9_odometry/CMakeFiles/tf_boardcaster.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 gp9_odometry/CMakeFiles/tf_boardcaster.dir/rule
-.PHONY : gp9_odometry/CMakeFiles/tf_boardcaster.dir/rule
-
-# Convenience name for target.
-tf_boardcaster: gp9_odometry/CMakeFiles/tf_boardcaster.dir/rule
-
-.PHONY : tf_boardcaster
-
-# fast build rule for target.
-tf_boardcaster/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f gp9_odometry/CMakeFiles/tf_boardcaster.dir/build.make gp9_odometry/CMakeFiles/tf_boardcaster.dir/build
-.PHONY : tf_boardcaster/fast
-
-# Convenience name for target.
-gp9_odometry/CMakeFiles/tf_listener_robot.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 gp9_odometry/CMakeFiles/tf_listener_robot.dir/rule
-.PHONY : gp9_odometry/CMakeFiles/tf_listener_robot.dir/rule
-
-# Convenience name for target.
-tf_listener_robot: gp9_odometry/CMakeFiles/tf_listener_robot.dir/rule
-
-.PHONY : tf_listener_robot
-
-# fast build rule for target.
-tf_listener_robot/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f gp9_odometry/CMakeFiles/tf_listener_robot.dir/build.make gp9_odometry/CMakeFiles/tf_listener_robot.dir/build
-.PHONY : tf_listener_robot/fast
-
 src/odometry.o: src/odometry.cpp.o
 
 .PHONY : src/odometry.o
@@ -237,60 +207,6 @@ src/odometry.cpp.s:
 	cd /home/ras19/catkin_ws/build && $(MAKE) -f gp9_odometry/CMakeFiles/odometry.dir/build.make gp9_odometry/CMakeFiles/odometry.dir/src/odometry.cpp.s
 .PHONY : src/odometry.cpp.s
 
-src/tf_boardcaster.o: src/tf_boardcaster.cpp.o
-
-.PHONY : src/tf_boardcaster.o
-
-# target to build an object file
-src/tf_boardcaster.cpp.o:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f gp9_odometry/CMakeFiles/tf_boardcaster.dir/build.make gp9_odometry/CMakeFiles/tf_boardcaster.dir/src/tf_boardcaster.cpp.o
-.PHONY : src/tf_boardcaster.cpp.o
-
-src/tf_boardcaster.i: src/tf_boardcaster.cpp.i
-
-.PHONY : src/tf_boardcaster.i
-
-# target to preprocess a source file
-src/tf_boardcaster.cpp.i:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f gp9_odometry/CMakeFiles/tf_boardcaster.dir/build.make gp9_odometry/CMakeFiles/tf_boardcaster.dir/src/tf_boardcaster.cpp.i
-.PHONY : src/tf_boardcaster.cpp.i
-
-src/tf_boardcaster.s: src/tf_boardcaster.cpp.s
-
-.PHONY : src/tf_boardcaster.s
-
-# target to generate assembly for a file
-src/tf_boardcaster.cpp.s:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f gp9_odometry/CMakeFiles/tf_boardcaster.dir/build.make gp9_odometry/CMakeFiles/tf_boardcaster.dir/src/tf_boardcaster.cpp.s
-.PHONY : src/tf_boardcaster.cpp.s
-
-src/tf_listener_robot.o: src/tf_listener_robot.cpp.o
-
-.PHONY : src/tf_listener_robot.o
-
-# target to build an object file
-src/tf_listener_robot.cpp.o:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f gp9_odometry/CMakeFiles/tf_listener_robot.dir/build.make gp9_odometry/CMakeFiles/tf_listener_robot.dir/src/tf_listener_robot.cpp.o
-.PHONY : src/tf_listener_robot.cpp.o
-
-src/tf_listener_robot.i: src/tf_listener_robot.cpp.i
-
-.PHONY : src/tf_listener_robot.i
-
-# target to preprocess a source file
-src/tf_listener_robot.cpp.i:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f gp9_odometry/CMakeFiles/tf_listener_robot.dir/build.make gp9_odometry/CMakeFiles/tf_listener_robot.dir/src/tf_listener_robot.cpp.i
-.PHONY : src/tf_listener_robot.cpp.i
-
-src/tf_listener_robot.s: src/tf_listener_robot.cpp.s
-
-.PHONY : src/tf_listener_robot.s
-
-# target to generate assembly for a file
-src/tf_listener_robot.cpp.s:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f gp9_odometry/CMakeFiles/tf_listener_robot.dir/build.make gp9_odometry/CMakeFiles/tf_listener_robot.dir/src/tf_listener_robot.cpp.s
-.PHONY : src/tf_listener_robot.cpp.s
-
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -302,20 +218,12 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... odometry"
-	@echo "... install/local"
 	@echo "... install/strip"
-	@echo "... tf_boardcaster"
+	@echo "... install/local"
 	@echo "... test"
-	@echo "... tf_listener_robot"
 	@echo "... src/odometry.o"
 	@echo "... src/odometry.i"
 	@echo "... src/odometry.s"
-	@echo "... src/tf_boardcaster.o"
-	@echo "... src/tf_boardcaster.i"
-	@echo "... src/tf_boardcaster.s"
-	@echo "... src/tf_listener_robot.o"
-	@echo "... src/tf_listener_robot.i"
-	@echo "... src/tf_listener_robot.s"
 .PHONY : help
 
 

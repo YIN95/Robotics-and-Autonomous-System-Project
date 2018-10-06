@@ -20,13 +20,14 @@ Odometry::Odometry(int control_frequency_){
     control_frequency = control_frequency_;
     dt = (current_time - last_time).toSec();
     estimatedSpeed = nh.subscribe<geometry_msgs::Twist>("/velocity_estimate", 1, &Odometry::motorCallbackSpeed, this);
-    pub_odom = nh.advertise<nav_msgs::Odometry>("/odom", 1);
+    pub_pose = nh.advertise<geometry_msgs::Pose2D>("/pose", 1);
     current_time = ros::Time::now();
     last_time = ros::Time::now();
 
-    rob_x = 0.0;
-    rob_y = 0.0;
+    rob_x = 0.1;
+    rob_y = 0.1;
     rob_theta = 0.0;
+
     rob_x_v = 0.0;
     rob_y_v = 0.0;
     rob_w = 0.0;
@@ -34,27 +35,15 @@ Odometry::Odometry(int control_frequency_){
 
 void Odometry::updateEstimatedOdometry(){
     updateEstimatedPosition();
-    current_time = ros::Time::now();
-    odom.header.stamp = current_time;
-    odom.header.frame_id = "odom";
-    
-    //set the position
-    odom.pose.pose.position.x = rob_x;  // x
-    odom.pose.pose.position.y = rob_y;  // y
-    odom.pose.pose.position.z = 0.0;  // z
-    odom.pose.pose.orientation.w = rob_theta; // theta
 
-    //set the velocity
-    odom.child_frame_id = "base_link";
-    odom.twist.twist.linear.x = rob_x_v;
-    odom.twist.twist.linear.y = rob_y_v;
-    odom.twist.twist.angular.z = rob_w;
+    pose.x = rob_x;
+    pose.y = rob_y;
+    pose.theta = rob_theta;
 
-    //publish the message
-    pub_odom.publish(odom);
+    pub_pose.publish(pose);
     last_time = current_time;
-    ROS_INFO("rob_x : %f", rob_x);
-    ROS_INFO("rob_y : %f", rob_y);
+    ROS_INFO("rob_x     : %f", rob_x);
+    ROS_INFO("rob_y     : %f", rob_y);
     ROS_INFO("rob_theta : %f", rob_theta);
     return;
 }

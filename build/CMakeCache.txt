@@ -677,10 +677,22 @@ tf_conversions_DIR:PATH=/opt/ros/kinetic/share/tf_conversions/cmake
 topic_tools_DIR:PATH=/opt/ros/kinetic/share/topic_tools/cmake
 
 //Value Computed by CMake
+transforms_BINARY_DIR:STATIC=/home/ras19/catkin_ws/build/transforms
+
+//Value Computed by CMake
+transforms_SOURCE_DIR:STATIC=/home/ras19/catkin_ws/src/transforms
+
+//Value Computed by CMake
 trial_BINARY_DIR:STATIC=/home/ras19/catkin_ws/build/trial
 
 //Value Computed by CMake
 trial_SOURCE_DIR:STATIC=/home/ras19/catkin_ws/src/trial
+
+//Value Computed by CMake
+trial_rviz_BINARY_DIR:STATIC=/home/ras19/catkin_ws/build/trial_rviz
+
+//Value Computed by CMake
+trial_rviz_SOURCE_DIR:STATIC=/home/ras19/catkin_ws/src/trial_rviz
 
 //Value Computed by CMake
 uarm_BINARY_DIR:STATIC=/home/ras19/catkin_ws/build/ras_project/ras_uarm
@@ -690,6 +702,9 @@ uarm_SOURCE_DIR:STATIC=/home/ras19/catkin_ws/src/ras_project/ras_uarm
 
 //The directory containing a CMake configuration file for urdf.
 urdf_DIR:PATH=/opt/ros/kinetic/share/urdf/cmake
+
+//The directory containing a CMake configuration file for visualization_msg.
+visualization_msg_DIR:PATH=visualization_msg_DIR-NOTFOUND
 
 //The directory containing a CMake configuration file for visualization_msgs.
 visualization_msgs_DIR:PATH=/opt/ros/kinetic/share/visualization_msgs/cmake
@@ -815,7 +830,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=23
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=25
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP
