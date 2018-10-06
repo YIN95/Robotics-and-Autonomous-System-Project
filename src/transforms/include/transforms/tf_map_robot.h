@@ -3,9 +3,9 @@
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/Pose2D.h>
 
-class TF_Global_Robot{
+class TF_Map_Robot{
 public:
-    TF_Global_Robot();
+    TF_Map_Robot();
     void poseCallBack(const geometry_msgs::Pose2D::ConstPtr &msg);
     
 public:

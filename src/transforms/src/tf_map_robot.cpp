@@ -1,9 +1,9 @@
-#include "tf_global_robot.h"
+#include "tf_map_robot.h"
 
 int main(int argc, char** argv){
-  ros::init(argc, argv, "tf_global_robot");
+  ros::init(argc, argv, "tf_map_robot");
 
-  TF_Global_Robot TF;
+  TF_Map_Robot TF;
   ros::Rate rate(10);
 
   while(TF.nh.ok()){
@@ -14,7 +14,7 @@ int main(int argc, char** argv){
 }
 
 
-void TF_Global_Robot::poseCallBack(const geometry_msgs::Pose2D::ConstPtr &msg) {
+void TF_Map_Robot::poseCallBack(const geometry_msgs::Pose2D::ConstPtr &msg) {
   static tf::TransformBroadcaster br_global;
   tf::Transform transform;
   transform.setOrigin(tf::Vector3(msg->x, msg->y, 0.0));
@@ -28,8 +28,8 @@ void TF_Global_Robot::poseCallBack(const geometry_msgs::Pose2D::ConstPtr &msg) {
 }
 
 
-TF_Global_Robot::TF_Global_Robot() {
-  sub_pose = nh.subscribe<geometry_msgs::Pose2D>("/pose", 1, &TF_Global_Robot::poseCallBack, this);
+TF_Map_Robot::TF_Map_Robot() {
+  sub_pose = nh.subscribe<geometry_msgs::Pose2D>("/pose", 1, &TF_Map_Robot::poseCallBack, this);
 
 }
 

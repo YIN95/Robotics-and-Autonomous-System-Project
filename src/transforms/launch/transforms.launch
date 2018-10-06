@@ -1,6 +1,10 @@
 <launch>
-    <include file="$(find rplidar_ros)/launch/rplidar.launch" />
+    <include file="$(find rplidar_ros)/launch/rplidar.launch"/>
+    <node pkg="gp9_odometry" name="odometry" type="odometry"/>
     <node pkg="transforms" name="tf_robot_laser" type="tf_robot_laser"/>
-    <node pkg="transforms" name="tf_global_robot" type="tf_global_robot"/>
+    <node pkg="transforms" name="tf_map_robot" type="tf_map_robot"/>
+    <node pkg="ras_maze_map" name="ras_maze_map_node" type="ras_maze_map_node" args="_map_file:='/home/ras19/catkin_ws/src/ras_project/ras_maze/ras_maze_map/maps/lab_maze_2018.txt'"/>
+
+    <!-- <node pkg="rviz" name="rviz"  type="rviz" args="-d $(find rplidar_ros)/rviz/rplidar.rviz" /> -->
  
 </launch>

@@ -2467,19 +2467,6 @@ world_node/fast:
 .PHONY : world_node/fast
 
 #=============================================================================
-# Target rules for targets named tf_global_robot
-
-# Build rule for target.
-tf_global_robot: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 tf_global_robot
-.PHONY : tf_global_robot
-
-# fast build rule for target.
-tf_global_robot/fast:
-	$(MAKE) -f transforms/CMakeFiles/tf_global_robot.dir/build.make transforms/CMakeFiles/tf_global_robot.dir/build
-.PHONY : tf_global_robot/fast
-
-#=============================================================================
 # Target rules for targets named tf_robot_laser
 
 # Build rule for target.
@@ -2491,6 +2478,19 @@ tf_robot_laser: cmake_check_build_system
 tf_robot_laser/fast:
 	$(MAKE) -f transforms/CMakeFiles/tf_robot_laser.dir/build.make transforms/CMakeFiles/tf_robot_laser.dir/build
 .PHONY : tf_robot_laser/fast
+
+#=============================================================================
+# Target rules for targets named tf_map_robot
+
+# Build rule for target.
+tf_map_robot: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 tf_map_robot
+.PHONY : tf_map_robot
+
+# fast build rule for target.
+tf_map_robot/fast:
+	$(MAKE) -f transforms/CMakeFiles/tf_map_robot.dir/build.make transforms/CMakeFiles/tf_map_robot.dir/build
+.PHONY : tf_map_robot/fast
 
 #=============================================================================
 # Target rules for targets named visualization_msgs_generate_messages_nodejs
@@ -3527,8 +3527,8 @@ help:
 	@echo "... _realsense_camera_generate_messages_check_deps_GetIMUInfo"
 	@echo "... realsense_camera_generate_messages_eus"
 	@echo "... world_node"
-	@echo "... tf_global_robot"
 	@echo "... tf_robot_laser"
+	@echo "... tf_map_robot"
 	@echo "... visualization_msgs_generate_messages_nodejs"
 	@echo "... visualization_msgs_generate_messages_eus"
 	@echo "... visualization_msgs_generate_messages_cpp"

@@ -6669,14 +6669,14 @@ clean: ras_lab1/ras_lab1_world/CMakeFiles/world_node.dir/clean
 # Directory level rules for directory transforms
 
 # Convenience name for "all" pass in the directory.
-transforms/all: transforms/CMakeFiles/tf_global_robot.dir/all
 transforms/all: transforms/CMakeFiles/tf_robot_laser.dir/all
+transforms/all: transforms/CMakeFiles/tf_map_robot.dir/all
 
 .PHONY : transforms/all
 
 # Convenience name for "clean" pass in the directory.
-transforms/clean: transforms/CMakeFiles/tf_global_robot.dir/clean
 transforms/clean: transforms/CMakeFiles/tf_robot_laser.dir/clean
+transforms/clean: transforms/CMakeFiles/tf_map_robot.dir/clean
 
 .PHONY : transforms/clean
 
@@ -6684,43 +6684,6 @@ transforms/clean: transforms/CMakeFiles/tf_robot_laser.dir/clean
 transforms/preinstall:
 
 .PHONY : transforms/preinstall
-
-#=============================================================================
-# Target rules for target transforms/CMakeFiles/tf_global_robot.dir
-
-# All Build rule for target.
-transforms/CMakeFiles/tf_global_robot.dir/all:
-	$(MAKE) -f transforms/CMakeFiles/tf_global_robot.dir/build.make transforms/CMakeFiles/tf_global_robot.dir/depend
-	$(MAKE) -f transforms/CMakeFiles/tf_global_robot.dir/build.make transforms/CMakeFiles/tf_global_robot.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ras19/catkin_ws/build/CMakeFiles --progress-num=85 "Built target tf_global_robot"
-.PHONY : transforms/CMakeFiles/tf_global_robot.dir/all
-
-# Include target in all.
-all: transforms/CMakeFiles/tf_global_robot.dir/all
-
-.PHONY : all
-
-# Build rule for subdir invocation for target.
-transforms/CMakeFiles/tf_global_robot.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ras19/catkin_ws/build/CMakeFiles 1
-	$(MAKE) -f CMakeFiles/Makefile2 transforms/CMakeFiles/tf_global_robot.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ras19/catkin_ws/build/CMakeFiles 0
-.PHONY : transforms/CMakeFiles/tf_global_robot.dir/rule
-
-# Convenience name for target.
-tf_global_robot: transforms/CMakeFiles/tf_global_robot.dir/rule
-
-.PHONY : tf_global_robot
-
-# clean rule for target.
-transforms/CMakeFiles/tf_global_robot.dir/clean:
-	$(MAKE) -f transforms/CMakeFiles/tf_global_robot.dir/build.make transforms/CMakeFiles/tf_global_robot.dir/clean
-.PHONY : transforms/CMakeFiles/tf_global_robot.dir/clean
-
-# clean rule for target.
-clean: transforms/CMakeFiles/tf_global_robot.dir/clean
-
-.PHONY : clean
 
 #=============================================================================
 # Target rules for target transforms/CMakeFiles/tf_robot_laser.dir
@@ -6756,6 +6719,43 @@ transforms/CMakeFiles/tf_robot_laser.dir/clean:
 
 # clean rule for target.
 clean: transforms/CMakeFiles/tf_robot_laser.dir/clean
+
+.PHONY : clean
+
+#=============================================================================
+# Target rules for target transforms/CMakeFiles/tf_map_robot.dir
+
+# All Build rule for target.
+transforms/CMakeFiles/tf_map_robot.dir/all:
+	$(MAKE) -f transforms/CMakeFiles/tf_map_robot.dir/build.make transforms/CMakeFiles/tf_map_robot.dir/depend
+	$(MAKE) -f transforms/CMakeFiles/tf_map_robot.dir/build.make transforms/CMakeFiles/tf_map_robot.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ras19/catkin_ws/build/CMakeFiles --progress-num=85 "Built target tf_map_robot"
+.PHONY : transforms/CMakeFiles/tf_map_robot.dir/all
+
+# Include target in all.
+all: transforms/CMakeFiles/tf_map_robot.dir/all
+
+.PHONY : all
+
+# Build rule for subdir invocation for target.
+transforms/CMakeFiles/tf_map_robot.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ras19/catkin_ws/build/CMakeFiles 1
+	$(MAKE) -f CMakeFiles/Makefile2 transforms/CMakeFiles/tf_map_robot.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ras19/catkin_ws/build/CMakeFiles 0
+.PHONY : transforms/CMakeFiles/tf_map_robot.dir/rule
+
+# Convenience name for target.
+tf_map_robot: transforms/CMakeFiles/tf_map_robot.dir/rule
+
+.PHONY : tf_map_robot
+
+# clean rule for target.
+transforms/CMakeFiles/tf_map_robot.dir/clean:
+	$(MAKE) -f transforms/CMakeFiles/tf_map_robot.dir/build.make transforms/CMakeFiles/tf_map_robot.dir/clean
+.PHONY : transforms/CMakeFiles/tf_map_robot.dir/clean
+
+# clean rule for target.
+clean: transforms/CMakeFiles/tf_map_robot.dir/clean
 
 .PHONY : clean
 

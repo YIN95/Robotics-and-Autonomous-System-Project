@@ -137,8 +137,8 @@ include_directories(
 # add_executable(${PROJECT_NAME}_node src/transforms_node.cpp)
 include_directories(./include/transforms/)
 
-add_executable(tf_global_robot src/tf_global_robot.cpp)
-target_link_libraries(tf_global_robot ${catkin_LIBRARIES})
+add_executable(tf_map_robot src/tf_map_robot.cpp)
+target_link_libraries(tf_map_robot ${catkin_LIBRARIES})
 
 add_executable(tf_robot_laser src/tf_robot_laser.cpp)
 target_link_libraries(tf_robot_laser ${catkin_LIBRARIES})

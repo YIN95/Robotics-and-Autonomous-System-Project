@@ -6,11 +6,35 @@ RAS-GROUP-9
         * [motor control command](#motor-control-command)
 
 ## Milestone 1
+0. To be able to connect, be on the same wifi as the NUC with your computer  
+ssh ras19@192.168.1.18
 1. Robot be able to drive in the maze.  
 2. Keyboard control.  
 3. Have a dead reckoning system (odometry) on the robot. 
 4. Use tf (ROS Transform library) to display the position of the robot 
 and the current laser scan from the laser in rviz. 
+
+*The commands for milestone*
+1. First, roscore and source
+``` c++
+roscore  
+```
+2. motor controller
+``` c++
+roslaunch gp9_motor_controller motor_controller.launch 
+```
+3. Transforms
+``` c++
+roslaunch transforms transforms.launch 
+```
+4. Map
+rosrun ras_maze_map ras_maze_map_node _map_file:='/home/ras19/catkin_ws/src/ras_project/ras_maze/ras_maze_map/maps/lab_maze_2018.txt'
+
+5. Rviz
+``` c++
+rviz
+```
+
 
 ### motor control command
 First, roscore and source
@@ -43,6 +67,6 @@ To change frequency of the encoder publishing by initiating motor node with freq
 rosrun phidgets motor _serial:=<SERIAL_NUMBER> _name:=<NAME> _frequency:=<FREQUENCY>
 ```
 Also can launch with the launch file
-``` c++
+``` 
 roslaunch gp9_motor_controller motor_controller.launch 
 ```

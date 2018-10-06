@@ -166,21 +166,6 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
-transforms/CMakeFiles/tf_global_robot.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 transforms/CMakeFiles/tf_global_robot.dir/rule
-.PHONY : transforms/CMakeFiles/tf_global_robot.dir/rule
-
-# Convenience name for target.
-tf_global_robot: transforms/CMakeFiles/tf_global_robot.dir/rule
-
-.PHONY : tf_global_robot
-
-# fast build rule for target.
-tf_global_robot/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f transforms/CMakeFiles/tf_global_robot.dir/build.make transforms/CMakeFiles/tf_global_robot.dir/build
-.PHONY : tf_global_robot/fast
-
-# Convenience name for target.
 transforms/CMakeFiles/tf_robot_laser.dir/rule:
 	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 transforms/CMakeFiles/tf_robot_laser.dir/rule
 .PHONY : transforms/CMakeFiles/tf_robot_laser.dir/rule
@@ -195,32 +180,47 @@ tf_robot_laser/fast:
 	cd /home/ras19/catkin_ws/build && $(MAKE) -f transforms/CMakeFiles/tf_robot_laser.dir/build.make transforms/CMakeFiles/tf_robot_laser.dir/build
 .PHONY : tf_robot_laser/fast
 
-src/tf_global_robot.o: src/tf_global_robot.cpp.o
+# Convenience name for target.
+transforms/CMakeFiles/tf_map_robot.dir/rule:
+	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 transforms/CMakeFiles/tf_map_robot.dir/rule
+.PHONY : transforms/CMakeFiles/tf_map_robot.dir/rule
 
-.PHONY : src/tf_global_robot.o
+# Convenience name for target.
+tf_map_robot: transforms/CMakeFiles/tf_map_robot.dir/rule
+
+.PHONY : tf_map_robot
+
+# fast build rule for target.
+tf_map_robot/fast:
+	cd /home/ras19/catkin_ws/build && $(MAKE) -f transforms/CMakeFiles/tf_map_robot.dir/build.make transforms/CMakeFiles/tf_map_robot.dir/build
+.PHONY : tf_map_robot/fast
+
+src/tf_map_robot.o: src/tf_map_robot.cpp.o
+
+.PHONY : src/tf_map_robot.o
 
 # target to build an object file
-src/tf_global_robot.cpp.o:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f transforms/CMakeFiles/tf_global_robot.dir/build.make transforms/CMakeFiles/tf_global_robot.dir/src/tf_global_robot.cpp.o
-.PHONY : src/tf_global_robot.cpp.o
+src/tf_map_robot.cpp.o:
+	cd /home/ras19/catkin_ws/build && $(MAKE) -f transforms/CMakeFiles/tf_map_robot.dir/build.make transforms/CMakeFiles/tf_map_robot.dir/src/tf_map_robot.cpp.o
+.PHONY : src/tf_map_robot.cpp.o
 
-src/tf_global_robot.i: src/tf_global_robot.cpp.i
+src/tf_map_robot.i: src/tf_map_robot.cpp.i
 
-.PHONY : src/tf_global_robot.i
+.PHONY : src/tf_map_robot.i
 
 # target to preprocess a source file
-src/tf_global_robot.cpp.i:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f transforms/CMakeFiles/tf_global_robot.dir/build.make transforms/CMakeFiles/tf_global_robot.dir/src/tf_global_robot.cpp.i
-.PHONY : src/tf_global_robot.cpp.i
+src/tf_map_robot.cpp.i:
+	cd /home/ras19/catkin_ws/build && $(MAKE) -f transforms/CMakeFiles/tf_map_robot.dir/build.make transforms/CMakeFiles/tf_map_robot.dir/src/tf_map_robot.cpp.i
+.PHONY : src/tf_map_robot.cpp.i
 
-src/tf_global_robot.s: src/tf_global_robot.cpp.s
+src/tf_map_robot.s: src/tf_map_robot.cpp.s
 
-.PHONY : src/tf_global_robot.s
+.PHONY : src/tf_map_robot.s
 
 # target to generate assembly for a file
-src/tf_global_robot.cpp.s:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f transforms/CMakeFiles/tf_global_robot.dir/build.make transforms/CMakeFiles/tf_global_robot.dir/src/tf_global_robot.cpp.s
-.PHONY : src/tf_global_robot.cpp.s
+src/tf_map_robot.cpp.s:
+	cd /home/ras19/catkin_ws/build && $(MAKE) -f transforms/CMakeFiles/tf_map_robot.dir/build.make transforms/CMakeFiles/tf_map_robot.dir/src/tf_map_robot.cpp.s
+.PHONY : src/tf_map_robot.cpp.s
 
 src/tf_robot_laser.o: src/tf_robot_laser.cpp.o
 
@@ -259,14 +259,14 @@ help:
 	@echo "... install"
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
-	@echo "... tf_global_robot"
 	@echo "... test"
 	@echo "... tf_robot_laser"
+	@echo "... tf_map_robot"
 	@echo "... install/local"
 	@echo "... install/strip"
-	@echo "... src/tf_global_robot.o"
-	@echo "... src/tf_global_robot.i"
-	@echo "... src/tf_global_robot.s"
+	@echo "... src/tf_map_robot.o"
+	@echo "... src/tf_map_robot.i"
+	@echo "... src/tf_map_robot.s"
 	@echo "... src/tf_robot_laser.o"
 	@echo "... src/tf_robot_laser.i"
 	@echo "... src/tf_robot_laser.s"
