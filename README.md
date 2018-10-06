@@ -6,8 +6,7 @@ RAS-GROUP-9
         * [motor control command](#motor-control-command)
 
 ## Milestone 1
-0. To be able to connect, be on the same wifi as the NUC with your computer  
-ssh ras19@192.168.1.18
+
 1. Robot be able to drive in the maze.  
 2. Keyboard control.  
 3. Have a dead reckoning system (odometry) on the robot. 
@@ -15,6 +14,9 @@ ssh ras19@192.168.1.18
 and the current laser scan from the laser in rviz. 
 
 *The commands for milestone*
+0. To be able to connect, be on the same wifi as the NUC with your computer  
+ssh ras19@192.168.1.18
+
 1. First, roscore and source
 ``` c++
 roscore  

@@ -64,6 +64,10 @@ void Odometry::updateEstimatedDelta(){
     rob_x_delta = rob_x_v * dt;
     rob_y_delta = rob_y_v * dt;
     rob_theta_delta = rob_w * dt;
+    ROS_INFO("rob_x_delta : %f", rob_x_delta);
+    ROS_INFO("rob_y_delta : %f", rob_y_delta);
+    ROS_INFO("rob_theta_delta : %f", rob_theta_delta);
+    ROS_INFO("dt : %f", dt);
 
     return;
 }
@@ -72,7 +76,9 @@ void Odometry::updateEstimatedSpeed(){
     rob_x_v = estimated_v * cos(rob_theta); 
     rob_y_v = estimated_v * sin(rob_theta); 
     rob_w = estimated_w;
-   
+    ROS_INFO("rob_x_v : %f", rob_x_v);
+    ROS_INFO("rob_y_v : %f", rob_y_v);
+    ROS_INFO("rob_w : %f", rob_w);
     return;
 }
 

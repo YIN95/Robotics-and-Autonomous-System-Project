@@ -38,10 +38,10 @@ MotorController::MotorController(int control_frequency_) {
 	alpha = std::vector<double>(2, 0);
 	beta = std::vector<double>(2, 0);
 	gamma = std::vector<double>(2, 0);
-	alpha[LEFT] = 15;
-	alpha[RIGHT] = 15;
-	beta[LEFT] = 60;
-	beta[RIGHT] = 60;
+	alpha[LEFT] = 5;
+	alpha[RIGHT] = 5;
+	beta[LEFT] = 20;
+	beta[RIGHT] = 20;
 	gamma[LEFT] = 0;
 	gamma[RIGHT] = 0;
 	prev_error = std::vector<double>(2, 0);
@@ -70,8 +70,8 @@ void MotorController::encoderCallbackRight(const phidgets::motor_encoder::ConstP
 }
 
 void MotorController::updateEstimatedSpeed() {
-	w_estimate[LEFT] = (delta_encoder[LEFT] * 2 * M_PI * control_frequency) / ticks_per_rev;
-	w_estimate[RIGHT] = (delta_encoder[RIGHT] * 2 * M_PI * control_frequency) / ticks_per_rev;
+	w_estimate[LEFT] = (delta_encoder[LEFT] * 2 * M_PI * 121) / ticks_per_rev;
+	w_estimate[RIGHT] = (delta_encoder[RIGHT] * 2 * M_PI * 121) / ticks_per_rev;
 	ROS_INFO("w_estimated_left : %f", w_estimate[LEFT]);
 	ROS_INFO("w_estimated_right: %f", w_estimate[RIGHT]);
 
