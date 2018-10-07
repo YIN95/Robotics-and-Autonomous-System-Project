@@ -26,7 +26,7 @@ Odometry::Odometry(int control_frequency_){
 
     rob_x = 0.1;
     rob_y = 0.1;
-    rob_theta = 0.0;
+    rob_theta = 0.5 * 3.1415;
 
     rob_x_v = 0.0;
     rob_y_v = 0.0;

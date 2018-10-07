@@ -1,5 +1,4 @@
 #include "tf_map_robot.h"
-#define PI 3.1415926
 int main(int argc, char** argv){
   ros::init(argc, argv, "tf_map_robot");
 
@@ -17,9 +16,9 @@ int main(int argc, char** argv){
 void TF_Map_Robot::poseCallBack(const geometry_msgs::Pose2D::ConstPtr &msg) {
   static tf::TransformBroadcaster br_global;
   tf::Transform transform;
-  transform.setOrigin(tf::Vector3(msg->y, msg->x, 0.0));
+  transform.setOrigin(tf::Vector3(msg->x, msg->y, 0.0));
   tf::Quaternion q;
-  q.setRPY(0, 0, msg->theta + 0.5 * PI);
+  q.setRPY(0, 0, msg->theta);
   transform.setRotation(q);
   br_global.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "/map", "/robot"));
   ROS_INFO("X: %f", msg->x);
