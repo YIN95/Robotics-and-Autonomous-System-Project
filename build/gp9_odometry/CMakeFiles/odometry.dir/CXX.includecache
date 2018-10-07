@@ -47,6 +47,8 @@ tf/transform_listener.h
 /home/ras19/catkin_ws/src/gp9_odometry/src/odometry.cpp
 odometry.h
 /home/ras19/catkin_ws/src/gp9_odometry/src/odometry.h
+math.h
+-
 
 /opt/ros/kinetic/include/boost_161_condition_variable.h
 boost/thread/detail/platform.hpp

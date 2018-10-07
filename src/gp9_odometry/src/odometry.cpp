@@ -1,4 +1,5 @@
 #include "odometry.h"
+#include <math.h>
 
 int main(int argc, char** argv){
     int control_frequency = 125;
@@ -24,9 +25,9 @@ Odometry::Odometry(int control_frequency_){
     current_time = ros::Time::now();
     last_time = ros::Time::now();
 
-    rob_x = 0.1;
-    rob_y = 0.1;
-    rob_theta = 0.5 * 3.1415;
+    rob_x = 0.225;
+    rob_y = 0.225;
+    rob_theta = 0.5 * M_PI;
 
     rob_x_v = 0.0;
     rob_y_v = 0.0;

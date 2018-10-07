@@ -29,10 +29,8 @@ roslaunch gp9_motor_controller motor_controller.launch
 ``` c++
 roslaunch transforms transforms.launch 
 ```
-4. Map
-rosrun ras_maze_map ras_maze_map_node _map_file:='/home/ras19/catkin_ws/src/ras_project/ras_maze/ras_maze_map/maps/lab_maze_2018.txt'
 
-5. Rviz
+4. Rviz
 ``` c++
 rviz
 ```

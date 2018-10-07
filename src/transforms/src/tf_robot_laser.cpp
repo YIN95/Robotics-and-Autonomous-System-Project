@@ -1,4 +1,9 @@
 #include "tf_robot_laser.h"
+#include <math.h>
+
+double degreeToRadian(double deg) {
+    return (M_PI / 180) * deg;
+}
 
 int main(int argc, char** argv){
     ros::init(argc, argv, "tf_robot_laser");
@@ -18,11 +23,9 @@ void TF_Robot_Laser::setTransform() {
     tf::Transform transform;
     transform.setOrigin(tf::Vector3(-0.06, 0.0, 0.0));
     tf::Quaternion q;
-    q.setRPY(0, 0, 0);
+    q.setRPY(0, 0, degreeToRadian(-5));
     transform.setRotation(q);
     br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "/robot", "/laser"));
 }
 
 TF_Robot_Laser::TF_Robot_Laser() {};
-
-
