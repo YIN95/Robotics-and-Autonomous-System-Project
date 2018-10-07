@@ -1,11 +1,11 @@
 #include "odometry.h"
 
 int main(int argc, char** argv){
-    int control_frequency = 10;
+    int control_frequency = 125;
     
     ros::init(argc, argv, "odometry");
     Odometry odometry(control_frequency);
-    ros::Rate rate(10);
+    ros::Rate rate(control_frequency);
 
     while (ros::ok()) {
 		ros::spinOnce();

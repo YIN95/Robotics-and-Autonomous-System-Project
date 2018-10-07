@@ -5,7 +5,7 @@
 
 int main(int argc, char **argv)
 {
-	int control_frequency = 10;
+	int control_frequency = 125;
 
 	ros::init(argc, argv, "velocity_publish");
 	VelocityController VW;
@@ -46,7 +46,7 @@ void VelocityController::turnRight(){
 
 void VelocityController::twistCallBack(const geometry_msgs::Twist::ConstPtr& msg){
 	velocity_msg.linear.x = msg->linear.x;
-	velocity_msg.angular.z = msg->angular.z;
+	velocity_msg.angular.z = 6*msg->angular.z;
 }
 
 

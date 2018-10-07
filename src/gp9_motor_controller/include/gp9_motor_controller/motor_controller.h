@@ -41,7 +41,7 @@ private:
 	const static int RIGHT = 1;	// RIGHT SIDE
 	const static double base = 0.19;
 	const static double wheel_radius = 0.05;
-	const static int ticks_per_rev = 898; // 898
+	const static double ticks_per_rev = 979.62; // 898
 	const static double clip_value = 100;
     int control_frequency;
 	
@@ -64,6 +64,7 @@ private:
 	std::vector<double> int_error;
 	std::vector<double> prev_error;
 	std::vector<double> w_desired;
+	std::vector<double> w_des_prev;
 	std::vector<double> w_estimate;
 	std::vector<int> delta_encoder;
 };

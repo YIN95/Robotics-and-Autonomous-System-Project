@@ -2,7 +2,7 @@
 
 int main(int argc, char** argv) 
 {	
-	int control_frequency = 10;
+	int control_frequency = 125;
 	
 	ros::init(argc, argv, "motor_publish");
 	MotorController motorController(control_frequency);
@@ -38,8 +38,8 @@ MotorController::MotorController(int control_frequency_) {
 	alpha = std::vector<double>(2, 0);
 	beta = std::vector<double>(2, 0);
 	gamma = std::vector<double>(2, 0);
-	alpha[LEFT] = 5;
-	alpha[RIGHT] = 5;
+	alpha[LEFT] = 3;
+	alpha[RIGHT] = 3;
 	beta[LEFT] = 20;
 	beta[RIGHT] = 20;
 	gamma[LEFT] = 0;
@@ -47,6 +47,7 @@ MotorController::MotorController(int control_frequency_) {
 	prev_error = std::vector<double>(2, 0);
 	int_error = std::vector<double>(2, 0);
 	w_desired =	std::vector<double>(2, 0);
+	w_des_prev = std::vector<double>(2, 0);
 	w_estimate = std::vector<double>(2, 0);
 	delta_encoder =	std::vector<int>(2, 0);
 }
@@ -70,8 +71,8 @@ void MotorController::encoderCallbackRight(const phidgets::motor_encoder::ConstP
 }
 
 void MotorController::updateEstimatedSpeed() {
-	w_estimate[LEFT] = (delta_encoder[LEFT] * 2 * M_PI * 121) / ticks_per_rev;
-	w_estimate[RIGHT] = (delta_encoder[RIGHT] * 2 * M_PI * 121) / ticks_per_rev;
+	w_estimate[LEFT] = (delta_encoder[LEFT] * 2 * M_PI * control_frequency) / ticks_per_rev;
+	w_estimate[RIGHT] = (delta_encoder[RIGHT] * 2 * M_PI * control_frequency) / ticks_per_rev;
 	ROS_INFO("w_estimated_left : %f", w_estimate[LEFT]);
 	ROS_INFO("w_estimated_right: %f", w_estimate[RIGHT]);
 
@@ -95,6 +96,11 @@ void MotorController::setMotorPowers() {
 	double error_right;
 	double derror_left_dt, derror_right_dt;
 	int signal_left, signal_right;
+
+	if (w_des_prev[LEFT] != w_desired[LEFT] | w_des_prev[RIGHT] != w_desired[RIGHT]) {
+		int_error[LEFT] = 0;
+		int_error[RIGHT] = 0;
+	}
 	
 	error_left = w_desired[LEFT] - w_estimate[LEFT];
 	derror_left_dt = (error_left - prev_error[LEFT]) / dt;
@@ -113,6 +119,9 @@ void MotorController::setMotorPowers() {
 	signal_right = int (alpha[RIGHT] * error_right + beta[RIGHT] * int_error[RIGHT] + gamma[RIGHT] * derror_right_dt);
 	right_motor.data = signal_right;
 	prev_error[RIGHT] = error_right;
+
+	w_des_prev[LEFT] = w_desired[LEFT];
+	w_des_prev[RIGHT] = w_desired[RIGHT];
 }
 
 void MotorController::clipPowerValues() {
