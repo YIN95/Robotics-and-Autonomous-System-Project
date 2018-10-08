@@ -19,7 +19,7 @@ int main(int argc, char** argv){
 
 Odometry::Odometry(int control_frequency_){
     //control_frequency = control_frequency_;
-    dt = (current_time - last_time).toSec();
+    //dt = (current_time - last_time).toSec();
     estimatedSpeed = nh.subscribe<geometry_msgs::Twist>("/velocity_estimate", 1, &Odometry::motorCallbackSpeed, this);
     pub_pose = nh.advertise<geometry_msgs::Pose2D>("/pose", 1);
     current_time = ros::Time::now();
