@@ -41,7 +41,8 @@ private:
 	const static int RIGHT = 1;	// RIGHT SIDE
 	const static double base = 0.19;
 	const static double wheel_radius = 0.05;
-	const static double ticks_per_rev = 979.62; // 898
+	// Best empirical value of the CPR is 875! Could be tuned more
+	const static double ticks_per_rev = 875; // 898 or 979.62
 	const static double clip_value = 100;
     int control_frequency;
 	

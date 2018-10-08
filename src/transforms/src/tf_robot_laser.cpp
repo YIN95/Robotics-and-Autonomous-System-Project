@@ -2,7 +2,7 @@
 #include <math.h>
 
 double degreeToRadian(double deg) {
-    return (M_PI / 180) * deg;
+    return deg * (M_PI / 180);
 }
 
 int main(int argc, char** argv){
@@ -23,7 +23,7 @@ void TF_Robot_Laser::setTransform() {
     tf::Transform transform;
     transform.setOrigin(tf::Vector3(-0.06, 0.0, 0.0));
     tf::Quaternion q;
-    q.setRPY(0, 0, degreeToRadian(-5));
+    q.setRPY(0, 0, degreeToRadian(0));
     transform.setRotation(q);
     br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "/robot", "/laser"));
 }

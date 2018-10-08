@@ -27,7 +27,7 @@ Odometry::Odometry(int control_frequency_){
 
     rob_x = 0.225;
     rob_y = 0.225;
-    rob_theta = 0.5 * M_PI;
+    rob_theta = 0.5 * M_PI; // Map is defined so that robot starts along y-axis. Therefore, we rotate it
 
     rob_x_v = 0.0;
     rob_y_v = 0.0;
