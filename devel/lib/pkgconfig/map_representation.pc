@@ -1,0 +1,8 @@
+prefix=/home/ras19/catkin_ws/devel
+
+Name: map_representation
+Description: Description of map_representation
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/ras19/catkin_ws/devel/lib 
+Requires: 

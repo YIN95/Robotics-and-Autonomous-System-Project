@@ -382,6 +382,12 @@ gmock_build_tests:BOOL=OFF
 gmock_main_LIB_DEPENDS:STATIC=general;-lpthread;
 
 //Value Computed by CMake
+gp9_map_representation_BINARY_DIR:STATIC=/home/ras19/catkin_ws/build/gp9_map_representation
+
+//Value Computed by CMake
+gp9_map_representation_SOURCE_DIR:STATIC=/home/ras19/catkin_ws/src/gp9_map_representation
+
+//Value Computed by CMake
 gp9_motor_controller_BINARY_DIR:STATIC=/home/ras19/catkin_ws/build/gp9_motor_controller
 
 //Value Computed by CMake
@@ -447,6 +453,12 @@ librealsense_DIR:PATH=/opt/ros/kinetic/share/librealsense/cmake
 
 //The directory containing a CMake configuration file for map_msgs.
 map_msgs_DIR:PATH=/opt/ros/kinetic/share/map_msgs/cmake
+
+//Value Computed by CMake
+map_representation_BINARY_DIR:STATIC=/home/ras19/catkin_ws/build/map_representation
+
+//Value Computed by CMake
+map_representation_SOURCE_DIR:STATIC=/home/ras19/catkin_ws/src/map_representation
 
 //The directory containing a CMake configuration file for message_filters.
 message_filters_DIR:PATH=/opt/ros/kinetic/share/message_filters/cmake
@@ -654,6 +666,12 @@ std_msgs_DIR:PATH=/opt/ros/kinetic/share/std_msgs/cmake
 
 //The directory containing a CMake configuration file for std_srvs.
 std_srvs_DIR:PATH=/opt/ros/kinetic/share/std_srvs/cmake
+
+//Value Computed by CMake
+test_BINARY_DIR:STATIC=/home/ras19/catkin_ws/build/test
+
+//Value Computed by CMake
+test_SOURCE_DIR:STATIC=/home/ras19/catkin_ws/src/test
 
 //The directory containing a CMake configuration file for tf2.
 tf2_DIR:PATH=/opt/ros/kinetic/share/tf2/cmake
