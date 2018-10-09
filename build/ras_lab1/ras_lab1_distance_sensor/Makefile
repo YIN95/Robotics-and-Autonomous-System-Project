@@ -56,27 +56,26 @@ CMAKE_BINARY_DIR = /home/ras19/catkin_ws/build
 #=============================================================================
 # Targets provided globally by CMake.
 
-# Special rule for the target test
-test:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running tests..."
-	/usr/bin/ctest --force-new-ctest-process $(ARGS)
-.PHONY : test
+# Special rule for the target rebuild_cache
+rebuild_cache:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
+	/usr/bin/cmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+.PHONY : rebuild_cache
 
-# Special rule for the target test
-test/fast: test
+# Special rule for the target rebuild_cache
+rebuild_cache/fast: rebuild_cache
 
-.PHONY : test/fast
+.PHONY : rebuild_cache/fast
 
-# Special rule for the target install/local
-install/local: preinstall
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
-	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
-.PHONY : install/local
+# Special rule for the target list_install_components
+list_install_components:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Available install components are: \"Unspecified\""
+.PHONY : list_install_components
 
-# Special rule for the target install/local
-install/local/fast: install/local
+# Special rule for the target list_install_components
+list_install_components/fast: list_install_components
 
-.PHONY : install/local/fast
+.PHONY : list_install_components/fast
 
 # Special rule for the target install/strip
 install/strip: preinstall
@@ -89,26 +88,27 @@ install/strip/fast: install/strip
 
 .PHONY : install/strip/fast
 
-# Special rule for the target list_install_components
-list_install_components:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Available install components are: \"Unspecified\""
-.PHONY : list_install_components
+# Special rule for the target install/local
+install/local: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
+	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local
 
-# Special rule for the target list_install_components
-list_install_components/fast: list_install_components
+# Special rule for the target install/local
+install/local/fast: install/local
 
-.PHONY : list_install_components/fast
+.PHONY : install/local/fast
 
-# Special rule for the target rebuild_cache
-rebuild_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/usr/bin/cmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
-.PHONY : rebuild_cache
+# Special rule for the target test
+test:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running tests..."
+	/usr/bin/ctest --force-new-ctest-process $(ARGS)
+.PHONY : test
 
-# Special rule for the target rebuild_cache
-rebuild_cache/fast: rebuild_cache
+# Special rule for the target test
+test/fast: test
 
-.PHONY : rebuild_cache/fast
+.PHONY : test/fast
 
 # Special rule for the target edit_cache
 edit_cache:
@@ -166,246 +166,6 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
-ras_lab1/ras_lab1_distance_sensor/CMakeFiles/generate_distance_node.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 ras_lab1/ras_lab1_distance_sensor/CMakeFiles/generate_distance_node.dir/rule
-.PHONY : ras_lab1/ras_lab1_distance_sensor/CMakeFiles/generate_distance_node.dir/rule
-
-# Convenience name for target.
-generate_distance_node: ras_lab1/ras_lab1_distance_sensor/CMakeFiles/generate_distance_node.dir/rule
-
-.PHONY : generate_distance_node
-
-# fast build rule for target.
-generate_distance_node/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f ras_lab1/ras_lab1_distance_sensor/CMakeFiles/generate_distance_node.dir/build.make ras_lab1/ras_lab1_distance_sensor/CMakeFiles/generate_distance_node.dir/build
-.PHONY : generate_distance_node/fast
-
-# Convenience name for target.
-ras_lab1/ras_lab1_distance_sensor/CMakeFiles/distance_sensor_test_node.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 ras_lab1/ras_lab1_distance_sensor/CMakeFiles/distance_sensor_test_node.dir/rule
-.PHONY : ras_lab1/ras_lab1_distance_sensor/CMakeFiles/distance_sensor_test_node.dir/rule
-
-# Convenience name for target.
-distance_sensor_test_node: ras_lab1/ras_lab1_distance_sensor/CMakeFiles/distance_sensor_test_node.dir/rule
-
-.PHONY : distance_sensor_test_node
-
-# fast build rule for target.
-distance_sensor_test_node/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f ras_lab1/ras_lab1_distance_sensor/CMakeFiles/distance_sensor_test_node.dir/build.make ras_lab1/ras_lab1_distance_sensor/CMakeFiles/distance_sensor_test_node.dir/build
-.PHONY : distance_sensor_test_node/fast
-
-# Convenience name for target.
-ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_generate_messages_py.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_generate_messages_py.dir/rule
-.PHONY : ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_generate_messages_py.dir/rule
-
-# Convenience name for target.
-actionlib_generate_messages_py: ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_generate_messages_py.dir/rule
-
-.PHONY : actionlib_generate_messages_py
-
-# fast build rule for target.
-actionlib_generate_messages_py/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_generate_messages_py.dir/build.make ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_generate_messages_py.dir/build
-.PHONY : actionlib_generate_messages_py/fast
-
-# Convenience name for target.
-ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_generate_messages_nodejs.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_generate_messages_nodejs.dir/rule
-.PHONY : ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_generate_messages_nodejs.dir/rule
-
-# Convenience name for target.
-actionlib_generate_messages_nodejs: ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_generate_messages_nodejs.dir/rule
-
-.PHONY : actionlib_generate_messages_nodejs
-
-# fast build rule for target.
-actionlib_generate_messages_nodejs/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_generate_messages_nodejs.dir/build.make ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_generate_messages_nodejs.dir/build
-.PHONY : actionlib_generate_messages_nodejs/fast
-
-# Convenience name for target.
-ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf_generate_messages_py.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf_generate_messages_py.dir/rule
-.PHONY : ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf_generate_messages_py.dir/rule
-
-# Convenience name for target.
-tf_generate_messages_py: ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf_generate_messages_py.dir/rule
-
-.PHONY : tf_generate_messages_py
-
-# fast build rule for target.
-tf_generate_messages_py/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf_generate_messages_py.dir/build.make ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf_generate_messages_py.dir/build
-.PHONY : tf_generate_messages_py/fast
-
-# Convenience name for target.
-ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_msgs_generate_messages_lisp.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_msgs_generate_messages_lisp.dir/rule
-.PHONY : ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_msgs_generate_messages_lisp.dir/rule
-
-# Convenience name for target.
-actionlib_msgs_generate_messages_lisp: ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_msgs_generate_messages_lisp.dir/rule
-
-.PHONY : actionlib_msgs_generate_messages_lisp
-
-# fast build rule for target.
-actionlib_msgs_generate_messages_lisp/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_msgs_generate_messages_lisp.dir/build.make ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_msgs_generate_messages_lisp.dir/build
-.PHONY : actionlib_msgs_generate_messages_lisp/fast
-
-# Convenience name for target.
-ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_generate_messages_lisp.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_generate_messages_lisp.dir/rule
-.PHONY : ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_generate_messages_lisp.dir/rule
-
-# Convenience name for target.
-actionlib_generate_messages_lisp: ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_generate_messages_lisp.dir/rule
-
-.PHONY : actionlib_generate_messages_lisp
-
-# fast build rule for target.
-actionlib_generate_messages_lisp/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_generate_messages_lisp.dir/build.make ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_generate_messages_lisp.dir/build
-.PHONY : actionlib_generate_messages_lisp/fast
-
-# Convenience name for target.
-ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf2_msgs_generate_messages_cpp.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf2_msgs_generate_messages_cpp.dir/rule
-.PHONY : ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf2_msgs_generate_messages_cpp.dir/rule
-
-# Convenience name for target.
-tf2_msgs_generate_messages_cpp: ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf2_msgs_generate_messages_cpp.dir/rule
-
-.PHONY : tf2_msgs_generate_messages_cpp
-
-# fast build rule for target.
-tf2_msgs_generate_messages_cpp/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf2_msgs_generate_messages_cpp.dir/build.make ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf2_msgs_generate_messages_cpp.dir/build
-.PHONY : tf2_msgs_generate_messages_cpp/fast
-
-# Convenience name for target.
-ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_generate_messages_eus.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_generate_messages_eus.dir/rule
-.PHONY : ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_generate_messages_eus.dir/rule
-
-# Convenience name for target.
-actionlib_generate_messages_eus: ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_generate_messages_eus.dir/rule
-
-.PHONY : actionlib_generate_messages_eus
-
-# fast build rule for target.
-actionlib_generate_messages_eus/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_generate_messages_eus.dir/build.make ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_generate_messages_eus.dir/build
-.PHONY : actionlib_generate_messages_eus/fast
-
-# Convenience name for target.
-ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf_generate_messages_cpp.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf_generate_messages_cpp.dir/rule
-.PHONY : ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf_generate_messages_cpp.dir/rule
-
-# Convenience name for target.
-tf_generate_messages_cpp: ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf_generate_messages_cpp.dir/rule
-
-.PHONY : tf_generate_messages_cpp
-
-# fast build rule for target.
-tf_generate_messages_cpp/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf_generate_messages_cpp.dir/build.make ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf_generate_messages_cpp.dir/build
-.PHONY : tf_generate_messages_cpp/fast
-
-# Convenience name for target.
-ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf_generate_messages_eus.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf_generate_messages_eus.dir/rule
-.PHONY : ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf_generate_messages_eus.dir/rule
-
-# Convenience name for target.
-tf_generate_messages_eus: ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf_generate_messages_eus.dir/rule
-
-.PHONY : tf_generate_messages_eus
-
-# fast build rule for target.
-tf_generate_messages_eus/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf_generate_messages_eus.dir/build.make ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf_generate_messages_eus.dir/build
-.PHONY : tf_generate_messages_eus/fast
-
-# Convenience name for target.
-ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_msgs_generate_messages_cpp.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_msgs_generate_messages_cpp.dir/rule
-.PHONY : ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_msgs_generate_messages_cpp.dir/rule
-
-# Convenience name for target.
-actionlib_msgs_generate_messages_cpp: ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_msgs_generate_messages_cpp.dir/rule
-
-.PHONY : actionlib_msgs_generate_messages_cpp
-
-# fast build rule for target.
-actionlib_msgs_generate_messages_cpp/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_msgs_generate_messages_cpp.dir/build.make ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_msgs_generate_messages_cpp.dir/build
-.PHONY : actionlib_msgs_generate_messages_cpp/fast
-
-# Convenience name for target.
-ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf_generate_messages_nodejs.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf_generate_messages_nodejs.dir/rule
-.PHONY : ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf_generate_messages_nodejs.dir/rule
-
-# Convenience name for target.
-tf_generate_messages_nodejs: ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf_generate_messages_nodejs.dir/rule
-
-.PHONY : tf_generate_messages_nodejs
-
-# fast build rule for target.
-tf_generate_messages_nodejs/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf_generate_messages_nodejs.dir/build.make ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf_generate_messages_nodejs.dir/build
-.PHONY : tf_generate_messages_nodejs/fast
-
-# Convenience name for target.
-ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_msgs_generate_messages_eus.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_msgs_generate_messages_eus.dir/rule
-.PHONY : ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_msgs_generate_messages_eus.dir/rule
-
-# Convenience name for target.
-actionlib_msgs_generate_messages_eus: ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_msgs_generate_messages_eus.dir/rule
-
-.PHONY : actionlib_msgs_generate_messages_eus
-
-# fast build rule for target.
-actionlib_msgs_generate_messages_eus/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_msgs_generate_messages_eus.dir/build.make ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_msgs_generate_messages_eus.dir/build
-.PHONY : actionlib_msgs_generate_messages_eus/fast
-
-# Convenience name for target.
-ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_generate_messages_cpp.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_generate_messages_cpp.dir/rule
-.PHONY : ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_generate_messages_cpp.dir/rule
-
-# Convenience name for target.
-actionlib_generate_messages_cpp: ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_generate_messages_cpp.dir/rule
-
-.PHONY : actionlib_generate_messages_cpp
-
-# fast build rule for target.
-actionlib_generate_messages_cpp/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_generate_messages_cpp.dir/build.make ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_generate_messages_cpp.dir/build
-.PHONY : actionlib_generate_messages_cpp/fast
-
-# Convenience name for target.
-ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_msgs_generate_messages_nodejs.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_msgs_generate_messages_nodejs.dir/rule
-.PHONY : ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_msgs_generate_messages_nodejs.dir/rule
-
-# Convenience name for target.
-actionlib_msgs_generate_messages_nodejs: ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_msgs_generate_messages_nodejs.dir/rule
-
-.PHONY : actionlib_msgs_generate_messages_nodejs
-
-# fast build rule for target.
-actionlib_msgs_generate_messages_nodejs/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_msgs_generate_messages_nodejs.dir/build.make ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_msgs_generate_messages_nodejs.dir/build
-.PHONY : actionlib_msgs_generate_messages_nodejs/fast
-
-# Convenience name for target.
 ras_lab1/ras_lab1_distance_sensor/CMakeFiles/distance_sensor.dir/rule:
 	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 ras_lab1/ras_lab1_distance_sensor/CMakeFiles/distance_sensor.dir/rule
 .PHONY : ras_lab1/ras_lab1_distance_sensor/CMakeFiles/distance_sensor.dir/rule
@@ -421,94 +181,19 @@ distance_sensor/fast:
 .PHONY : distance_sensor/fast
 
 # Convenience name for target.
-ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_msgs_generate_messages_py.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_msgs_generate_messages_py.dir/rule
-.PHONY : ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_msgs_generate_messages_py.dir/rule
+ras_lab1/ras_lab1_distance_sensor/CMakeFiles/generate_distance_node.dir/rule:
+	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 ras_lab1/ras_lab1_distance_sensor/CMakeFiles/generate_distance_node.dir/rule
+.PHONY : ras_lab1/ras_lab1_distance_sensor/CMakeFiles/generate_distance_node.dir/rule
 
 # Convenience name for target.
-actionlib_msgs_generate_messages_py: ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_msgs_generate_messages_py.dir/rule
+generate_distance_node: ras_lab1/ras_lab1_distance_sensor/CMakeFiles/generate_distance_node.dir/rule
 
-.PHONY : actionlib_msgs_generate_messages_py
+.PHONY : generate_distance_node
 
 # fast build rule for target.
-actionlib_msgs_generate_messages_py/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_msgs_generate_messages_py.dir/build.make ras_lab1/ras_lab1_distance_sensor/CMakeFiles/actionlib_msgs_generate_messages_py.dir/build
-.PHONY : actionlib_msgs_generate_messages_py/fast
-
-# Convenience name for target.
-ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf2_msgs_generate_messages_lisp.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf2_msgs_generate_messages_lisp.dir/rule
-.PHONY : ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf2_msgs_generate_messages_lisp.dir/rule
-
-# Convenience name for target.
-tf2_msgs_generate_messages_lisp: ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf2_msgs_generate_messages_lisp.dir/rule
-
-.PHONY : tf2_msgs_generate_messages_lisp
-
-# fast build rule for target.
-tf2_msgs_generate_messages_lisp/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf2_msgs_generate_messages_lisp.dir/build.make ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf2_msgs_generate_messages_lisp.dir/build
-.PHONY : tf2_msgs_generate_messages_lisp/fast
-
-# Convenience name for target.
-ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf_generate_messages_lisp.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf_generate_messages_lisp.dir/rule
-.PHONY : ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf_generate_messages_lisp.dir/rule
-
-# Convenience name for target.
-tf_generate_messages_lisp: ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf_generate_messages_lisp.dir/rule
-
-.PHONY : tf_generate_messages_lisp
-
-# fast build rule for target.
-tf_generate_messages_lisp/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf_generate_messages_lisp.dir/build.make ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf_generate_messages_lisp.dir/build
-.PHONY : tf_generate_messages_lisp/fast
-
-# Convenience name for target.
-ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf2_msgs_generate_messages_nodejs.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf2_msgs_generate_messages_nodejs.dir/rule
-.PHONY : ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf2_msgs_generate_messages_nodejs.dir/rule
-
-# Convenience name for target.
-tf2_msgs_generate_messages_nodejs: ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf2_msgs_generate_messages_nodejs.dir/rule
-
-.PHONY : tf2_msgs_generate_messages_nodejs
-
-# fast build rule for target.
-tf2_msgs_generate_messages_nodejs/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf2_msgs_generate_messages_nodejs.dir/build.make ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf2_msgs_generate_messages_nodejs.dir/build
-.PHONY : tf2_msgs_generate_messages_nodejs/fast
-
-# Convenience name for target.
-ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf2_msgs_generate_messages_eus.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf2_msgs_generate_messages_eus.dir/rule
-.PHONY : ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf2_msgs_generate_messages_eus.dir/rule
-
-# Convenience name for target.
-tf2_msgs_generate_messages_eus: ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf2_msgs_generate_messages_eus.dir/rule
-
-.PHONY : tf2_msgs_generate_messages_eus
-
-# fast build rule for target.
-tf2_msgs_generate_messages_eus/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf2_msgs_generate_messages_eus.dir/build.make ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf2_msgs_generate_messages_eus.dir/build
-.PHONY : tf2_msgs_generate_messages_eus/fast
-
-# Convenience name for target.
-ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf2_msgs_generate_messages_py.dir/rule:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf2_msgs_generate_messages_py.dir/rule
-.PHONY : ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf2_msgs_generate_messages_py.dir/rule
-
-# Convenience name for target.
-tf2_msgs_generate_messages_py: ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf2_msgs_generate_messages_py.dir/rule
-
-.PHONY : tf2_msgs_generate_messages_py
-
-# fast build rule for target.
-tf2_msgs_generate_messages_py/fast:
-	cd /home/ras19/catkin_ws/build && $(MAKE) -f ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf2_msgs_generate_messages_py.dir/build.make ras_lab1/ras_lab1_distance_sensor/CMakeFiles/tf2_msgs_generate_messages_py.dir/build
-.PHONY : tf2_msgs_generate_messages_py/fast
+generate_distance_node/fast:
+	cd /home/ras19/catkin_ws/build && $(MAKE) -f ras_lab1/ras_lab1_distance_sensor/CMakeFiles/generate_distance_node.dir/build.make ras_lab1/ras_lab1_distance_sensor/CMakeFiles/generate_distance_node.dir/build
+.PHONY : generate_distance_node/fast
 
 # Convenience name for target.
 ras_lab1/ras_lab1_distance_sensor/CMakeFiles/copy_distance_sensor_lib.dir/rule:
@@ -524,6 +209,21 @@ copy_distance_sensor_lib: ras_lab1/ras_lab1_distance_sensor/CMakeFiles/copy_dist
 copy_distance_sensor_lib/fast:
 	cd /home/ras19/catkin_ws/build && $(MAKE) -f ras_lab1/ras_lab1_distance_sensor/CMakeFiles/copy_distance_sensor_lib.dir/build.make ras_lab1/ras_lab1_distance_sensor/CMakeFiles/copy_distance_sensor_lib.dir/build
 .PHONY : copy_distance_sensor_lib/fast
+
+# Convenience name for target.
+ras_lab1/ras_lab1_distance_sensor/CMakeFiles/distance_sensor_test_node.dir/rule:
+	cd /home/ras19/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 ras_lab1/ras_lab1_distance_sensor/CMakeFiles/distance_sensor_test_node.dir/rule
+.PHONY : ras_lab1/ras_lab1_distance_sensor/CMakeFiles/distance_sensor_test_node.dir/rule
+
+# Convenience name for target.
+distance_sensor_test_node: ras_lab1/ras_lab1_distance_sensor/CMakeFiles/distance_sensor_test_node.dir/rule
+
+.PHONY : distance_sensor_test_node
+
+# fast build rule for target.
+distance_sensor_test_node/fast:
+	cd /home/ras19/catkin_ws/build && $(MAKE) -f ras_lab1/ras_lab1_distance_sensor/CMakeFiles/distance_sensor_test_node.dir/build.make ras_lab1/ras_lab1_distance_sensor/CMakeFiles/distance_sensor_test_node.dir/build
+.PHONY : distance_sensor_test_node/fast
 
 src/distance_sensor_test_node.o: src/distance_sensor_test_node.cpp.o
 
@@ -585,37 +285,17 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
-	@echo "... test"
-	@echo "... install/local"
-	@echo "... install/strip"
-	@echo "... list_install_components"
-	@echo "... generate_distance_node"
-	@echo "... distance_sensor_test_node"
-	@echo "... actionlib_generate_messages_py"
-	@echo "... rebuild_cache"
-	@echo "... actionlib_generate_messages_nodejs"
-	@echo "... tf_generate_messages_py"
-	@echo "... actionlib_msgs_generate_messages_lisp"
-	@echo "... actionlib_generate_messages_lisp"
-	@echo "... tf2_msgs_generate_messages_cpp"
-	@echo "... actionlib_generate_messages_eus"
-	@echo "... tf_generate_messages_cpp"
-	@echo "... tf_generate_messages_eus"
-	@echo "... actionlib_msgs_generate_messages_cpp"
-	@echo "... tf_generate_messages_nodejs"
-	@echo "... actionlib_msgs_generate_messages_eus"
-	@echo "... actionlib_generate_messages_cpp"
-	@echo "... actionlib_msgs_generate_messages_nodejs"
 	@echo "... distance_sensor"
-	@echo "... actionlib_msgs_generate_messages_py"
-	@echo "... tf2_msgs_generate_messages_lisp"
-	@echo "... edit_cache"
-	@echo "... tf_generate_messages_lisp"
-	@echo "... tf2_msgs_generate_messages_nodejs"
-	@echo "... install"
-	@echo "... tf2_msgs_generate_messages_eus"
-	@echo "... tf2_msgs_generate_messages_py"
+	@echo "... rebuild_cache"
+	@echo "... generate_distance_node"
 	@echo "... copy_distance_sensor_lib"
+	@echo "... list_install_components"
+	@echo "... install/strip"
+	@echo "... install/local"
+	@echo "... test"
+	@echo "... edit_cache"
+	@echo "... distance_sensor_test_node"
+	@echo "... install"
 	@echo "... src/distance_sensor_test_node.o"
 	@echo "... src/distance_sensor_test_node.i"
 	@echo "... src/distance_sensor_test_node.s"

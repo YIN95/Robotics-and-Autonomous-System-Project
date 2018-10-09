@@ -70,3 +70,8 @@ Also can launch with the launch file
 ``` 
 roslaunch gp9_motor_controller motor_controller.launch 
 ```
+### Realsense command
+roslaunch realsense_camera sr300_nodelet_rgbd.launch
+
+frame: camera_rgb_frame  
+topic: /camera/depth_registered/points  
