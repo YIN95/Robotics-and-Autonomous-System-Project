@@ -125,7 +125,7 @@ if __name__ == '__main__':
     pub = rospy.Publisher('/maprepr', OccupancyGrid, queue_size=1)
     rate = rospy.Rate(1)  # 10hz
 
-    number_of_cells_in_smallest_dimension = 25
+    number_of_cells_in_smallest_dimension = 100
 
     map_repr = MapRepresentation()
     map_repr.construct_representation(number_of_cells_in_smallest_dimension)
