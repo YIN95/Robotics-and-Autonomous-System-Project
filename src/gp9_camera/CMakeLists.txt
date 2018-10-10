@@ -140,8 +140,8 @@ link_libraries(${OpenCV_LIBRARIES})
 add_executable(object_detection src/object_detection.cpp)
 target_link_libraries(object_detection ${catkin_LIBRARIES})
 
-add_executable(object_detection_haar src/object_detection_haar.cpp)
-target_link_libraries(object_detection_haar ${catkin_LIBRARIES})
+#add_executable(object_detection_haar src/object_detection_haar.cpp)
+#target_link_libraries(object_detection_haar ${catkin_LIBRARIES})
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/gp9_camera.cpp
