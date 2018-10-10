@@ -1,4 +1,4 @@
-#include "odometry.h"
+#include <gp9_odometry/odometry.h>
 #include <math.h>
 
 int main(int argc, char** argv){

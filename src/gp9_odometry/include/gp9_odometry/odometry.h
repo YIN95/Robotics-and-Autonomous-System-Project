@@ -4,7 +4,6 @@
 #include <std_msgs/Float32.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Pose2D.h>
-#include "phidgets/motor_encoder.h"
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
 

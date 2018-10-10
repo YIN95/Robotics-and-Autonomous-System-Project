@@ -13,6 +13,8 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   sensor_msgs
   pcl_ros
+  cv_bridge
+  tf
 )
 
 ## System dependencies are found with CMake's conventions
@@ -118,7 +120,7 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+  include
   ${catkin_INCLUDE_DIRS}
 )
 # PCL
@@ -127,12 +129,19 @@ include_directories(${PCL_INCLUDE_DIRS})
 link_directories(${PCL_LIBRARY_DIRS})
 link_libraries(${PCL_LIBRARIES})
 
+# OpenCV
+FIND_PACKAGE(OpenCV REQUIRED)
+include_directories(${OpenCV_INCLUDE_DIRS})
+link_directories(${OpenCV_LIBRARY_DIRS})
+link_libraries(${OpenCV_LIBRARIES})
 
-include_directories(./include/gp9_camera/)
+# include_directories(./include/gp9_camera/)
 
 add_executable(object_detection src/object_detection.cpp)
 target_link_libraries(object_detection ${catkin_LIBRARIES})
 
+# add_executable(object_detection_haar src/object_detection_haar.cpp)
+# target_link_libraries(object_detection_haar ${catkin_LIBRARIES})
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/gp9_camera.cpp

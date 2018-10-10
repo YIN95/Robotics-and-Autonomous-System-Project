@@ -1,8 +1,0 @@
-prefix=/home/ras19/catkin_ws/devel
-
-Name: trial
-Description: Description of trial
-Version: 0.0.0
-Cflags: 
-Libs: -L/home/ras19/catkin_ws/devel/lib 
-Requires: 

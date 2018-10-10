@@ -1,4 +1,4 @@
-#include "motor_controller.h"
+#include <gp9_motor_controller/motor_controller.h>
 
 int main(int argc, char** argv) 
 {	
