@@ -1,4 +1,6 @@
-#include <gp9_camera/object_detection.h>
+#include "gp9_camera/object_detection.h"
+#include <vector>
+#include <pcl/filters/filter.h>
 
 int main(int argc, char** argv){
     ros::init(argc, argv, "object_detection");
@@ -22,20 +24,23 @@ ObjectDetection::ObjectDetection(){
 }
 
 void ObjectDetection::pointCloudCallback(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &msg){
-    BOOST_FOREACH (const pcl::PointXYZRGB& pt, msg->points)
-       ROS_INFO("\t(%f, %f, %f)\n", pt.x, pt.y, pt.z);
+    rgb_cloud.points = msg->points;
+    cleanData();
 }
 
 void ObjectDetection::detectObject(){
-    cleanData();
     clusterObject();
     checkColor();
     checkSize();
+    color_lim_s = 70;
 }
 
 void ObjectDetection::cleanData(){
-
-
+    std::vector<int> indices;
+    ROS_INFO("%i", (int) rgb_cloud.points.size());
+    pcl::removeNaNFromPointCloud(rgb_cloud, rgb_cloud, indices);
+    //Also remove other unimportant points
+    ROS_INFO("%i", (int) rgb_cloud.points.size());
 }
 
 void ObjectDetection::clusterObject(){
@@ -51,4 +56,15 @@ void ObjectDetection::checkColor(){
 void ObjectDetection::checkSize(){
 
 
+}
+
+bool ObjectDetection::objectInImage(){
+    BOOST_FOREACH(pcl::PointXYZHSV &pt, hsv_cloud.points){
+        if(pt.s > color_lim_s) {
+            ROS_INFO("Colored object!!!");
+        }
+        else if(pt.v < 20){
+        }
+    }
+    return true;
 }

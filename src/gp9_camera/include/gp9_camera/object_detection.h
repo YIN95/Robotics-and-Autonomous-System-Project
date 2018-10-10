@@ -21,9 +21,12 @@ public: /* Functions */
 	void clusterObject();
 	void checkColor();
 	void checkSize();
+        bool objectInImage();
 
 private:
-	std::vector<unsigned char> data;
+        pcl::PointCloud<pcl::PointXYZRGB> rgb_cloud;
+        pcl::PointCloud<pcl::PointXYZHSV> hsv_cloud;
+        int color_lim_s;
 	unsigned int height;
 	unsigned int width;
 };

@@ -1,8 +1,8 @@
-prefix=/home/ras19/catkin_ws/devel
+prefix=/home/ras29/catkin_ws/devel
 
 Name: gp9_camera
 Description: Description of gp9_camera
 Version: 0.1.3
 Cflags: 
-Libs: -L/home/ras19/catkin_ws/devel/lib 
+Libs: -L/home/ras29/catkin_ws/devel/lib 
 Requires: 
