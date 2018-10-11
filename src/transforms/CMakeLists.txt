@@ -143,6 +143,9 @@ target_link_libraries(tf_map_robot ${catkin_LIBRARIES})
 add_executable(tf_robot_laser src/tf_robot_laser.cpp)
 target_link_libraries(tf_robot_laser ${catkin_LIBRARIES})
 
+add_executable(tf_robot_camera src/tf_robot_camera.cpp)
+target_link_libraries(tf_robot_camera ${catkin_LIBRARIES})
+
 
 
 ## Rename C++ executable without prefix

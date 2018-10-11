@@ -26,11 +26,7 @@ public: /* Functions */
 private:
         pcl::PointCloud<pcl::PointXYZRGB> rgb_cloud;
         pcl::PointCloud<pcl::PointXYZHSV> hsv_cloud;
-<<<<<<< HEAD
         double color_lim_s;
-=======
-        int color_lim_s;
->>>>>>> 6e7e7c18ef80232176f38f5d0633539c8395f9c2
 	unsigned int height;
 	unsigned int width;
 };
