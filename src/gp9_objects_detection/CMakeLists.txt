@@ -36,3 +36,6 @@ include
 
 add_executable(objects_detection src/objects_detection.cpp)
 target_link_libraries(objects_detection ${catkin_LIBRARIES})
+
+add_executable(calibration_util src/calibration_util.cpp)
+target_link_libraries(calibration_util ${catkin_LIBRARIES})

@@ -32,10 +32,11 @@ public:
     int colorClassifier(int h, int s, int v, int b, int g, int r);
     void showresult(int txt);
     void showResult(int index);
-    
+    int getDepth(int x, int y);
 public:
-    int img_rgb_height;
-    int img_rgb_width;
+    static const int img_rgb_height = 480;
+    static const int img_rgb_width = 640;
+    int object_depth;
     cv_bridge::CvImagePtr cv_rgb_ptr;
     cv_bridge::CvImagePtr cv_depth_ptr;
     string cascade_name;

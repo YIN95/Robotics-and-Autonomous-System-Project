@@ -17,10 +17,9 @@ int main(int argc, char** argv)
 }
 
 ObjectDetection::ObjectDetection(){
-    img_rgb_height = 0;
-    img_rgb_width = 0;
+    object_depth = 99999;
 	sub_image_rgb = nh.subscribe<sensor_msgs::Image>("/camera/rgb/image_rect_color", 1, &ObjectDetection::imageRGBCallback, this);
-	sub_image_depth = nh.subscribe<sensor_msgs::Image>("/camera/depth/image", 1, &ObjectDetection::imageDepthCallback, this);
+	sub_image_depth = nh.subscribe<sensor_msgs::Image>("/camera/depth_registered/sw_registered/image_rect", 1, &ObjectDetection::imageDepthCallback, this);
     cascade_name = "/home/ras19/catkin_ws/src/gp9_objects_detection/src/cascade.xml";
     if(!cascade.load(cascade_name)){ 
         ROS_ERROR("Error loading cascade!"); 
@@ -47,8 +46,8 @@ void ObjectDetection::imageDepthCallback(const sensor_msgs::ImageConstPtr &msg){
     catch (...){
         return;
     }
-    // cv::imshow("DEPTH_WINDOW", cv_depth_ptr->image);
-    // cv::waitKey(3);  
+    cv::imshow("DEPTH_WINDOW", cv_depth_ptr->image);
+    cv::waitKey(3);  
 }
 
 void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
@@ -67,12 +66,16 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
             Point center(center_x, center_y);
             // ellipse(frame, center, Size(objects[0].width/2, objects[0].height/2 ), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
             int color_result = colorFilter_is_object(frame, center_x, center_y);
+            
             if (color_result > 0){
                 ellipse(ptr->image, center, Size(4, 4), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
                 Point pt1(objects[0].x, objects[0].y);
                 Point pt2(objects[0].x + objects[0].width, objects[0].y + objects[0].height);
+                object_depth = getDepth(center_x, center_y);
+                ROS_INFO("DEPTH: %d", object_depth);
                 rectangle(ptr->image, pt1, pt2, Scalar( 255, 0, 255 ), 4, 8, 0 );
                 showResult(color_result);
+
             }
         }
         else{
@@ -197,4 +200,11 @@ void ObjectDetection::showResult(int index){
     }
     putText(cv_rgb_ptr->image, text, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
     return;
+}
+
+int ObjectDetection::getDepth(int x, int y){
+    Mat frame_depth = cv_depth_ptr->image;
+    uchar* d = frame_depth.ptr<uchar>(y); 
+    int depth = d[x];            
+    return depth;
 }
