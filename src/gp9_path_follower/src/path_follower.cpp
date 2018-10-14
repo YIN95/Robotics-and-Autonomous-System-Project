@@ -52,12 +52,12 @@ public:
 		gains_rotation = std::vector<double>(3, 0);
 		gains_translation = std::vector<double>(3, 0);
 
-		gains_rotation[0] = 1;
-		gains_rotation[1] = 0;
+		gains_rotation[0] = 6;
+		gains_rotation[1] = 0.3;
 		gains_rotation[2] = 0;
 
 		gains_translation[0] = 1;
-		gains_translation[1] = 0;
+		gains_translation[1] = 0.05;
 		gains_translation[2] = 0;
 		
 	}
@@ -101,7 +101,7 @@ public:
 		double distance = sqrt(pow(delta_x, 2) + pow(delta_y, 2));
 		error_angle = desired_angle - pose[2];
 
-		double degrees = 10;
+		double degrees = 2;
 		double angle_threshold = degrees * M_PI / 180;
 
 		if (error_angle > angle_threshold) {
@@ -109,7 +109,7 @@ public:
 			PID_rotation(error_angle, 0);
 		}
 
-		else if (distance > 0.5) {
+		else if (distance > 0.05) {
 			ROS_INFO("translation");
 			PID_translation(distance);
 		}
@@ -123,7 +123,9 @@ public:
 
 
 	void turnOnSpot() {
+
 		if (point_flag) {
+			ROS_INFO("pointflag true");
 			double desired_angle = pose_desired[2];
 			error_angle = desired_angle - pose[2];
 			PID_rotation(error_angle, 1);
@@ -135,13 +137,16 @@ public:
 	void PID_rotation(double error_angle, int rotation_number) {
 
 		double derror_angle = (error_angle - error_previous_angle[rotation_number]) * control_frequency;
-		error_int_angle[rotation_number] += error_angle;
+		error_int_angle[rotation_number] = error_int_angle[rotation_number] + error_angle;
 		error_previous_angle[rotation_number] = error_angle;
-		ROS_INFO("error angle: %f", error_angle);
 
 		double P = gains_rotation[0] * error_angle;
 		double I = gains_rotation[1] * error_int_angle[rotation_number];
 		double D = gains_rotation[2] * derror_angle;
+
+		ROS_INFO("v P part: %f", P);
+		ROS_INFO("v D part: %f", D);
+		ROS_INFO("v I part: %f", I);
 
 		double w = P + I + D;
 
@@ -152,7 +157,6 @@ public:
 	void PID_translation(double distance) {
 
 		error_distance = distance; // desired distance is 0
-		ROS_INFO("error dist: %f", error_distance);
 		double derror_distance = (error_distance - error_previous_dist) * control_frequency;
 		error_int_dist += error_distance;
 		error_previous_dist = error_distance;
@@ -167,8 +171,6 @@ public:
 		ROS_INFO("v P part: %f", P);
 		ROS_INFO("v D part: %f", D);
 		ROS_INFO("v I part: %f", I);
-		
-		ROS_INFO("v inside: %f", v);
 
 		velocity_msg.linear.x = v;
 		velocity_msg.angular.z = 0;
@@ -182,8 +184,9 @@ public:
 
 
 	void move() {
-		
-		ROS_INFO("In move method! :");
+
+		ROS_INFO("error angle: %f", error_angle);
+		ROS_INFO("error dist: %f", error_distance);
 
 		double delta_x = pose_desired[0] - pose[0];
 		double delta_y = pose_desired[1] - pose[1];
@@ -200,8 +203,8 @@ public:
 			turnOnSpot();
 		}
 
-		ROS_INFO("v outside: %f", velocity_msg.linear.x);
-		ROS_INFO("w outside: %f", velocity_msg.angular.z);
+		ROS_INFO("v : %f", velocity_msg.linear.x);
+		ROS_INFO("w : %f", velocity_msg.angular.z);
 
 
 		ROS_INFO("publishing");
