@@ -10,9 +10,12 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/objdetect.hpp>
 #include <opencv2/videoio.hpp>
+#include <geometry_msgs/Pose2D.h>
+#include <tf/transform_broadcaster.h>
 #include <iostream>
 #include <stdio.h>
 #include <gp9_objects_detection/detection_util.h>
+#include <visualization_msgs/Marker.h>
 
 using namespace cv;
 using namespace std;
@@ -21,6 +24,11 @@ public: /* ros */
 	ros::NodeHandle nh;
     ros::Subscriber sub_image_rgb;
     ros::Subscriber sub_image_depth;
+    ros::Publisher pub_object_pose;
+    ros::Publisher pub_object_marker;
+    
+    // image_transport::Publisher pub_image_detect;
+
 public:
     ObjectDetection();
     void imageRGBCallback(const sensor_msgs::ImageConstPtr &msg);
@@ -33,9 +41,11 @@ public:
     void showresult(int txt);
     void showResult(int index);
     int getDepth(int x, int y);
+    void pubPose(double x, double y);
 public:
     static const int img_rgb_height = 480;
     static const int img_rgb_width = 640;
+    static const double fx = 619.7237548828125;
     int object_depth;
     cv_bridge::CvImagePtr cv_rgb_ptr;
     cv_bridge::CvImagePtr cv_depth_ptr;
@@ -43,5 +53,8 @@ public:
     CascadeClassifier cascade;
     std::vector<Rect> objects;
     ObjectColorShape obj;
+
+    geometry_msgs::Pose2D pose;
+    
 };
 

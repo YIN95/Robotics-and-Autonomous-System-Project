@@ -1,5 +1,4 @@
 #include <gp9_objects_detection/objects_detection.h>
-
 // roslaunch realsense_camera sr300_nodelet_rgbd.launch
 
 int main(int argc, char** argv) 
@@ -19,7 +18,11 @@ int main(int argc, char** argv)
 ObjectDetection::ObjectDetection(){
     object_depth = 99999;
 	sub_image_rgb = nh.subscribe<sensor_msgs::Image>("/camera/rgb/image_rect_color", 1, &ObjectDetection::imageRGBCallback, this);
-	sub_image_depth = nh.subscribe<sensor_msgs::Image>("/camera/depth_registered/sw_registered/image_rect", 1, &ObjectDetection::imageDepthCallback, this);
+	// sub_image_depth = nh.subscribe<sensor_msgs::Image>("/camera/depth_registered/sw_registered/image_rect", 1, &ObjectDetection::imageDepthCallback, this);
+   	sub_image_depth = nh.subscribe<sensor_msgs::Image>("/camera/depth/image_raw", 1, &ObjectDetection::imageDepthCallback, this);
+    pub_object_pose = nh.advertise<geometry_msgs::Pose2D>("/object/pose", 1);
+    pub_object_marker = nh.advertise<visualization_msgs::Marker>("/object/marker", 1);
+    
     cascade_name = "/home/ras19/catkin_ws/src/gp9_objects_detection/src/cascade.xml";
     if(!cascade.load(cascade_name)){ 
         ROS_ERROR("Error loading cascade!"); 
@@ -76,6 +79,13 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                 rectangle(ptr->image, pt1, pt2, Scalar( 255, 0, 255 ), 4, 8, 0 );
                 showResult(color_result);
 
+                pose.x = 1.0 * object_depth / 1000;
+                pose.y = pose.x / 619.7237548828125 * (center_x - 304.5382995605469);
+                pose.theta = 0;
+                pub_object_pose.publish(pose);
+
+                pubPose(pose.x, pose.y);
+                
             }
         }
         else{
@@ -97,6 +107,34 @@ void ObjectDetection::removeBackground(Mat frame){
     cvtColor(frame,img_hsv,CV_RGB2HSV);
     // OBJECTS_MIN = cv.Scalar(0, 40, 90)
     // OBJECTS_MAX = cv.Scalar(255, 255, 255)
+}
+
+void ObjectDetection::pubPose(double x, double y){
+    visualization_msgs::Marker marker;
+    marker.header.frame_id = "camera";
+    marker.header.stamp = ros::Time();
+    marker.ns = "my_namespace";
+    marker.id = 0;
+    marker.type = visualization_msgs::Marker::SPHERE;
+    marker.action = visualization_msgs::Marker::ADD;
+    marker.pose.position.x = x;
+    marker.pose.position.y = y;
+    marker.pose.position.z = 0;
+    marker.pose.orientation.x = 0.0;
+    marker.pose.orientation.y = 0.0;
+    marker.pose.orientation.z = 0.0;
+    marker.pose.orientation.w = 1.0;
+    marker.scale.x = 0.1;
+    marker.scale.y = 0.1;
+    marker.scale.z = 0.1;
+    marker.color.a = 1.0; // Don't forget to set the alpha!
+    marker.color.r = 0.0;
+    marker.color.g = 1.0;
+    marker.color.b = 0.0;
+    // //only if using a MESH_RESOURCE marker type:
+    // marker.mesh_resource = "package://pr2_description/meshes/base_v0/base.dae";
+    pub_object_marker.publish(marker);
+    // vis_pub.publish(marker);
 }
 
 int ObjectDetection::colorFilter_is_object(Mat frame, int x, int y){
@@ -205,6 +243,6 @@ void ObjectDetection::showResult(int index){
 int ObjectDetection::getDepth(int x, int y){
     Mat frame_depth = cv_depth_ptr->image;
     uchar* d = frame_depth.ptr<uchar>(y); 
-    int depth = d[x];            
+    int depth = d[2*x] + 255*d[2*x+1];            
     return depth;
 }
