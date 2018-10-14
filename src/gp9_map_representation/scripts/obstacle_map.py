@@ -1,6 +1,7 @@
 from __future__ import division
 from __future__ import print_function
 
+
 from copy import copy
 from collections import OrderedDict
 
@@ -82,10 +83,7 @@ class ObstacleMap:
         self.number_of_boxes = 0
         self.polygons = []
         self.obstacles = []
-
-    def construct_obstacle_map(self, path_to_maze):
-        self._create_polygons(path_to_maze)
-        self._create_obstacles()
+        self.map_dimensions = {'min_x': 0, 'max_x': 0, 'min_y': 0, 'max_y': 0}
 
     def plot_map(self, axis_size=[-0.5, 3, -0.5, 3]):
         for obstacle in self.obstacles:
@@ -95,17 +93,36 @@ class ObstacleMap:
         plt.axis(axis_size)
         plt.show()
 
+    def construct_obstacle_map(self, path_to_maze, simplification=None):
+        self._create_polygons(path_to_maze)
+        self._create_obstacles()
+
+        if simplification is None:
+            simplification = self.radius / 2
+        self._simplify_obstacles(simplification)
+
     def _create_polygons(self, path_to_maze):
+
+        all_x = []
+        all_y = []
         with open(path_to_maze) as f:
             for line in f:
                 point_list = line.split()
+                if point_list[0] == '#':
+                    continue
                 start_point = np.array(point_list[0:2], dtype=float)
                 end_point = np.array(point_list[2:4], dtype=float)
+                all_x += [start_point[0], end_point[0]]
+                all_y += [start_point[1], end_point[1]]
                 lb = LineBox()
                 lb.construct_box(start_point, end_point, self.radius)
                 self.polygons.append(sh.Polygon(lb.ordered_vertices))
 
-            self.number_of_boxes = len(self.polygons)
+        self.map_dimensions['min_x'] = min(all_x)
+        self.map_dimensions['max_x'] = max(all_x)
+        self.map_dimensions['min_y'] = min(all_y)
+        self.map_dimensions['max_y'] = max(all_y)
+        self.number_of_boxes = len(self.polygons)
 
     def _create_obstacles(self):
 
@@ -134,16 +151,44 @@ class ObstacleMap:
                 obstacle_list.remove(primary_box)
 
         # Add the last merged box which will be the bounding box of the maze
-        # taking item 0 since they are not merged
+        # taking item 1 since they are not merged
         if isinstance(merged_box, tuple):
             self.obstacles.append(merged_box[1])
         else:
             self.obstacles.append(merged_box)
 
     @staticmethod
-    def plot_polygon(polygon):
+    def merge_obstacles(poly1, poly2):
+        """
+        Takes sh Polygons as input, outputs a new shapely Polygon if they overlap.
+        Otherwise it outputs the two input Polygons
+        """
 
-        # todo: Make sure it works for multiple holes
+        is_merged = True
+
+        try:
+            poly3 = poly1.union(poly2)
+            coords = list(poly3.exterior.coords)
+            coords = list(OrderedDict.fromkeys(coords))
+            vertices = copy(coords)
+
+            interiors = poly3.interiors
+            has_holes = len(interiors) > 0
+            if has_holes:
+                holes = [interiors[i] for i in range(len(interiors))]
+                return sh.Polygon(vertices, holes), is_merged
+            else:
+                return sh.Polygon(vertices), is_merged
+
+        except AttributeError:
+            is_merged = False
+            return (poly1, poly2), is_merged
+
+    def _simplify_obstacles(self, simplification_factor):
+        self.obstacles = [o.simplify(simplification_factor) for o in self.obstacles]
+
+    @staticmethod
+    def plot_polygon(polygon):
 
         ordered_vertices = polygon.exterior.coords
         number_of_vertex = len(ordered_vertices)
@@ -168,53 +213,6 @@ class ObstacleMap:
                              [first_point[1], second_point[1]],
                              'b')
 
-                #
-                # for vertex in inner_vertices:
-                #     plt.scatter(vertex[0], vertex[1], c='b')
-
-
-    @staticmethod
-    def merge_obstacles(poly1, poly2):
-        """
-        Takes sh Polygons as input, outputs a new shapely Polygon if they overlap.
-        Otherwise it outputs the two input Polygons
-        """
-
-        # debug for boundary box case
-
-        is_merged = True
-
-        try:
-            poly3 = poly1.union(poly2)
-            coords = list(poly3.exterior.coords)
-            coords = list(OrderedDict.fromkeys(coords))
-            vertices = copy(coords)
-
-            for i in range(len(coords)):
-                first = coords[i]
-                second = coords[(i + 1) % len(coords)]
-                third = coords[(i + 2) % len(coords)]
-
-                if first[0] == second[0] == third[0]:
-                    vertices.remove(second)
-
-                elif first[1] == second[1] == third[1]:
-                    vertices.remove(second)
-
-            interiors = poly3.interiors
-            has_holes = len(interiors) > 0
-            if has_holes:
-                # todo: Make sure it works for multiple holes
-                holes = [interiors[i] for i in range(len(interiors))]
-                return sh.Polygon(vertices, holes), is_merged
-            else:
-                return sh.Polygon(vertices), is_merged
-
-        except AttributeError:
-            is_merged = False
-            return (poly1, poly2), is_merged
-
-
 
 if __name__ == '__main__':
 
@@ -224,8 +222,6 @@ if __name__ == '__main__':
     obstacle_map.construct_obstacle_map('../maps/maze3.txt')
     obstacle_map.plot_map([-0.5, 3, -0.5, 6])
 
-
-    a = 0
 
 
 

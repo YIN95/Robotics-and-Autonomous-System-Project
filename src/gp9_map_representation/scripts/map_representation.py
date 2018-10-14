@@ -44,6 +44,8 @@ class MapRepresentation:
         with open(self.path_to_maze) as f:
             for line in f:
                 point_list = line.split()
+                if point_list[0] == '#':
+                    continue
                 start_point = point_list[0:2]
                 end_point = point_list[2:4]
                 start_array.append(start_point)
