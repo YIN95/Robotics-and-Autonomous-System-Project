@@ -32,6 +32,9 @@ MotorController::MotorController(int control_frequency_) {
 	control_frequency = control_frequency_;
 	dt = 1.0 / control_frequency;
 	
+	v_threshold = 0.4;
+	w_threshold = 1.5;
+
 	v_robot_desired = 0;
 	w_robot_desired = 0;
 	
@@ -53,8 +56,21 @@ MotorController::MotorController(int control_frequency_) {
 }
 
 void MotorController::velocityCallback(const geometry_msgs::Twist::ConstPtr &msg) {
-	v_robot_desired = msg->linear.x;
-	w_robot_desired= msg->angular.z;
+	double v = msg->linear.x;
+	double w = msg->angular.z;
+
+	double v_abs = fabs(v);
+	if (v_abs > v_threshold) {
+		v = v_threshold * v_abs / v;
+	}
+
+	double w_abs = fabs(w);
+	if (w_abs > w_threshold) {
+		w = w_threshold * w_abs / w;
+	}
+
+	v_robot_desired = v;
+	w_robot_desired = w;
 	ROS_INFO("v: %f", v_robot_desired);
 	ROS_INFO("w: %f", w_robot_desired);
 }
@@ -134,6 +150,7 @@ void MotorController::clipPowerValues() {
 		left_motor.data *= scale_factor;
 		right_motor.data *= scale_factor;
 	}
+
 	ROS_INFO("signal to left motor: %f", left_motor.data);
 	ROS_INFO("signal to right motor: %f", right_motor.data);
 }
@@ -142,7 +159,7 @@ void MotorController::PID() {
 	updateDesiredSpeed();
 	updateEstimatedSpeed();
 	setMotorPowers();
-	clipPowerValues();
+	// clipPowerValues();     // Is this really needed? Or should we clip velocity instead?
 	pub_left.publish(left_motor);
 	pub_right.publish(right_motor);
 }
