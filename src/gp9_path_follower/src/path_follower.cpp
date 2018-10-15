@@ -1,8 +1,11 @@
 #include <ros/ros.h>
+#include <tf/transform_broadcaster.h>
 #include <vector>
 #include <math.h>
+#include <visualization_msgs/Marker.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Pose2D.h>
+#include <geometry_msgs/Quaternion.h>
 #include <sensor_msgs/LaserScan.h>
 
 /* 
@@ -20,6 +23,8 @@ public:
 	ros::Subscriber sub_desired_pose;
 	ros::Subscriber sub_odom;
 	ros::Subscriber sub_lidar;
+
+	ros::Publisher pub_desired_pose;
 	ros::Publisher pub_velocity;
 
 	StraightLines(int control_frequency_, double min_distance_to_obstacle_, int every_lidar_value_) {
@@ -29,6 +34,7 @@ public:
 		sub_odom = nh.subscribe<geometry_msgs::Pose2D>("/pose", 1, &StraightLines::poseCallBack, this);
 		sub_lidar = nh.subscribe<sensor_msgs::LaserScan>("/scan", 1, &StraightLines::lidarCallBack, this);
 
+		pub_desired_pose = nh.advertise<visualization_msgs::Marker>("/visualization_marker", 1);
 		pub_velocity = nh.advertise<geometry_msgs::Twist>("/motor_controller/velocity", 1);
 
 		point_flag = false;
@@ -54,13 +60,13 @@ public:
 		gains_rotation = std::vector<double>(3, 0);
 		gains_translation = std::vector<double>(3, 0);
 
-		gains_rotation[0] = 6;
-		gains_rotation[1] = 1;
+		gains_rotation[0] = 0.5;
+		gains_rotation[1] = 0.1;
 		gains_rotation[2] = 0;
 
 		gains_translation[0] = 1;
-		gains_translation[1] = 0.05;
-		gains_translation[2] = 0;
+		gains_translation[1] = 0.01;
+		gains_translation[2] = 0.1;
 		
 	}
 
@@ -74,6 +80,7 @@ public:
 		pose_desired[0] = desired_pose_msg->x;
 		pose_desired[1] = desired_pose_msg->y;
 		pose_desired[2] = desired_pose_msg->theta;
+		show_desired_pose();
 	}
 
 	void lidarCallBack(const sensor_msgs::LaserScan::ConstPtr& lidar_msg) {
@@ -104,16 +111,29 @@ public:
 
 		double distance = sqrt(pow(delta_x, 2) + pow(delta_y, 2));
 		error_angle = desired_angle - pose[2];
-
-
 		ROS_INFO("error angle: %f", error_angle);
+
+		if (error_angle > M_PI) { 
+			error_angle -= 2 * M_PI;
+		}
+
+		else if (error_angle < M_PI) {
+			error_angle += 2 * M_PI;
+		}
+
+		double error_angle_abs = fabs(error_angle);
+
+		ROS_INFO("delta_x: %f", delta_x);
+		ROS_INFO("delta_y: %f", delta_y);
+		ROS_INFO("error angle abs: %f", error_angle_abs);
 		ROS_INFO("error dist: %f", distance);
 
-		double degrees = 2;
+		double degrees = 1;
 		double angle_threshold = degrees * M_PI / 180;
+		ROS_INFO("angle threshold: %f", angle_threshold);
 		double distance_threshold = 0.05;
 
-		if ((error_angle > angle_threshold) && (distance > distance_threshold)) {
+		if ((error_angle_abs > angle_threshold) && (distance > distance_threshold)) {
 			ROS_INFO("turning in moveToPoint");
 			PID_rotation(error_angle, 0);
 		}
@@ -153,9 +173,9 @@ public:
 		double I = gains_rotation[1] * error_int_angle[rotation_number];
 		double D = gains_rotation[2] * derror_angle;
 
-		ROS_INFO("v P part: %f", P);
-		ROS_INFO("v D part: %f", D);
-		ROS_INFO("v I part: %f", I);
+		ROS_INFO("w P part: %f", P);
+		ROS_INFO("w D part: %f", D);
+		ROS_INFO("w I part: %f", I);
 
 		double w = P + I + D;
 
@@ -169,7 +189,6 @@ public:
 		double derror_distance = (error_distance - error_previous_dist) * control_frequency;
 		error_int_dist += error_distance;
 		error_previous_dist = error_distance;
-		ROS_INFO("derror dist: %f", derror_distance);
 
 		double P = gains_translation[0] * error_distance;
 		double I = gains_translation[1] * error_int_dist;
@@ -220,6 +239,31 @@ public:
 
 	bool has_stopped() {
 		return stopped;
+	}
+
+	void show_desired_pose() {
+
+		visualization_msgs::Marker marker;
+		geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(pose_desired[2]);
+		
+		marker.header.frame_id = "map";
+		marker.header.stamp = ros::Time();
+		marker.ns = "my_namespace";
+		marker.id = 0;
+		marker.type = visualization_msgs::Marker::ARROW;
+		marker.action = visualization_msgs::Marker::ADD;
+		marker.pose.position.x = pose_desired[0];
+		marker.pose.position.y = pose_desired[1];
+		marker.pose.position.z = 0;
+		marker.pose.orientation = odom_quat;
+		marker.scale.x = 0.5;
+		marker.scale.y = 0.1;
+		marker.scale.z = 0.1;
+		marker.color.a = 0.5; // Don't forget to set the alpha!
+		marker.color.r = 1.0;
+		marker.color.g = 0;
+		marker.color.b = 1.0;
+		pub_desired_pose.publish(marker);
 	}
 
 private:
