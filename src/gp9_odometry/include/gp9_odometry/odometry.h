@@ -6,6 +6,8 @@
 #include <geometry_msgs/Pose2D.h>
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
+#include <visualization_msgs/Marker.h>
+#include <nav_msgs/Odometry.h>
 
 class Odometry{
 public: /* ros */
@@ -15,7 +17,7 @@ public: /* ros */
 
 	/* Publishers */
     ros::Publisher pub_pose;
-
+    ros::Publisher pub_robot_marker;
     /* Subscribers */
 	ros::Subscriber estimatedSpeed;
 
@@ -29,6 +31,7 @@ public: /* Functions */
     void updateEstimatedDelta();
     void updateEstimatedOdometry();
     void motorCallbackSpeed(const geometry_msgs::Twist::ConstPtr &msg);
+    void pub_robot_Pose(double x, double y);
     // void cal
 
 private: /* robot pose */

@@ -46,6 +46,8 @@ public:
     static const int img_rgb_height = 480;
     static const int img_rgb_width = 640;
     static const double fx = 619.7237548828125;
+    static const double cx = 304.5382995605469;
+    int preDetectColor;
     int object_depth;
     cv_bridge::CvImagePtr cv_rgb_ptr;
     cv_bridge::CvImagePtr cv_depth_ptr;

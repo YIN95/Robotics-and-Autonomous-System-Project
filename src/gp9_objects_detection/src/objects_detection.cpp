@@ -17,6 +17,7 @@ int main(int argc, char** argv)
 
 ObjectDetection::ObjectDetection(){
     object_depth = 99999;
+    preDetectColor = 0;
 	sub_image_rgb = nh.subscribe<sensor_msgs::Image>("/camera/rgb/image_rect_color", 1, &ObjectDetection::imageRGBCallback, this);
 	// sub_image_depth = nh.subscribe<sensor_msgs::Image>("/camera/depth_registered/sw_registered/image_rect", 1, &ObjectDetection::imageDepthCallback, this);
    	sub_image_depth = nh.subscribe<sensor_msgs::Image>("/camera/depth/image_raw", 1, &ObjectDetection::imageDepthCallback, this);
@@ -80,12 +81,12 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                 showResult(color_result);
 
                 pose.x = 1.0 * object_depth / 1000;
-                pose.y = pose.x / 619.7237548828125 * (center_x - 304.5382995605469);
+                pose.y = pose.x / fx * (center_x - cx);
                 pose.theta = 0;
                 pub_object_pose.publish(pose);
-
-                pubPose(pose.x, pose.y);
-                
+                if (preDetectColor != color_result)
+                    pubPose(pose.x, pose.y);
+                preDetectColor = color_result;
             }
         }
         else{
