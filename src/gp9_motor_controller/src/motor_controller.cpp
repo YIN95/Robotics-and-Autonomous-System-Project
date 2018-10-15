@@ -59,12 +59,14 @@ void MotorController::velocityCallback(const geometry_msgs::Twist::ConstPtr &msg
 	double v = msg->linear.x;
 	double w = msg->angular.z;
 
-	if (v > v_threshold) {
-		v = v_threshold;
+	double v_abs = fabs(v);
+	if (v_abs > v_threshold) {
+		v = v_threshold * v_abs / v;
 	}
 
-	if (w > w_threshold) {
-		w = w_threshold;
+	double w_abs = fabs(w);
+	if (w_abs > w_threshold) {
+		w = w_threshold * w_abs / w;
 	}
 
 	v_robot_desired = v;

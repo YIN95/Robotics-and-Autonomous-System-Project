@@ -60,10 +60,12 @@ public:
 		gains_rotation = std::vector<double>(3, 0);
 		gains_translation = std::vector<double>(3, 0);
 
-		gains_rotation[0] = 0.5;
-		gains_rotation[1] = 0.1;
+		// ROTATION
+		gains_rotation[0] = 3;
+		gains_rotation[1] = 0.05;
 		gains_rotation[2] = 0;
 
+		// TRANSLATION
 		gains_translation[0] = 1;
 		gains_translation[1] = 0.01;
 		gains_translation[2] = 0.1;
@@ -80,6 +82,8 @@ public:
 		pose_desired[0] = desired_pose_msg->x;
 		pose_desired[1] = desired_pose_msg->y;
 		pose_desired[2] = desired_pose_msg->theta;
+		ROS_INFO("pose_desired x: %f", pose_desired[0]);
+		ROS_INFO("pose_desired y: %f", pose_desired[1]);
 		show_desired_pose();
 	}
 
@@ -107,39 +111,40 @@ public:
 
 
 	void moveToPoint() {
+		double degrees = 45;
+		double angle_threshold = degrees * M_PI / 180;
+		double distance_threshold = 0.05;
+
+		double desired_angle;
 		double delta_x = pose_desired[0] - pose[0];
 		double delta_y = pose_desired[1] - pose[1];
-		double desired_angle = atan2(delta_y, delta_x); // aim to goal point
-
-		// double desired_angle2 = pose_desired[2]; // goal orientation
-
 		double distance = sqrt(pow(delta_x, 2) + pow(delta_y, 2));
+
+		ROS_INFO("distance: %f", distance);
+
+		if (distance < distance_threshold) {
+			desired_angle = 0;
+		}
+
+		else {
+			desired_angle = atan2(delta_y, delta_x); // aim to goal point
+		}
+
 		error_angle = desired_angle - pose[2];
+
+		ROS_INFO("BEFORE IF STATEMENTS");
 		ROS_INFO("error angle: %f", radToDeg(error_angle));
-
-		if (error_angle > M_PI) { 
-			ROS_INFO("larger");
-			error_angle -= 2 * M_PI;
-		}
-
-		else if (error_angle < -M_PI) {
-			ROS_INFO("smaller");
-			error_angle += 2 * M_PI;
-		}
+		ROS_INFO("desired angle: %f", radToDeg(desired_angle));
 
 		double error_angle_abs = fabs(error_angle);
 
-		ROS_INFO("error angle: %f", radToDeg(error_angle));
+		// ROS_INFO("error angle: %f", radToDeg(error_angle));
 		ROS_INFO("error angle abs: %f", radToDeg(error_angle_abs));
 		ROS_INFO("error dist: %f", distance);
-
-		double degrees = 1;
-		double angle_threshold = degrees * M_PI / 180;
-		ROS_INFO("angle threshold: %f", angle_threshold);
-		double distance_threshold = 0.05;
+		ROS_INFO("GOING INTO IF STATEMENTS");
 
 		if ((error_angle_abs > angle_threshold) && (distance > distance_threshold)) {
-			ROS_INFO("turning in moveToPoint");
+			ROS_INFO("first turn");
 			PID_rotation(error_angle, 0);
 		}
 
@@ -159,9 +164,10 @@ public:
 	void turnOnSpot() {
 
 		if (point_flag) {
-			ROS_INFO("pointflag true");
+			ROS_INFO("second turn");
 			double desired_angle = pose_desired[2];
 			error_angle = desired_angle - pose[2];
+			ROS_INFO("error angle: %f", radToDeg(error_angle));
 			PID_rotation(error_angle, 1);
 			point_flag = false;
 		}
