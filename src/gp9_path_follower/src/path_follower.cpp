@@ -55,7 +55,7 @@ public:
 		gains_translation = std::vector<double>(3, 0);
 
 		gains_rotation[0] = 6;
-		gains_rotation[1] = 0.3;
+		gains_rotation[1] = 1;
 		gains_rotation[2] = 0;
 
 		gains_translation[0] = 1;
@@ -98,20 +98,27 @@ public:
 	void moveToPoint() {
 		double delta_x = pose_desired[0] - pose[0];
 		double delta_y = pose_desired[1] - pose[1];
-		double desired_angle = atan2(delta_y, delta_x);
+		double desired_angle = atan2(delta_y, delta_x); // aim to goal point
+
+		// double desired_angle2 = pose_desired[2]; // goal orientation
 
 		double distance = sqrt(pow(delta_x, 2) + pow(delta_y, 2));
 		error_angle = desired_angle - pose[2];
 
+
+		ROS_INFO("error angle: %f", error_angle);
+		ROS_INFO("error dist: %f", distance);
+
 		double degrees = 2;
 		double angle_threshold = degrees * M_PI / 180;
+		double distance_threshold = 0.05;
 
-		if (error_angle > angle_threshold) {
+		if ((error_angle > angle_threshold) && (distance > distance_threshold)) {
 			ROS_INFO("turning in moveToPoint");
 			PID_rotation(error_angle, 0);
 		}
 
-		else if (distance > 0.05) {
+		else if (distance > distance_threshold) {
 			ROS_INFO("translation");
 			PID_translation(distance);
 		}
@@ -187,12 +194,9 @@ public:
 
 	void move() {
 
-		ROS_INFO("error angle: %f", error_angle);
-		ROS_INFO("error dist: %f", error_distance);
-
-		double delta_x = pose_desired[0] - pose[0];
-		double delta_y = pose_desired[1] - pose[1];
-		error_distance = sqrt(pow(delta_x, 2) + pow(delta_y, 2));
+		// double delta_x = pose_desired[0] - pose[0];
+		// double delta_y = pose_desired[1] - pose[1];
+		// error_distance = sqrt(pow(delta_x, 2) + pow(delta_y, 2));
 
 		bool obstacle_in_the_way = obstacleCheck();
 		if (obstacle_in_the_way) {
