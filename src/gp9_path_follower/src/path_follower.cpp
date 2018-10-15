@@ -5,9 +5,11 @@
 #include <geometry_msgs/Pose2D.h>
 #include <sensor_msgs/LaserScan.h>
 
-/*
-Third, abort method when seeing obstacles. Lidar readings done, need camera stuff.
-Fourth, rename this class. It makes no sense what so ever
+/* 
+TODO list 
+
+1. Debug abort method when seeing obstacles with lidar.  
+2. Add support for stopping when seeing batteries, for this we need camera topic.
 */
 
 class StraightLines{
