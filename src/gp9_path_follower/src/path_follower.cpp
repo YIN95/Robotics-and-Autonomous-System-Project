@@ -101,6 +101,10 @@ public:
 		return false;
 	}
 
+	double radToDeg(double radians) {
+		return radians * 180 / M_PI;
+	}
+
 
 	void moveToPoint() {
 		double delta_x = pose_desired[0] - pose[0];
@@ -111,21 +115,22 @@ public:
 
 		double distance = sqrt(pow(delta_x, 2) + pow(delta_y, 2));
 		error_angle = desired_angle - pose[2];
-		ROS_INFO("error angle: %f", error_angle);
+		ROS_INFO("error angle: %f", radToDeg(error_angle));
 
 		if (error_angle > M_PI) { 
+			ROS_INFO("larger");
 			error_angle -= 2 * M_PI;
 		}
 
-		else if (error_angle < M_PI) {
+		else if (error_angle < -M_PI) {
+			ROS_INFO("smaller");
 			error_angle += 2 * M_PI;
 		}
 
 		double error_angle_abs = fabs(error_angle);
 
-		ROS_INFO("delta_x: %f", delta_x);
-		ROS_INFO("delta_y: %f", delta_y);
-		ROS_INFO("error angle abs: %f", error_angle_abs);
+		ROS_INFO("error angle: %f", radToDeg(error_angle));
+		ROS_INFO("error angle abs: %f", radToDeg(error_angle_abs));
 		ROS_INFO("error dist: %f", distance);
 
 		double degrees = 1;
