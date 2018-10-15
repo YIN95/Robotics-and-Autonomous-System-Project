@@ -28,6 +28,8 @@ ObjectDetection::ObjectDetection(){
     string path = buffer;
     string filePath = "/gp9_objects_detection/src/cascade.xml";
     string fullPath = path + filePath;
+    
+    fullPath = "/home/ras29/catkin_ws/src/gp9_objects_detection/src/cascade.xml";
     cascade_name = fullPath;
     if(!cascade.load(cascade_name)){ 
         ROS_ERROR("Error loading cascade!"); 

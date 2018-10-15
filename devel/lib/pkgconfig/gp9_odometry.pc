@@ -1,8 +1,8 @@
-prefix=/home/ras19/catkin_ws/devel
+prefix=/home/ras29/catkin_ws/devel
 
 Name: gp9_odometry
 Description: Description of gp9_odometry
 Version: 0.0.2
 Cflags: 
-Libs: -L/home/ras19/catkin_ws/devel/lib 
+Libs: -L/home/ras29/catkin_ws/devel/lib 
 Requires: 
