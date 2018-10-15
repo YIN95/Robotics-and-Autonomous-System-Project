@@ -121,8 +121,6 @@ void Odometry::pub_robot_Pose(double x, double y){
     marker.color.r = 0.2;
     marker.color.g = 0;
     marker.color.b = 1.0;
-    // //only if using a MESH_RESOURCE marker type:
     // marker.mesh_resource = "package://pr2_description/meshes/base_v0/base.dae";
     pub_robot_marker.publish(marker);
-    // vis_pub.publish(marker);
 }

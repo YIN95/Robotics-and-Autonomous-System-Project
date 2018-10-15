@@ -23,8 +23,12 @@ ObjectDetection::ObjectDetection(){
    	sub_image_depth = nh.subscribe<sensor_msgs::Image>("/camera/depth/image_raw", 1, &ObjectDetection::imageDepthCallback, this);
     pub_object_pose = nh.advertise<geometry_msgs::Pose2D>("/object/pose", 1);
     pub_object_marker = nh.advertise<visualization_msgs::Marker>("/object/marker", 1);
-    
-    cascade_name = "/home/ras19/catkin_ws/src/gp9_objects_detection/src/cascade.xml";
+    char *buffer;
+    buffer = getcwd(NULL, 0);
+    string path = buffer;
+    string filePath = "/gp9_objects_detection/src/cascade.xml";
+    string fullPath = path + filePath;
+    cascade_name = fullPath;
     if(!cascade.load(cascade_name)){ 
         ROS_ERROR("Error loading cascade!"); 
     };
@@ -63,7 +67,7 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
         cvtColor(frame, frame_gray, COLOR_BGR2GRAY);
         equalizeHist(frame_gray, frame_gray);
         //-- Detect objects
-        cascade.detectMultiScale(frame_gray, objects, 1.1, 5, 0|CASCADE_SCALE_IMAGE, Size(80, 80));
+        cascade.detectMultiScale(frame_gray, objects, 1.1, 5, 0|CASCADE_SCALE_IMAGE, Size(50, 50), Size(140, 140));
         if (only_detect_one && objects.size()>0){
             int center_x = objects[0].x + objects[0].width/2;
             int center_y = objects[0].y + objects[0].height/2;
