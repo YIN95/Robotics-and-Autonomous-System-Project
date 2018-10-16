@@ -1,8 +1,0 @@
-prefix=/home/ras29/catkin_ws/devel
-
-Name: gp9_map_representation
-Description: Description of gp9_map_representation
-Version: 0.0.0
-Cflags: 
-Libs: -L/home/ras29/catkin_ws/devel/lib 
-Requires: 

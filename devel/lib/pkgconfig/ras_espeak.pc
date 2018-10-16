@@ -1,8 +1,0 @@
-prefix=/home/ras29/catkin_ws/devel
-
-Name: ras_espeak
-Description: Description of ras_espeak
-Version: 1.0.0
-Cflags: 
-Libs: -L/home/ras29/catkin_ws/devel/lib 
-Requires: 

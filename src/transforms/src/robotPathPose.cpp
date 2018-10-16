@@ -22,7 +22,7 @@ int main(int argc, char** argv){
 robotPathPose::robotPathPose(){
     sub_object_coor = nh.subscribe<geometry_msgs::Pose2D>("/global_pose/object", 1, &robotPathPose::objectCallback, this);
     sub_robot_coor = nh.subscribe<geometry_msgs::Pose2D>("/global_pose/robot", 1, &robotPathPose::robotCallback, this);
-    pub_global_robot_coor_theta = nh.advertise<geometry_msgs::Pose2D>("/global_PathPose/robot", 1);
+    pub_global_robot_coor_theta = nh.advertise<geometry_msgs::Pose2D>("/desired_pose", 1);
     
     object_x = 0;
     object_y = 0;

@@ -1,2 +1,0 @@
-set(phidgets_MESSAGE_FILES "/home/ras29/catkin_ws/src/ras_project/ras_phidget/msg/motor_params.msg;/home/ras29/catkin_ws/src/ras_project/ras_phidget/msg/motor_encoder.msg;/home/ras29/catkin_ws/src/ras_project/ras_phidget/msg/interface_kit_params.msg")
-set(phidgets_SERVICE_FILES "/home/ras29/catkin_ws/src/ras_project/ras_phidget/srv/lidar_control.srv;/home/ras29/catkin_ws/src/ras_project/ras_phidget/srv/interface_kit.srv")

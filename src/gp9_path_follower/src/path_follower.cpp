@@ -61,8 +61,8 @@ public:
 		gains_translation = std::vector<double>(3, 0);
 
 		// ROTATION
-		gains_rotation[0] = 3;
-		gains_rotation[1] = 0.05;
+		gains_rotation[0] = 4.5;	//3 more or less fine (value of yesterday)
+		gains_rotation[1] = 0;	//0.5 more or less fine (value of yesterday)
 		gains_rotation[2] = 0;
 
 		// TRANSLATION
@@ -76,14 +76,17 @@ public:
 		pose[0] = pose_msg->x;
 		pose[1] = pose_msg->y;
 		pose[2] = pose_msg->theta;
+		ROS_INFO("pose x: %f", pose[0]);
+		ROS_INFO("pose y: %f", pose[1]);
+		ROS_INFO("pose theta: %f", pose[2]);
 	}
 
 	void desiredPoseCallBack(const geometry_msgs::Pose2D::ConstPtr& desired_pose_msg) {
 		pose_desired[0] = desired_pose_msg->x;
 		pose_desired[1] = desired_pose_msg->y;
 		pose_desired[2] = desired_pose_msg->theta;
-		ROS_INFO("pose_desired x: %f", pose_desired[0]);
-		ROS_INFO("pose_desired y: %f", pose_desired[1]);
+		//ROS_INFO("pose_desired x: %f", pose_desired[0]);
+		//ROS_INFO("pose_desired y: %f", pose_desired[1]);
 		show_desired_pose();
 	}
 
@@ -111,7 +114,7 @@ public:
 
 
 	void moveToPoint() {
-		double degrees = 45;
+		double degrees = 15;
 		double angle_threshold = degrees * M_PI / 180;
 		double distance_threshold = 0.05;
 
@@ -132,16 +135,16 @@ public:
 
 		error_angle = desired_angle - pose[2];
 
-		ROS_INFO("BEFORE IF STATEMENTS");
+		//ROS_INFO("BEFORE IF STATEMENTS");
 		ROS_INFO("error angle: %f", radToDeg(error_angle));
-		ROS_INFO("desired angle: %f", radToDeg(desired_angle));
+		//ROS_INFO("desired angle: %f", radToDeg(desired_angle));
 
 		double error_angle_abs = fabs(error_angle);
 
 		// ROS_INFO("error angle: %f", radToDeg(error_angle));
-		ROS_INFO("error angle abs: %f", radToDeg(error_angle_abs));
-		ROS_INFO("error dist: %f", distance);
-		ROS_INFO("GOING INTO IF STATEMENTS");
+		//ROS_INFO("error angle abs: %f", radToDeg(error_angle_abs));
+		//ROS_INFO("error dist: %f", distance);
+		//ROS_INFO("GOING INTO IF STATEMENTS");
 
 		if ((error_angle_abs > angle_threshold) && (distance > distance_threshold)) {
 			ROS_INFO("first turn");
@@ -309,7 +312,7 @@ int main(int argc, char** argv) {
 
 	int control_frequency = 10;
 	int check_every_laser = 4;
-	double min_distance_to_obstacles = 0.15;
+	double min_distance_to_obstacles = 0.30;
 
 	ros::init(argc, argv, "path_follower");
 	StraightLines sl(control_frequency, min_distance_to_obstacles, check_every_laser);
