@@ -49,26 +49,38 @@ public:
 		pose = std::vector<double>(3, 0);
 		pose_desired = std::vector<double>(3, 0);
 
+		degrees = 5;
+		angle_threshold = degrees * M_PI / 180;
+		distance_threshold = 0.05;
+		distance = 1000;
+		desired_angle = 0;
+
 		error_angle = M_PI;
 		error_distance = 100;
-		error_previous_angle = std::vector<double>(2, 0);
 		error_previous_dist = 0;
 
-		error_int_angle = std::vector<double>(2, 0);
+		error_int_angle = 0;
+		error_previous_angle = 0;
 
 		// Gains
 		gains_rotation = std::vector<double>(3, 0);
-		gains_translation = std::vector<double>(3, 0);
+		gains_translation = std::vector<double>(6, 0);
 
 		// ROTATION
 		gains_rotation[0] = 4.5;	//3 more or less fine (value of yesterday)
 		gains_rotation[1] = 0;	//0.5 more or less fine (value of yesterday)
 		gains_rotation[2] = 0;
 
-		// TRANSLATION
+		// TRANSLATION+ROTATION
+		//Translation
 		gains_translation[0] = 1;
 		gains_translation[1] = 0.01;
 		gains_translation[2] = 0.1;
+		
+		//Rotation
+		gains_translation[3] = 1;
+		gains_translation[4] = 0;
+		gains_translation[5] = 0;
 		
 	}
 
@@ -76,9 +88,9 @@ public:
 		pose[0] = pose_msg->x;
 		pose[1] = pose_msg->y;
 		pose[2] = pose_msg->theta;
-		ROS_INFO("pose x: %f", pose[0]);
-		ROS_INFO("pose y: %f", pose[1]);
-		ROS_INFO("pose theta: %f", pose[2]);
+		// ROS_INFO("pose x: %f", pose[0]);
+		// ROS_INFO("pose y: %f", pose[1]);
+		// ROS_INFO("pose theta: %f", pose[2]);
 	}
 
 	void desiredPoseCallBack(const geometry_msgs::Pose2D::ConstPtr& desired_pose_msg) {
@@ -113,42 +125,33 @@ public:
 	}
 
 
-	void moveToPoint() {
-		double degrees = 15;
-		double angle_threshold = degrees * M_PI / 180;
-		double distance_threshold = 0.05;
-
-		double desired_angle;
+	void updateErrors(){
 		double delta_x = pose_desired[0] - pose[0];
 		double delta_y = pose_desired[1] - pose[1];
-		double distance = sqrt(pow(delta_x, 2) + pow(delta_y, 2));
-
-		ROS_INFO("distance: %f", distance);
-
-		if (distance < distance_threshold) {
-			desired_angle = 0;
-		}
-
-		else {
-			desired_angle = atan2(delta_y, delta_x); // aim to goal point
-		}
-
+		distance = sqrt(pow(delta_x, 2) + pow(delta_y, 2));
+		desired_angle = atan2(delta_y, delta_x); // aim to goal point
 		error_angle = desired_angle - pose[2];
+	}
+
+
+	void moveToPoint() {
+	
+		updateErrors();
+
+		ROS_INFO("distance error: %f", distance);
 
 		//ROS_INFO("BEFORE IF STATEMENTS");
 		ROS_INFO("error angle: %f", radToDeg(error_angle));
 		//ROS_INFO("desired angle: %f", radToDeg(desired_angle));
-
-		double error_angle_abs = fabs(error_angle);
 
 		// ROS_INFO("error angle: %f", radToDeg(error_angle));
 		//ROS_INFO("error angle abs: %f", radToDeg(error_angle_abs));
 		//ROS_INFO("error dist: %f", distance);
 		//ROS_INFO("GOING INTO IF STATEMENTS");
 
-		if ((error_angle_abs > angle_threshold) && (distance > distance_threshold)) {
+		if ((fabs(error_angle)> angle_threshold) && (distance > distance_threshold)) {
 			ROS_INFO("first turn");
-			PID_rotation(error_angle, 0);
+			PID_rotation();
 		}
 
 		else if (distance > distance_threshold) {
@@ -157,34 +160,18 @@ public:
 		}
 
 		else {
-			point_flag = true;
-			velocity_msg.linear.x = 0;
-			velocity_msg.angular.z = 0;
+			closeEnough();
 		}
 	}
 
+	void PID_rotation() {
 
-	void turnOnSpot() {
-
-		if (point_flag) {
-			ROS_INFO("second turn");
-			double desired_angle = pose_desired[2];
-			error_angle = desired_angle - pose[2];
-			ROS_INFO("error angle: %f", radToDeg(error_angle));
-			PID_rotation(error_angle, 1);
-			point_flag = false;
-		}
-	}
-
-
-	void PID_rotation(double error_angle, int rotation_number) {
-
-		double derror_angle = (error_angle - error_previous_angle[rotation_number]) * control_frequency;
-		error_int_angle[rotation_number] = error_int_angle[rotation_number] + error_angle;
-		error_previous_angle[rotation_number] = error_angle;
+		double derror_angle = (error_angle - error_previous_angle) * control_frequency;
+		error_int_angle = error_int_angle + error_angle;
+		error_previous_angle = error_angle;
 
 		double P = gains_rotation[0] * error_angle;
-		double I = gains_rotation[1] * error_int_angle[rotation_number];
+		double I = gains_rotation[1] * error_int_angle;
 		double D = gains_rotation[2] * derror_angle;
 
 		ROS_INFO("w P part: %f", P);
@@ -214,16 +201,36 @@ public:
 		ROS_INFO("v D part: %f", D);
 		ROS_INFO("v I part: %f", I);
 
+		double derror_angle = (error_angle - error_previous_angle) * control_frequency;
+		error_int_angle = error_int_angle + error_angle;
+		error_previous_angle = error_angle;
+
+		double PW = gains_rotation[3] * error_angle;
+		double IW = gains_rotation[4] * error_int_angle;
+		double DW = gains_rotation[5] * derror_angle;
+
+		ROS_INFO("w P part: %f", PW);
+		ROS_INFO("w D part: %f", DW);
+		ROS_INFO("w I part: %f", IW);
+
+		double w = P + I + D;
+
 		velocity_msg.linear.x = v;
-		velocity_msg.angular.z = 0;
+		velocity_msg.angular.z = w;
 	}
   
+	void closeEnough() {
+		velocity_msg.linear.x = 0;
+		velocity_msg.angular.z = 0;
+		ROS_INFO("Close Enough");
+	}
+
 	void stop() {
+		ROS_INFO("Has Stopped");
 		velocity_msg.linear.x = 0;
 		velocity_msg.angular.z = 0;
 		stopped = true;
 	}
-
 
 	void move() {
 
@@ -239,7 +246,6 @@ public:
 
 		else {
 			moveToPoint();
-			turnOnSpot();
 		}
 
 		ROS_INFO("v : %f", velocity_msg.linear.x);
@@ -285,6 +291,13 @@ private:
 	bool stopped;
 	int control_frequency;
 	double dt;
+
+	double degrees;
+	double angle_threshold;
+	double distance_threshold;
+	double distance;
+	double desired_angle;
+	
 	geometry_msgs::Twist velocity_msg;
 
 	std::vector<double> laser_distances;
@@ -300,8 +313,8 @@ private:
 	std::vector<double> pose;
 	std::vector<double> pose_desired;
 	
-	std::vector<double> error_int_angle;
-	std::vector<double> error_previous_angle;
+	double error_int_angle;
+	double error_previous_angle;
 	
 	std::vector<double> gains_rotation;
 	std::vector<double> gains_translation;
