@@ -197,7 +197,7 @@ class ObstacleMap:
             second_point = ordered_vertices[(i + 1) % number_of_vertex]
             plt.plot([first_point[0], second_point[0]],
                      [first_point[1], second_point[1]],
-                     'b')
+                     'k')
 
         interiors = polygon.interiors
         has_interior = len(interiors) > 0
@@ -211,7 +211,7 @@ class ObstacleMap:
                     second_point = inner_vertices[(i + 1) % number_of_vertex]
                     plt.plot([first_point[0], second_point[0]],
                              [first_point[1], second_point[1]],
-                             'b')
+                             'k')
 
 
 if __name__ == '__main__':
