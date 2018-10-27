@@ -24,8 +24,10 @@ int main(int argc, char** argv){
     geometry_msgs::Pose2D pose;
     pose.x = transform.getOrigin().x();
     pose.y = transform.getOrigin().y();
+    ROS_INFO("posex: %d", pose.x);
+    ROS_INFO("posey: %d", pose.y);
     pose_pub.publish(pose);
-
+    
     rate.sleep();
   }
   return 0;

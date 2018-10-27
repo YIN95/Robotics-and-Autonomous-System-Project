@@ -23,6 +23,8 @@ ObjectDetection::ObjectDetection(){
    	sub_image_depth = nh.subscribe<sensor_msgs::Image>("/camera/depth/image_raw", 1, &ObjectDetection::imageDepthCallback, this);
     pub_object_pose = nh.advertise<geometry_msgs::Pose2D>("/object/pose", 1);
     pub_object_marker = nh.advertise<visualization_msgs::Marker>("/object/marker", 1);
+    pose_pub = nh.advertise<geometry_msgs::Pose2D>("/global_pose/object", 1);
+
     char *buffer;
     buffer = getcwd(NULL, 0);
     string path = buffer;
@@ -87,12 +89,15 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                 showResult(color_result);
 
                 pose.x = 1.0 * object_depth / 1000;
-                pose.y = pose.x / fx * (center_x - cx);
+                pose.y = -1.0 * pose.x / fx * (center_x - cx);
                 pose.theta = 0;
                 pub_object_pose.publish(pose);
-                if (preDetectColor != color_result)
+                ROS_INFO("pre, now: %d %d", preDetectColor, color_result);
+                if (preDetectColor != color_result){
                     pubPose(pose.x, pose.y);
-                preDetectColor = color_result;
+                    listen_obj_map(pose.x, pose.y);
+                    preDetectColor = color_result;
+                }
             }
         }
         else{
@@ -107,6 +112,32 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
     catch(...){
         return;
     }
+}
+
+void ObjectDetection::listen_obj_map(double x, double y){
+    geometry_msgs::PointStamped obj_tf_camera;
+    obj_tf_camera.header.frame_id = "camera";
+    obj_tf_camera.header.stamp = ros::Time();
+    obj_tf_camera.point.x = x;
+    obj_tf_camera.point.y = y;
+    obj_tf_camera.point.z = 0.0;
+    try{
+        geometry_msgs::PointStamped obj_tf_map;
+        listener.transformPoint("map", obj_tf_camera, obj_tf_map);
+
+        ROS_INFO("camera: (%.2f, %.2f. %.2f) -----> map: (%.2f, %.2f, %.2f) at time %.2f",
+            obj_tf_camera.point.x, obj_tf_camera.point.y, obj_tf_camera.point.z,
+            obj_tf_map.point.x, obj_tf_map.point.y, obj_tf_map.point.z, obj_tf_map.header.stamp.toSec());
+        geometry_msgs::Pose2D pose_;
+        pose_.x = obj_tf_map.point.x;
+        pose_.y = obj_tf_map.point.y;
+        pose_pub.publish(pose_);
+    }
+    catch(tf::TransformException& ex){
+        ROS_ERROR("Received an exception trying to transform a point");
+    }
+
+    
 }
 
 void ObjectDetection::removeBackground(Mat frame){

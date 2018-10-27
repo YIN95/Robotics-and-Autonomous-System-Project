@@ -16,6 +16,8 @@
 #include <stdio.h>
 #include <gp9_objects_detection/detection_util.h>
 #include <visualization_msgs/Marker.h>
+#include <tf/transform_listener.h>
+#include <geometry_msgs/PointStamped.h>
 
 using namespace cv;
 using namespace std;
@@ -26,6 +28,11 @@ public: /* ros */
     ros::Subscriber sub_image_depth;
     ros::Publisher pub_object_pose;
     ros::Publisher pub_object_marker;
+    ros::Publisher pose_pub;
+    // geometry_msgs::PointStamped obj_tf_camera;
+
+    tf::TransformListener listener;
+    // tf::StampedTransform transform;
     
     // image_transport::Publisher pub_image_detect;
 
@@ -42,6 +49,8 @@ public:
     void showResult(int index);
     int getDepth(int x, int y);
     void pubPose(double x, double y);
+    void listen_obj_map(double x, double y);
+
 public:
     static const int img_rgb_height = 480;
     static const int img_rgb_width = 640;

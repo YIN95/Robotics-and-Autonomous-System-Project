@@ -21,7 +21,7 @@ int main(int argc, char** argv){
 
 robotPathPose::robotPathPose(){
     sub_object_coor = nh.subscribe<geometry_msgs::Pose2D>("/global_pose/object", 1, &robotPathPose::objectCallback, this);
-    sub_robot_coor = nh.subscribe<geometry_msgs::Pose2D>("/global_pose/robot", 1, &robotPathPose::robotCallback, this);
+    sub_robot_coor = nh.subscribe<geometry_msgs::Pose2D>("/pose", 1, &robotPathPose::robotCallback, this);
     pub_global_robot_coor_theta = nh.advertise<geometry_msgs::Pose2D>("/desired_pose", 1);
     
     object_x = 0;
@@ -37,9 +37,12 @@ void robotPathPose::objectCallback(const geometry_msgs::Pose2D::ConstPtr &msg){
     object_x = msg->x;
     object_y = msg->y;
     pose.theta = coor2Pose(object_x, object_y, robot_x, robot_y);
-    pose.x = object_x - 0.05;
-    pose.y = object_y;
+    // pose.x = object_x - 0.05;
+    pose.x = robot_x;
+    pose.y = robot_y;
     pub_global_robot_coor_theta.publish(pose);
+    ROS_INFO("pose: (%f, %f, %f)", robot_x, robot_y, pose.theta);
+
     return;
 }
 
