@@ -116,6 +116,8 @@ void MotorController::setMotorPowers() {
 	if (w_des_prev[LEFT] != w_desired[LEFT] | w_des_prev[RIGHT] != w_desired[RIGHT]) {
 		int_error[LEFT] = 0;
 		int_error[RIGHT] = 0;
+		prev_error[LEFT] = 0;
+		prev_error[RIGHT] = 0;
 	}
 	
 	error_left = w_desired[LEFT] - w_estimate[LEFT];
@@ -159,7 +161,6 @@ void MotorController::PID() {
 	updateDesiredSpeed();
 	updateEstimatedSpeed();
 	setMotorPowers();
-	// clipPowerValues();     // Is this really needed? Or should we clip velocity instead?
 	pub_left.publish(left_motor);
 	pub_right.publish(right_motor);
 }

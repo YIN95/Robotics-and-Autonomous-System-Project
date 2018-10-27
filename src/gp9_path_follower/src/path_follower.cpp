@@ -7,6 +7,7 @@
 #include <geometry_msgs/Pose2D.h>
 #include <geometry_msgs/Quaternion.h>
 #include <sensor_msgs/LaserScan.h>
+#include <stdlib.h>
 
 /* 
 TODO list 
@@ -67,19 +68,19 @@ public:
 		gains_translation = std::vector<double>(6, 0);
 
 		// ROTATION
-		gains_rotation[0] = 4.5;	//3 more or less fine (value of yesterday)
-		gains_rotation[1] = 0;	//0.5 more or less fine (value of yesterday)
+		gains_rotation[0] = 8;	//3 more or less fine (value of yesterday)
+		gains_rotation[1] = 0.01;	//0.5 more or less fine (value of yesterday)
 		gains_rotation[2] = 0;
 
 		// TRANSLATION+ROTATION
 		//Translation
-		gains_translation[0] = 1;
-		gains_translation[1] = 0.01;
-		gains_translation[2] = 0.1;
+		gains_translation[0] = 3;
+		gains_translation[1] = 0.007;
+		gains_translation[2] = 2.25;
 		
 		//Rotation
-		gains_translation[3] = 1;
-		gains_translation[4] = 0;
+		gains_translation[3] = 20.0;
+		gains_translation[4] = 0.01;
 		gains_translation[5] = 0;
 		
 	}
@@ -128,9 +129,15 @@ public:
 	void updateErrors(){
 		double delta_x = pose_desired[0] - pose[0];
 		double delta_y = pose_desired[1] - pose[1];
+		ROS_INFO("delta x: %f", delta_x);
+		ROS_INFO("delta y: %f", delta_y);
 		distance = sqrt(pow(delta_x, 2) + pow(delta_y, 2));
 		desired_angle = atan2(delta_y, delta_x); // aim to goal point
+		// ROS_INFO("desired angle: %f", radToDeg(desired_angle));
 		error_angle = desired_angle - pose[2];
+		// ROS_INFO("actual angle : %f", radToDeg(pose[2]));
+
+		ROS_INFO("error angle  : %f", radToDeg(error_angle));
 	}
 
 
@@ -140,16 +147,7 @@ public:
 
 		ROS_INFO("distance error: %f", distance);
 
-		//ROS_INFO("BEFORE IF STATEMENTS");
-		ROS_INFO("error angle: %f", radToDeg(error_angle));
-		//ROS_INFO("desired angle: %f", radToDeg(desired_angle));
-
-		// ROS_INFO("error angle: %f", radToDeg(error_angle));
-		//ROS_INFO("error angle abs: %f", radToDeg(error_angle_abs));
-		//ROS_INFO("error dist: %f", distance);
-		//ROS_INFO("GOING INTO IF STATEMENTS");
-
-		if ((fabs(error_angle)> angle_threshold) && (distance > distance_threshold)) {
+		if ((fabs(error_angle) > angle_threshold) && (distance > distance_threshold)) {
 			ROS_INFO("first turn");
 			PID_rotation();
 		}
@@ -170,6 +168,8 @@ public:
 		error_int_angle = error_int_angle + error_angle;
 		error_previous_angle = error_angle;
 
+		ROS_INFO("error angle : %f", error_angle);
+
 		double P = gains_rotation[0] * error_angle;
 		double I = gains_rotation[1] * error_int_angle;
 		double D = gains_rotation[2] * derror_angle;
@@ -179,7 +179,7 @@ public:
 		ROS_INFO("w I part: %f", I);
 
 		double w = P + I + D;
-
+		double random = (rand() % 10) / 10.0;
 		velocity_msg.linear.x = 0;
 		velocity_msg.angular.z = w;
 	}
@@ -191,38 +191,48 @@ public:
 		error_int_dist += error_distance;
 		error_previous_dist = error_distance;
 
+//		ROS_INFO("error angle : %f", error_angle);
+
 		double P = gains_translation[0] * error_distance;
 		double I = gains_translation[1] * error_int_dist;
 		double D = gains_translation[2] * derror_distance;
 		
 		double v = P + I + D;
 
-		ROS_INFO("v P part: %f", P);
-		ROS_INFO("v D part: %f", D);
-		ROS_INFO("v I part: %f", I);
+//		ROS_INFO("v P part: %f", P);
+//		ROS_INFO("v D part: %f", D);
+//		ROS_INFO("v I part: %f", I);
 
 		double derror_angle = (error_angle - error_previous_angle) * control_frequency;
 		error_int_angle = error_int_angle + error_angle;
 		error_previous_angle = error_angle;
 
-		double PW = gains_rotation[3] * error_angle;
-		double IW = gains_rotation[4] * error_int_angle;
-		double DW = gains_rotation[5] * derror_angle;
+		double PW = gains_translation[3] * error_angle;
+		double IW = gains_translation[4] * error_int_angle;
+		double DW = gains_translation[5] * derror_angle;
 
-		ROS_INFO("w P part: %f", PW);
-		ROS_INFO("w D part: %f", DW);
-		ROS_INFO("w I part: %f", IW);
+//		ROS_INFO("w P part: %f", PW);
+//		ROS_INFO("w D part: %f", DW);
+//		ROS_INFO("w I part: %f", IW);
 
-		double w = P + I + D;
+		double w = PW + IW + DW;
 
 		velocity_msg.linear.x = v;
 		velocity_msg.angular.z = w;
 	}
-  
+
+	void resetErrors() {
+			error_previous_angle = 0;
+			error_int_angle = 0;
+			error_previous_dist = 0;
+			error_int_dist = 0;
+	}
+
 	void closeEnough() {
-		velocity_msg.linear.x = 0;
-		velocity_msg.angular.z = 0;
-		ROS_INFO("Close Enough");
+			velocity_msg.linear.x = 0;
+			velocity_msg.angular.z = 0;
+			resetErrors();
+			ROS_INFO("Close Enough");
 	}
 
 	void stop() {
@@ -323,7 +333,7 @@ private:
 
 int main(int argc, char** argv) {
 
-	int control_frequency = 10;
+	int control_frequency = 125;
 	int check_every_laser = 4;
 	double min_distance_to_obstacles = 0.30;
 
