@@ -1,5 +1,7 @@
 #include <gp9_objects_detection/objects_detection.h>
 // roslaunch realsense_camera sr300_nodelet_rgbd.launch
+// the following one is better
+// roslaunch ras_camera ras_camera_nodelet.launch
 
 int main(int argc, char** argv) 
 {	
@@ -93,7 +95,7 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                 pose.theta = 0;
                 pub_object_pose.publish(pose);
                 ROS_INFO("pre, now: %d %d", preDetectColor, color_result);
-                
+
                 if (preDetectColor != color_result){
                     pubPose(pose.x, pose.y);
                     listen_obj_map(pose.x, pose.y);
