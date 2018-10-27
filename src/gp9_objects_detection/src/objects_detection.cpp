@@ -93,6 +93,7 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                 pose.theta = 0;
                 pub_object_pose.publish(pose);
                 ROS_INFO("pre, now: %d %d", preDetectColor, color_result);
+                
                 if (preDetectColor != color_result){
                     pubPose(pose.x, pose.y);
                     listen_obj_map(pose.x, pose.y);
