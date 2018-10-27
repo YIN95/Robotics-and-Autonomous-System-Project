@@ -1,0 +1,8 @@
+prefix=/home/ras19/catkin_ws/devel
+
+Name: gp9_path_follower
+Description: Description of gp9_path_follower
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/ras19/catkin_ws/devel/lib 
+Requires: 
