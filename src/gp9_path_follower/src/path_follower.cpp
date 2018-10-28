@@ -7,7 +7,6 @@
 #include <geometry_msgs/Pose2D.h>
 #include <geometry_msgs/Quaternion.h>
 #include <sensor_msgs/LaserScan.h>
-#include <stdlib.h>
 
 /* 
 TODO list 
@@ -40,6 +39,9 @@ public:
 
 		point_flag = false;
 		stopped = false;
+		same_point = false;
+		other_angle = false;
+		turnFlag = false;
 		control_frequency = control_frequency_;
 		dt = 1 / control_frequency;
 
@@ -48,6 +50,7 @@ public:
 		every_lidar_value = every_lidar_value_;
 
 		pose = std::vector<double>(3, 0);
+		pose_previous = std::vector<double>(3, 0);
 		pose_desired = std::vector<double>(3, 0);
 
 		degrees = 5;
@@ -89,6 +92,7 @@ public:
 		pose[0] = pose_msg->x;
 		pose[1] = pose_msg->y;
 		pose[2] = pose_msg->theta;
+
 		// ROS_INFO("pose x: %f", pose[0]);
 		// ROS_INFO("pose y: %f", pose[1]);
 		// ROS_INFO("pose theta: %f", pose[2]);
@@ -100,6 +104,16 @@ public:
 		pose_desired[2] = desired_pose_msg->theta;
 		//ROS_INFO("pose_desired x: %f", pose_desired[0]);
 		//ROS_INFO("pose_desired y: %f", pose_desired[1]);
+		bool x_close = fabs(pose_previous[0] - pose_desired[0]) < 1e-6;
+		bool y_close = fabs(pose_previous[1] - pose_desired[1]) < 1e-6;
+		same_point = (x_close && y_close);
+		bool angle_close = fabs(pose_desired[2] - pose_previous[2]) < 1e-6;
+		other_angle = !angle_close;
+
+		pose_previous[0] = pose_desired[0];
+		pose_previous[1] = pose_desired[1];
+		pose_previous[2] = pose_desired[2];
+		
 		show_desired_pose();
 	}
 
@@ -135,9 +149,20 @@ public:
 		desired_angle = atan2(delta_y, delta_x); // aim to goal point
 		// ROS_INFO("desired angle: %f", radToDeg(desired_angle));
 		error_angle = desired_angle - pose[2];
-		// ROS_INFO("actual angle : %f", radToDeg(pose[2]));
+		ROS_INFO("desired angle: %f", desired_angle);
+		ROS_INFO("actual angle : %f", pose[2]);
+		ROS_INFO("error angle before: %f", error_angle);
+		if (error_angle <= -M_PI) {
+			error_angle += 2*M_PI;
+		}
 
-		ROS_INFO("error angle  : %f", radToDeg(error_angle));
+		else if (error_angle > M_PI) {
+			error_angle -= 2*M_PI;
+		}
+		ROS_INFO("error angle after: %f", error_angle);
+
+		// ROS_INFO("actual angle : %f", radToDeg(pose[2]));
+		// ROS_INFO("error angle  : %f", radToDeg(error_angle));
 	}
 
 
@@ -179,7 +204,6 @@ public:
 		ROS_INFO("w I part: %f", I);
 
 		double w = P + I + D;
-		double random = (rand() % 10) / 10.0;
 		velocity_msg.linear.x = 0;
 		velocity_msg.angular.z = w;
 	}
@@ -222,17 +246,20 @@ public:
 	}
 
 	void resetErrors() {
-			error_previous_angle = 0;
-			error_int_angle = 0;
-			error_previous_dist = 0;
-			error_int_dist = 0;
+		error_previous_angle = 0;
+		error_int_angle = 0;
+		error_previous_dist = 0;
+		error_int_dist = 0;
 	}
 
 	void closeEnough() {
+		if (!turnFlag) {
 			velocity_msg.linear.x = 0;
 			velocity_msg.angular.z = 0;
 			resetErrors();
 			ROS_INFO("Close Enough");
+		}
+		
 	}
 
 	void stop() {
@@ -296,9 +323,46 @@ public:
 		pub_desired_pose.publish(marker);
 	}
 
+	void turnOnSpot() {
+		ROS_INFO("same point:  %d", same_point);
+		ROS_INFO("other angle: %d", other_angle);
+
+		if (same_point && other_angle) {
+			turnFlag = true;
+			resetErrors();
+		}
+
+		ROS_INFO("turn flag: %d", turnFlag);
+
+		if (turnFlag) {
+				error_angle = pose_desired[2] - pose[2];
+				if (error_angle <= -M_PI) {
+					error_angle += 2*M_PI;
+				}
+
+				else if (error_angle > M_PI) {
+					error_angle -= 2*M_PI;
+				}
+				if (fabs(error_angle) > angle_threshold) {
+					PID_rotation();
+				}
+
+				else {
+					ROS_INFO("turning off turn flag");
+					turnFlag = false;
+				}
+				
+			}
+		
+	}
+
+
 private:
+	bool turnFlag;
 	bool point_flag;
 	bool stopped;
+	bool same_point;
+	bool other_angle;
 	int control_frequency;
 	double dt;
 
@@ -321,6 +385,7 @@ private:
 	
 	double error_int_dist;
 	std::vector<double> pose;
+	std::vector<double> pose_previous;
 	std::vector<double> pose_desired;
 	
 	double error_int_angle;
@@ -344,6 +409,7 @@ int main(int argc, char** argv) {
 	while (sl.nh.ok()) {
 		ros::spinOnce();
 		if (!sl.has_stopped()) {
+			sl.turnOnSpot();
 			sl.move();
 		}
 
