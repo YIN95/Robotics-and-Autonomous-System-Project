@@ -61,8 +61,8 @@ void ObjectDetection::imageDepthCallback(const sensor_msgs::ImageConstPtr &msg){
     catch (...){
         return;
     }
-    cv::imshow("DEPTH_WINDOW", cv_depth_ptr->image);
-    cv::waitKey(3);  
+    // cv::imshow("DEPTH_WINDOW", cv_depth_ptr->image);
+    // cv::waitKey(3);  
 }
 
 void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
@@ -82,13 +82,13 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
             // ellipse(frame, center, Size(objects[0].width/2, objects[0].height/2 ), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
             int color_result = colorFilter_is_object(frame, center_x, center_y);
             object_depth = getDepth(center_x, center_y);
-
-            if (color_result > 0 && object_depth > 50){
+            ROS_INFO("DEPTH: %d", object_depth);
+            if (color_result > 0 && object_depth >= 0){
                 ellipse(ptr->image, center, Size(4, 4), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
                 Point pt1(objects[0].x, objects[0].y);
                 Point pt2(objects[0].x + objects[0].width, objects[0].y + objects[0].height);
                 
-                ROS_INFO("DEPTH: %d", object_depth);
+                
                 rectangle(ptr->image, pt1, pt2, Scalar( 255, 0, 255 ), 4, 8, 0 );
                 showResult(color_result);
 
@@ -98,7 +98,7 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                 pub_object_pose.publish(pose);
 
                 // if (preDetectColor != color_result){
-                if (check_pre_object(color_result)){
+                if (check_pre_object(color_result)&& object_depth >= 50){
                     listen_obj_map(pose.x, pose.y, color_result);
                     preDetectColor = color_result;
                 }
@@ -200,7 +200,14 @@ int ObjectDetection::colorFilter_is_object(Mat frame, int x, int y){
         int g = d_[x * 3 + 1];            
         int r = d_[x * 3 + 2];  
         if (s < 40){
+            ROS_INFO("-----------");
+            ROS_INFO("center: (%d, %d)", x, y);
+            ROS_INFO("BGR: (%d, %d, %d)", b, g, r);
+            ROS_INFO("HSV: (%d, %d, %d)", h, s, v);
+           
+            return colorClassifier(h, s, v, b, g, r);
             return -1;
+            
         }
         else{
             ROS_INFO("-----------");
@@ -218,40 +225,86 @@ int ObjectDetection::colorFilter_is_object(Mat frame, int x, int y){
 }
 
 int ObjectDetection::colorClassifier(int h, int s, int v, int b, int g, int r){
+    bool use_rgb = false;
+    if (use_rgb){
+        if (10 < b && b < 70 && 50 < g && g < 120 && 0 < r && r < 40){
+            ROS_INFO("COLOR_GREEN");
+            return obj.COLOR_GREEN;
+        }
+        else if ((0 <= b && b < 20) && (70 < g && g < 180) && (143 < r && r < 255)){
+            ROS_INFO("COLOR_YELLOW");
+            return obj.COLOR_YELLOW;
+        }
+        else if ((5 <= b && b < 30) && 80 < g && g < 160 && 50 < r && r < 125){
+            ROS_INFO("COLOR_LIGHT_GREEN");
+            return obj.COLOR_LIGHT_GREEN;
+        }
+        else if (0 <= b && b < 10 && 30 < g && g < 70 && 150 < r && r < 220){
+            ROS_INFO("COLOR_ORANGE");
+            return obj.COLOR_ORANGE;
+        }
+        else if (0 <= b && b < 30 && 0 <= g && g < 40 && 125 < r && r < 185){
+            ROS_INFO("COLOR_RED");
+            return obj.COLOR_RED;
+        }
+        else if (80 <= b && b < 160 && 79 < g && g < 130 && 0 <= r && r < 30){
+            ROS_INFO("COLOR_LIGHT_BLUE");
+            return obj.COLOR_LIGHT_BLUE;
+        }
+        else if (30 <= b && b < 79 && 40 < g && g < 110 && 0 <= r && r < 30){
+            ROS_INFO("COLOR_BLUE");
+            return obj.COLOR_BLUE;
+        }
+        else if (50 <= b && b < 180 && 40 < g && g < 100 && 90 < r && r < 180){
+            ROS_INFO("COLOR_PURPLE");
+            return obj.COLOR_PURPLE;
+        }
+        return -1;
+    }
+    else{
+        // return 1;
+        if (s <95){
+            return -1;
+        }
+        if (55 <= h && h <= 69 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
+            ROS_INFO("COLOR_GREEN");
+            return obj.COLOR_GREEN;
+        }
+        else if ((90 <= h && h <= 107) && (0 <= s && s <= 255) && (0 <= v && v <= 255)){
+            ROS_INFO("COLOR_YELLOW");
+            return obj.COLOR_YELLOW;
+        }
+        else if ((70 <= h && h <= 89) && 0 <= s && s <= 255 && 0 <= v && v <= 255){
+            ROS_INFO("COLOR_LIGHT_GREEN");
+            return obj.COLOR_LIGHT_GREEN;
+        }
+        else if (108 <= h && h <= 117 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
+            ROS_INFO("COLOR_ORANGE");
+            return obj.COLOR_ORANGE;
+        }
+        else if (0 <= h && h < 17 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
+            ROS_INFO("COLOR_RED");
+            return obj.COLOR_RED;
+        }
+        else if (118 <= h && h <= 128 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
+            ROS_INFO("COLOR_RED");
+            return obj.COLOR_RED;
+        }
+        else if (18 <= h && h <= 54 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
+            ROS_INFO("COLOR_LIGHT_BLUE");
+            return obj.COLOR_LIGHT_BLUE;
+        }
+        else if (18 <= h && h <= 54 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
+            ROS_INFO("COLOR_BLUE");
+            return obj.COLOR_BLUE;
+        }
+        else if (129 <= h && h < 170 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
+            ROS_INFO("COLOR_PURPLE");
+            return obj.COLOR_PURPLE;
+        }
+        return -1;        
+    }
     
-    if (40 < b && b < 80 && 70 < g && g < 120 && 0 < r && r < 10){
-        ROS_INFO("COLOR_GREEN");
-        return obj.COLOR_GREEN;
-    }
-    else if ((0 <= b && b < 20) && (70 < g && g < 180) && (160 < r && r < 255)){
-        ROS_INFO("COLOR_YELLOW");
-        return obj.COLOR_YELLOW;
-    }
-    else if ((5 <= b && b < 30) && 80 < g && g < 160 && 50 < r && r < 125){
-        ROS_INFO("COLOR_LIGHT_GREEN");
-        return obj.COLOR_LIGHT_GREEN;
-    }
-    else if (0 <= b && b < 10 && 30 < g && g < 70 && 150 < r && r < 210){
-        ROS_INFO("COLOR_ORANGE");
-        return obj.COLOR_ORANGE;
-    }
-    else if (0 <= b && b < 30 && 0 <= g && g < 40 && 125 < r && r < 160){
-        ROS_INFO("COLOR_RED");
-        return obj.COLOR_RED;
-    }
-    else if (80 <= b && b < 160 && 79 < g && g < 130 && 0 <= r && r < 30){
-        ROS_INFO("COLOR_LIGHT_BLUE");
-        return obj.COLOR_LIGHT_BLUE;
-    }
-    else if (30 <= b && b < 79 && 40 < g && g < 110 && 0 <= r && r < 30){
-        ROS_INFO("COLOR_BLUE");
-        return obj.COLOR_BLUE;
-    }
-    else if (50 <= b && b < 180 && 40 < g && g < 100 && 90 < r && r < 180){
-        ROS_INFO("COLOR_PURPLE");
-        return obj.COLOR_PURPLE;
-    }
-    return -1;
 }
 
 void ObjectDetection::showResult(int index){
@@ -290,9 +343,20 @@ void ObjectDetection::showResult(int index){
 }
 
 int ObjectDetection::getDepth(int x, int y){
+    int i, j, depth, temp;
+    depth = 0;
     Mat frame_depth = cv_depth_ptr->image;
-    uchar* d = frame_depth.ptr<uchar>(y); 
-    int depth = d[2*x] + 255*d[2*x+1];            
+    for (i=x-10; i<x+10; i++){
+        for (j=y-10; j<y+10; j++){
+            uchar* d = frame_depth.ptr<uchar>(j);
+            temp = d[2*i] + 255*d[2*i+1];
+            depth = max(depth, temp);
+        }
+    }
+
+    
+    // uchar* d = frame_depth.ptr<uchar>(y); 
+    // int depth = d[2*x] + 255*d[2*x+1];            
     return depth;
 }
 
