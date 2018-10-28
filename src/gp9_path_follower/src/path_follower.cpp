@@ -53,6 +53,12 @@ public:
 		pose_previous = std::vector<double>(3, 0);
 		pose_desired = std::vector<double>(3, 0);
 
+
+		// HAS TO BE THE SAME AS FOR ODOMETRY! TAKE FROM PARAM SERVER
+		pose_previous[0] = 0.225;
+		pose_previous[1] = 0.225;
+		pose_previous[2] = M_PI / 2;
+
 		degrees = 5;
 		angle_threshold = degrees * M_PI / 180;
 		distance_threshold = 0.05;
@@ -167,24 +173,27 @@ public:
 
 
 	void moveToPoint() {
-	
-		updateErrors();
+		
+		if (!turnFlag) {
+			
+			updateErrors();
+			ROS_INFO("distance error: %f", distance);
 
-		ROS_INFO("distance error: %f", distance);
+			if ((fabs(error_angle) > angle_threshold) && (distance > distance_threshold) ) {
+				ROS_INFO("first turn");
+				PID_rotation();
+			}
 
-		if ((fabs(error_angle) > angle_threshold) && (distance > distance_threshold)) {
-			ROS_INFO("first turn");
-			PID_rotation();
+			else if (distance > distance_threshold) {
+				ROS_INFO("translation");
+				PID_translation(distance);
+			}
+
+			else {
+				closeEnough();
+			}
 		}
-
-		else if (distance > distance_threshold) {
-			ROS_INFO("translation");
-			PID_translation(distance);
-		}
-
-		else {
-			closeEnough();
-		}
+		
 	}
 
 	void PID_rotation() {
@@ -253,12 +262,10 @@ public:
 	}
 
 	void closeEnough() {
-		if (!turnFlag) {
-			velocity_msg.linear.x = 0;
-			velocity_msg.angular.z = 0;
-			resetErrors();
-			ROS_INFO("Close Enough");
-		}
+		velocity_msg.linear.x = 0;
+		velocity_msg.angular.z = 0;
+		resetErrors();
+		ROS_INFO("Close Enough");
 		
 	}
 
