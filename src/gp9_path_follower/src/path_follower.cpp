@@ -71,23 +71,25 @@ public:
 
 		error_int_angle = 0;
 		error_previous_angle = 0;
+		error_int_angle_translation = 0;
+		error_previous_angle_translation = 0;
 
 		// Gains
 		gains_rotation = std::vector<double>(3, 0);
 		gains_translation = std::vector<double>(6, 0);
 
 		// ROTATION
-		gains_rotation[0] = 8;	//3 more or less fine (value of yesterday)
+		gains_rotation[0] = 10.0;	//3 more or less fine (value of yesterday)
 		gains_rotation[1] = 0.01;	//0.5 more or less fine (value of yesterday)
 		gains_rotation[2] = 0;
 
 		// TRANSLATION+ROTATION
-		//Translation
-		gains_translation[0] = 3;
+		//Translation, these gains are good!
+		gains_translation[0] = 5;
 		gains_translation[1] = 0.007;
-		gains_translation[2] = 2.25;
+		gains_translation[2] = 0;
 		
-		//Rotation
+		//Rotation, these gains are good!
 		gains_translation[3] = 20.0;
 		gains_translation[4] = 0.01;
 		gains_translation[5] = 0;
@@ -149,15 +151,15 @@ public:
 	void updateErrors(){
 		double delta_x = pose_desired[0] - pose[0];
 		double delta_y = pose_desired[1] - pose[1];
-		ROS_INFO("delta x: %f", delta_x);
-		ROS_INFO("delta y: %f", delta_y);
+		// ROS_INFO("delta x: %f", delta_x);
+		// ROS_INFO("delta y: %f", delta_y);
 		distance = sqrt(pow(delta_x, 2) + pow(delta_y, 2));
 		desired_angle = atan2(delta_y, delta_x); // aim to goal point
 		// ROS_INFO("desired angle: %f", radToDeg(desired_angle));
 		error_angle = desired_angle - pose[2];
-		ROS_INFO("desired angle: %f", desired_angle);
-		ROS_INFO("actual angle : %f", pose[2]);
-		ROS_INFO("error angle before: %f", error_angle);
+		// ROS_INFO("desired angle: %f", desired_angle);
+		// ROS_INFO("actual angle : %f", pose[2]);
+		// ROS_INFO("error angle before: %f", error_angle);
 		if (error_angle <= -M_PI) {
 			error_angle += 2*M_PI;
 		}
@@ -165,7 +167,7 @@ public:
 		else if (error_angle > M_PI) {
 			error_angle -= 2*M_PI;
 		}
-		ROS_INFO("error angle after: %f", error_angle);
+		// ROS_INFO("error angle after: %f", error_angle);
 
 		// ROS_INFO("actual angle : %f", radToDeg(pose[2]));
 		// ROS_INFO("error angle  : %f", radToDeg(error_angle));
@@ -175,7 +177,7 @@ public:
 	void moveToPoint() {
 		
 		if (!turnFlag) {
-			
+
 			updateErrors();
 			ROS_INFO("distance error: %f", distance);
 
@@ -236,12 +238,12 @@ public:
 //		ROS_INFO("v D part: %f", D);
 //		ROS_INFO("v I part: %f", I);
 
-		double derror_angle = (error_angle - error_previous_angle) * control_frequency;
-		error_int_angle = error_int_angle + error_angle;
-		error_previous_angle = error_angle;
+		double derror_angle = (error_angle - error_previous_angle_translation) * control_frequency;
+		error_int_angle_translation = error_int_angle_translation + error_angle;
+		error_previous_angle_translation = error_angle;
 
 		double PW = gains_translation[3] * error_angle;
-		double IW = gains_translation[4] * error_int_angle;
+		double IW = gains_translation[4] * error_int_angle_translation;
 		double DW = gains_translation[5] * derror_angle;
 
 //		ROS_INFO("w P part: %f", PW);
@@ -259,6 +261,8 @@ public:
 		error_int_angle = 0;
 		error_previous_dist = 0;
 		error_int_dist = 0;
+		error_previous_angle_translation = 0;
+		error_int_angle_translation = 0;
 	}
 
 	void closeEnough() {
@@ -397,6 +401,9 @@ private:
 	
 	double error_int_angle;
 	double error_previous_angle;
+
+	double error_int_angle_translation;
+	double error_previous_angle_translation;
 	
 	std::vector<double> gains_rotation;
 	std::vector<double> gains_translation;

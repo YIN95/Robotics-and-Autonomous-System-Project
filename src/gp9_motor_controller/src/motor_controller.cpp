@@ -32,8 +32,8 @@ MotorController::MotorController(int control_frequency_) {
 	control_frequency = control_frequency_;
 	dt = 1.0 / control_frequency;
 	
-	v_threshold = 0.4;
-	w_threshold = 1.5;
+	v_threshold = 0.4; // 0.4
+	w_threshold = 2.0; // 1.5
 
 	v_robot_desired = 0;
 	w_robot_desired = 0;
