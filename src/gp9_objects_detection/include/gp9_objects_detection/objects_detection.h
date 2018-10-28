@@ -16,8 +16,10 @@
 #include <stdio.h>
 #include <gp9_objects_detection/detection_util.h>
 #include <visualization_msgs/Marker.h>
+#include <visualization_msgs/MarkerArray.h>
 #include <tf/transform_listener.h>
 #include <geometry_msgs/PointStamped.h>
+#include <string>
 
 using namespace cv;
 using namespace std;
@@ -26,15 +28,16 @@ public: /* ros */
 	ros::NodeHandle nh;
     ros::Subscriber sub_image_rgb;
     ros::Subscriber sub_image_depth;
+
     ros::Publisher pub_object_pose;
     ros::Publisher pub_object_marker;
+    ros::Publisher pub_object_marker_array;
     ros::Publisher pose_pub;
-    // geometry_msgs::PointStamped obj_tf_camera;
+
+    visualization_msgs::Marker marker;
+    visualization_msgs::MarkerArray marker_array;
 
     tf::TransformListener listener;
-    // tf::StampedTransform transform;
-    
-    // image_transport::Publisher pub_image_detect;
 
 public:
     ObjectDetection();
@@ -48,8 +51,9 @@ public:
     void showresult(int txt);
     void showResult(int index);
     int getDepth(int x, int y);
-    void pubPose(double x, double y);
-    void listen_obj_map(double x, double y);
+    void pubPose(double x, double y, int type);
+    void listen_obj_map(double x, double y, int type);
+    bool check_pre_object(int temp);
 
 public:
     static const int img_rgb_height = 480;

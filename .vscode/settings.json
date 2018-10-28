@@ -4,6 +4,10 @@
     "files.associations": {
         "array": "cpp",
         "initializer_list": "cpp",
-        "utility": "cpp"
+        "utility": "cpp",
+        "thread": "cpp",
+        "functional": "cpp",
+        "type_traits": "cpp",
+        "tuple": "cpp"
     }
 }

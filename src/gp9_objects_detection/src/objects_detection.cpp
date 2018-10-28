@@ -25,6 +25,7 @@ ObjectDetection::ObjectDetection(){
    	sub_image_depth = nh.subscribe<sensor_msgs::Image>("/camera/depth/image_raw", 1, &ObjectDetection::imageDepthCallback, this);
     pub_object_pose = nh.advertise<geometry_msgs::Pose2D>("/object/pose", 1);
     pub_object_marker = nh.advertise<visualization_msgs::Marker>("/object/marker", 1);
+    pub_object_marker_array = nh.advertise<visualization_msgs::MarkerArray>("/object/marker_array", 10);
     pose_pub = nh.advertise<geometry_msgs::Pose2D>("/global_pose/object", 1);
 
     char *buffer;
@@ -80,12 +81,13 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
             Point center(center_x, center_y);
             // ellipse(frame, center, Size(objects[0].width/2, objects[0].height/2 ), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
             int color_result = colorFilter_is_object(frame, center_x, center_y);
-            
-            if (color_result > 0){
+            object_depth = getDepth(center_x, center_y);
+
+            if (color_result > 0 && object_depth > 50){
                 ellipse(ptr->image, center, Size(4, 4), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
                 Point pt1(objects[0].x, objects[0].y);
                 Point pt2(objects[0].x + objects[0].width, objects[0].y + objects[0].height);
-                object_depth = getDepth(center_x, center_y);
+                
                 ROS_INFO("DEPTH: %d", object_depth);
                 rectangle(ptr->image, pt1, pt2, Scalar( 255, 0, 255 ), 4, 8, 0 );
                 showResult(color_result);
@@ -94,11 +96,10 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                 pose.y = -1.0 * pose.x / fx * (center_x - cx);
                 pose.theta = 0;
                 pub_object_pose.publish(pose);
-                ROS_INFO("pre, now: %d %d", preDetectColor, color_result);
 
-                if (preDetectColor != color_result){
-                    pubPose(pose.x, pose.y);
-                    listen_obj_map(pose.x, pose.y);
+                // if (preDetectColor != color_result){
+                if (check_pre_object(color_result)){
+                    listen_obj_map(pose.x, pose.y, color_result);
                     preDetectColor = color_result;
                 }
             }
@@ -117,7 +118,7 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
     }
 }
 
-void ObjectDetection::listen_obj_map(double x, double y){
+void ObjectDetection::listen_obj_map(double x, double y, int type){
     geometry_msgs::PointStamped obj_tf_camera;
     obj_tf_camera.header.frame_id = "camera";
     obj_tf_camera.header.stamp = ros::Time();
@@ -135,6 +136,7 @@ void ObjectDetection::listen_obj_map(double x, double y){
         pose_.x = obj_tf_map.point.x;
         pose_.y = obj_tf_map.point.y;
         pose_pub.publish(pose_);
+        pubPose(pose_.x, pose_.y, type);
     }
     catch(tf::TransformException& ex){
         ROS_ERROR("Received an exception trying to transform a point");
@@ -150,12 +152,13 @@ void ObjectDetection::removeBackground(Mat frame){
     // OBJECTS_MAX = cv.Scalar(255, 255, 255)
 }
 
-void ObjectDetection::pubPose(double x, double y){
-    visualization_msgs::Marker marker;
-    marker.header.frame_id = "camera";
+void ObjectDetection::pubPose(double x, double y, int type){
+    int id;
+    id = marker_array.markers.size();
+    marker.header.frame_id = "map";
     marker.header.stamp = ros::Time();
-    marker.ns = "my_namespace";
-    marker.id = 0;
+    marker.ns = "space";
+    marker.id = id;
     marker.type = visualization_msgs::Marker::SPHERE;
     marker.action = visualization_msgs::Marker::ADD;
     marker.pose.position.x = x;
@@ -163,7 +166,7 @@ void ObjectDetection::pubPose(double x, double y){
     marker.pose.position.z = 0;
     marker.pose.orientation.x = 0.0;
     marker.pose.orientation.y = 0.0;
-    marker.pose.orientation.z = 0.0;
+    marker.pose.orientation.z = type;
     marker.pose.orientation.w = 1.0;
     marker.scale.x = 0.1;
     marker.scale.y = 0.1;
@@ -174,7 +177,12 @@ void ObjectDetection::pubPose(double x, double y){
     marker.color.b = 0.0;
     // //only if using a MESH_RESOURCE marker type:
     // marker.mesh_resource = "package://pr2_description/meshes/base_v0/base.dae";
-    pub_object_marker.publish(marker);
+    // pub_object_marker.publish(marker);
+
+    marker_array.markers.push_back(marker);
+    pub_object_marker_array.publish(marker_array);
+        
+    // ROS_INFO("SIZE: %d", xx);
     // vis_pub.publish(marker);
 }
 
@@ -286,4 +294,22 @@ int ObjectDetection::getDepth(int x, int y){
     uchar* d = frame_depth.ptr<uchar>(y); 
     int depth = d[2*x] + 255*d[2*x+1];            
     return depth;
+}
+
+bool ObjectDetection::check_pre_object(int temp){
+    int size = marker_array.markers.size();
+    int index = 1;
+    
+    if (size == 0){
+        return true;
+    }
+
+    while((index <= 3) && (size - index >= 0)){
+        // ROS_INFO("!!!%d , %s", temp, arker_array.markers[size-index].ns);
+        if (marker_array.markers[size-index].pose.orientation.z == temp){
+            return false;
+        }
+        index++;
+    }
+    return true;
 }
