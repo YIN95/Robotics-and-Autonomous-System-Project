@@ -13,9 +13,8 @@ public:
     static const int SHAPE_CUBE = 2;
     static const int SHAPE_CYLINDER = 3;
     static const int SHAPE_CROSS = 4;
-    static const int SHAPE_PATRIC = 5;
-    static const int SHAPE_TRIANGLE = 6;
-    static const int SHAPE_STAR = 7;
+    static const int SHAPE_TRIANGLE = 5;
+    static const int SHAPE_STAR = 6;
 
     static const int Yellow_Ball = 1;
     static const int Yellow_Cube = 2;
