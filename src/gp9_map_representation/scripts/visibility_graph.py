@@ -266,7 +266,7 @@ if __name__ == "__main__":
     # start = graph.vertices[35]
     start = Vertex(0.225, 0.225)
     print(start)
-    goal = Vertex(0.5, 4.5)
+    goal = Vertex(2, 3)
     print(goal)
 
     path = graph.shortest_path(start, goal)
