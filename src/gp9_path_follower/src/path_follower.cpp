@@ -53,8 +53,11 @@ public:
 		pose_previous = std::vector<double>(3, 0);
 		pose_desired = std::vector<double>(3, 0);
 
-
 		// HAS TO BE THE SAME AS FOR ODOMETRY! TAKE FROM PARAM SERVER
+		pose_desired[0] = 0.225;
+		pose_desired[1] = 0.225;
+		pose_desired[2] = M_PI / 2;
+
 		pose_previous[0] = 0.225;
 		pose_previous[1] = 0.225;
 		pose_previous[2] = M_PI / 2;
@@ -369,6 +372,9 @@ public:
 
 
 private:
+
+	
+
 	bool turnFlag;
 	bool point_flag;
 	bool stopped;
