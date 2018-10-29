@@ -1,0 +1,2 @@
+set(gp9_servo_control_MESSAGE_FILES "")
+set(gp9_servo_control_SERVICE_FILES "/home/ras19/catkin_ws/src/gp9_servo_control/srv/SetServoAngles.srv")
