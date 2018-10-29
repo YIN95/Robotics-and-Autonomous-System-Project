@@ -59,6 +59,13 @@ void Odometry::updateEstimatedPosition(){
     rob_x = rob_x + rob_x_delta;
     rob_y = rob_y + rob_y_delta;
     rob_theta = rob_theta + rob_theta_delta;
+    if (rob_theta < 0) {
+        rob_theta += 2*M_PI;
+    }
+    else if (rob_theta > 2*M_PI) {
+        rob_theta -= 2*M_PI;
+    }
+
     return;
 }
 

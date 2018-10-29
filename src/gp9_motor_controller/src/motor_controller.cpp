@@ -32,8 +32,8 @@ MotorController::MotorController(int control_frequency_) {
 	control_frequency = control_frequency_;
 	dt = 1.0 / control_frequency;
 	
-	v_threshold = 0.4;
-	w_threshold = 1.5;
+	v_threshold = 0.4; // 0.4
+	w_threshold = 2.0; // 1.5
 
 	v_robot_desired = 0;
 	w_robot_desired = 0;
@@ -116,6 +116,8 @@ void MotorController::setMotorPowers() {
 	if (w_des_prev[LEFT] != w_desired[LEFT] | w_des_prev[RIGHT] != w_desired[RIGHT]) {
 		int_error[LEFT] = 0;
 		int_error[RIGHT] = 0;
+		prev_error[LEFT] = 0;
+		prev_error[RIGHT] = 0;
 	}
 	
 	error_left = w_desired[LEFT] - w_estimate[LEFT];
@@ -159,7 +161,6 @@ void MotorController::PID() {
 	updateDesiredSpeed();
 	updateEstimatedSpeed();
 	setMotorPowers();
-	// clipPowerValues();     // Is this really needed? Or should we clip velocity instead?
 	pub_left.publish(left_motor);
 	pub_right.publish(right_motor);
 }
