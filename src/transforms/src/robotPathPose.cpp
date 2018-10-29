@@ -38,8 +38,15 @@ void robotPathPose::objectCallback(const geometry_msgs::Pose2D::ConstPtr &msg){
     object_y = msg->y;
     pose.theta = coor2Pose(object_x, object_y, robot_x, robot_y);
     // pose.x = object_x - 0.05;
-    pose.x = robot_x;
-    pose.y = robot_y;
+
+    double D = sqrt((object_x-robot_x)*(object_x-robot_x) + (object_y-robot_y)*(object_y-robot_y));
+    double d = 0.1;
+    double t = (D-d) / D;
+
+    pose.x = robot_x + t*(object_x-robot_x);
+    pose.y = robot_y + t*(object_y-robot_y);
+
+
     pub_global_robot_coor_theta.publish(pose);
     ROS_INFO("pose: (%f, %f, %f)", robot_x, robot_y, pose.theta);
 

@@ -108,7 +108,7 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                     char keyt = (char)waitKey(1);
 
                     // if (preDetectColor != color_result){
-                    if (check_pre_object(color_result)&& object_depth >= 50){
+                    if (check_pre_object(color_result)&& object_depth >= 50 && object_depth <=650){
                         //frame_target = cropTarget(pose.x, pose.y);
                         listen_obj_map(pose.x, pose.y, color_result);
                         preDetectColor = color_result;
