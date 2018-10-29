@@ -114,8 +114,7 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                         preDetectColor = color_result;
                     }
 
-                    imshow("RESULT", frame);
-                    char keyr = (char)waitKey(1);
+                    
                 }
             }
 
@@ -126,6 +125,8 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                 ellipse(frame, center, Size(objects[i].width/2, objects[i].height/2 ), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
             }
         }
+        imshow("RESULT", frame);
+        char keyr = (char)waitKey(1);
        
     }
     catch(...){
