@@ -56,8 +56,8 @@ void ObjectDetection::imageDepthCallback(const sensor_msgs::ImageConstPtr &msg){
     catch (...){
         return;
     }
-    cv::imshow("DEPTH_WINDOW", cv_depth_ptr->image);
-    cv::waitKey(3);  
+    // cv::imshow("DEPTH_WINDOW", cv_depth_ptr->image);
+    // cv::waitKey(3);  
 }
 
 void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
