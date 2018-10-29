@@ -49,12 +49,14 @@ public:
     int colorFilter_is_object(Mat frame, int x, int y);
     int colorClassifier(int h, int s, int v, int b, int g, int r);
     void showresult(int txt);
-    void showResult(int index);
+    void showResult(int index, int obi);
     int getDepth(int x, int y);
     void pubPose(double x, double y, int type);
     void listen_obj_map(double x, double y, int type);
     bool check_pre_object(int temp);
-
+    int getTrueDepth(int depth);
+    Mat cropTarget(int x, int y);
+    void saveTrainingData(Mat target);
 public:
     static const int img_rgb_height = 480;
     static const int img_rgb_width = 640;

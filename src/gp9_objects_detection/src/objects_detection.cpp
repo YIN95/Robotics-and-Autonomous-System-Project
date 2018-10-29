@@ -69,40 +69,56 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
 {
     try{
         bool only_detect_one = true;
+        int detect_size = 1;
         Mat frame = ptr->image;
         Mat frame_gray;
+        Mat frame_target;
         cvtColor(frame, frame_gray, COLOR_BGR2GRAY);
         equalizeHist(frame_gray, frame_gray);
         //-- Detect objects
         cascade.detectMultiScale(frame_gray, objects, 1.1, 5, 0|CASCADE_SCALE_IMAGE, Size(50, 50), Size(140, 140));
+        detect_size = std::min(int(objects.size()), detect_size);
         if (only_detect_one && objects.size()>0){
-            int center_x = objects[0].x + objects[0].width/2;
-            int center_y = objects[0].y + objects[0].height/2;
-            Point center(center_x, center_y);
-            // ellipse(frame, center, Size(objects[0].width/2, objects[0].height/2 ), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
-            int color_result = colorFilter_is_object(frame, center_x, center_y);
-            object_depth = getDepth(center_x, center_y);
-            ROS_INFO("DEPTH: %d", object_depth);
-            if (color_result > 0 && object_depth >= 0){
-                ellipse(ptr->image, center, Size(4, 4), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
-                Point pt1(objects[0].x, objects[0].y);
-                Point pt2(objects[0].x + objects[0].width, objects[0].y + objects[0].height);
-                
-                
-                rectangle(ptr->image, pt1, pt2, Scalar( 255, 0, 255 ), 4, 8, 0 );
-                showResult(color_result);
+            int i;
+            for (i=0; i<detect_size; i++){
+                int center_x = objects[i].x + objects[i].width/2;
+                int center_y = objects[i].y + objects[i].height/2;
+                Point center(center_x, center_y);
+                // ellipse(frame, center, Size(objects[0].width/2, objects[0].height/2 ), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
+                int color_result = colorFilter_is_object(frame, center_x, center_y);
+                object_depth = getDepth(center_x, center_y);
+                object_depth = getTrueDepth(object_depth);
+                ROS_INFO("DEPTH: %d", object_depth);
+                if (color_result > 0 && object_depth >= 0){
+                    ellipse(ptr->image, center, Size(4, 4), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
+                    Point pt1(objects[i].x, objects[i].y);
+                    Point pt2(objects[i].x + objects[i].width, objects[i].y + objects[i].height);
+                    
+                    
+                    rectangle(ptr->image, pt1, pt2, Scalar( 255, 0, 255 ), 4, 8, 0 );
+                    showResult(color_result, i+1);
 
-                pose.x = 1.0 * object_depth / 1000;
-                pose.y = -1.0 * pose.x / fx * (center_x - cx);
-                pose.theta = 0;
-                pub_object_pose.publish(pose);
+                    pose.x = 1.0 * object_depth / 1000;
+                    pose.y = -1.0 * pose.x / fx * (center_x - cx);
+                    pose.theta = 0;
+                    pub_object_pose.publish(pose);
 
-                // if (preDetectColor != color_result){
-                if (check_pre_object(color_result)&& object_depth >= 50){
-                    listen_obj_map(pose.x, pose.y, color_result);
-                    preDetectColor = color_result;
+                    frame_target = cropTarget(objects[i].x, objects[i].y);
+                    imshow("target", frame_target);
+                    char keyt = (char)waitKey(1);
+
+                    // if (preDetectColor != color_result){
+                    if (check_pre_object(color_result)&& object_depth >= 50){
+                        //frame_target = cropTarget(pose.x, pose.y);
+                        listen_obj_map(pose.x, pose.y, color_result);
+                        preDetectColor = color_result;
+                    }
+
+                    imshow("RESULT", frame);
+                    char keyr = (char)waitKey(1);
                 }
             }
+
         }
         else{
             for (size_t i = 0; i < objects.size(); i++ ){
@@ -110,8 +126,7 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                 ellipse(frame, center, Size(objects[i].width/2, objects[i].height/2 ), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
             }
         }
-        imshow("RESULT", frame);
-        char key = (char)waitKey(1);
+       
     }
     catch(...){
         return;
@@ -307,8 +322,8 @@ int ObjectDetection::colorClassifier(int h, int s, int v, int b, int g, int r){
     
 }
 
-void ObjectDetection::showResult(int index){
-    Point org(30, 50);
+void ObjectDetection::showResult(int index, int obi){
+    Point org(30, obi*50);
     String text;
     switch(index) {
         case 1:
@@ -339,6 +354,7 @@ void ObjectDetection::showResult(int index){
             return;
     }
     putText(cv_rgb_ptr->image, text, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+    
     return;
 }
 
@@ -376,4 +392,48 @@ bool ObjectDetection::check_pre_object(int temp){
         index++;
     }
     return true;
+}
+
+int ObjectDetection::getTrueDepth(int depth){
+    double TD;
+    int height = 180;
+    TD = sqrt(depth*depth - height*height);
+    TD = std::max(int(TD), 0);
+    return int(TD);
+}
+
+Mat ObjectDetection::cropTarget(int x, int y){
+    Mat frame_global = cv_rgb_ptr->image;
+    Mat frame_target;
+    int sx, sy;
+    int cropsize = 128;
+    sx = x-(cropsize/4);
+    sy = y-(cropsize/4);
+    
+    if ((x-(cropsize/2))<0){
+        sx = 0;
+    }
+
+    if ((y-(cropsize/2))<0){
+        sy = 0;
+    }
+
+    if ((x+(cropsize/2))>640){
+        sx = 640-cropsize;
+    }
+
+    if ((y+(cropsize/2))>480){
+        sy = 480-cropsize;
+    }
+    
+    
+    Rect rect(sx, sy, cropsize, cropsize);
+    frame_target = frame_global(rect);
+    //imshow("RESULT", frame_global);
+    //char key = (char)waitKey(1);
+    return frame_target;
+}
+
+void ObjectDetection::saveTrainingData(Mat target){
+    
 }
