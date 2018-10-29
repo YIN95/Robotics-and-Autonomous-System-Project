@@ -103,7 +103,7 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                     pose.theta = 0;
                     pub_object_pose.publish(pose);
 
-                    frame_target = cropTarget(objects[i].x, objects[i].y);
+                    frame_target = cropTarget(center_x, center_y);
                     imshow("target", frame_target);
                     char keyt = (char)waitKey(1);
 
@@ -282,7 +282,7 @@ int ObjectDetection::colorClassifier(int h, int s, int v, int b, int g, int r){
         if (s <95){
             return -1;
         }
-        if (55 <= h && h <= 69 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
+        if (35 <= h && h <= 69 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
             ROS_INFO("COLOR_GREEN");
             return obj.COLOR_GREEN;
         }
@@ -306,11 +306,11 @@ int ObjectDetection::colorClassifier(int h, int s, int v, int b, int g, int r){
             ROS_INFO("COLOR_RED");
             return obj.COLOR_RED;
         }
-        else if (18 <= h && h <= 54 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
+        else if (18 <= h && h <= 35 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
             ROS_INFO("COLOR_LIGHT_BLUE");
             return obj.COLOR_LIGHT_BLUE;
         }
-        else if (18 <= h && h <= 54 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
+        else if (18 <= h && h <= 35 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
             ROS_INFO("COLOR_BLUE");
             return obj.COLOR_BLUE;
         }
@@ -408,8 +408,8 @@ Mat ObjectDetection::cropTarget(int x, int y){
     Mat frame_target;
     int sx, sy;
     int cropsize = 128;
-    sx = x-(cropsize/4);
-    sy = y-(cropsize/4);
+    sx = x-(cropsize/2);
+    sy = y-(cropsize/2);
     
     if ((x-(cropsize/2))<0){
         sx = 0;
@@ -426,8 +426,8 @@ Mat ObjectDetection::cropTarget(int x, int y){
     if ((y+(cropsize/2))>480){
         sy = 480-cropsize;
     }
-    
-    
+    ROS_INFO("x, %d ; y, %d", x, y);
+    ROS_INFO("sx, %d ; sy, %d", sx, sy);
     Rect rect(sx, sy, cropsize, cropsize);
     frame_target = frame_global(rect);
     //imshow("RESULT", frame_global);

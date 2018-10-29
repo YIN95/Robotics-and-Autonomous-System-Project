@@ -4,6 +4,7 @@ import datetime
 import os
 global path
 global label
+global img
 
 def get_img_path(path):
     img_paths = []
@@ -28,13 +29,15 @@ def OnMouseAction(event, x, y, flags, param):
         print y
         print path
         print label
-        collect(x, y, path, label, frame)
+        image = img[y-64:y+64, x-64:x+64, :]
+        collect(x, y, path, label, image)
 
 ######################################
 
 def main():
     global path
     global label
+    global img
 
     cap = cv2.VideoCapture(0)
     cap.set(3, 640)
@@ -60,6 +63,7 @@ def main():
 
     while(cap.isOpened()):
         ret, frame = cap.read()
+        img = frame
         if ret==True:
             cv2.imshow('frame',frame)
             key = cv2.waitKey(1)
