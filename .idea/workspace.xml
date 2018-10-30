@@ -1,66 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true" buildAllGenerated="false">
+    <generated />
+  </component>
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" CONFIG_NAME="Debug" />
+    </configurations>
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="3b184da7-fa74-477e-a179-db9ca8a7857b" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/CMakeCache.txt" beforeDir="false" afterPath="$PROJECT_DIR$/build/CMakeCache.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/CMakeFiles/Makefile.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/build/CMakeFiles/Makefile.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/CMakeFiles/Makefile2" beforeDir="false" afterPath="$PROJECT_DIR$/build/CMakeFiles/Makefile2" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/CMakeFiles/TargetDirectories.txt" beforeDir="false" afterPath="$PROJECT_DIR$/build/CMakeFiles/TargetDirectories.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/CMakeFiles/progress.marks" beforeDir="false" afterPath="$PROJECT_DIR$/build/CMakeFiles/progress.marks" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/CTestTestfile.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/build/CTestTestfile.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/build/Makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/catkin_generated/order_packages.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/build/catkin_generated/order_packages.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/catkin_make.cache" beforeDir="false" afterPath="$PROJECT_DIR$/build/catkin_make.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/cmake_install.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/build/cmake_install.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/gp9_motor_controller/CMakeFiles/motor_controller.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/gp9_motor_controller/CMakeFiles/motor_controller.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/gp9_motor_controller/CMakeFiles/velocity_controller.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/gp9_motor_controller/CMakeFiles/velocity_controller.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/gp9_odometry/CMakeFiles/odometry.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/gp9_odometry/CMakeFiles/odometry.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/gtest/CMakeFiles/gmock.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/gtest/CMakeFiles/gmock.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/gtest/CMakeFiles/gmock_main.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/gtest/CMakeFiles/gmock_main.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/gtest/gtest/CMakeFiles/gtest.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/gtest/gtest/CMakeFiles/gtest.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/gtest/gtest/CMakeFiles/gtest_main.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/gtest/gtest/CMakeFiles/gtest_main.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/key_teleop/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/build/key_teleop/Makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_lab1/ras_lab1_distance_sensor/CMakeFiles/distance_sensor_test_node.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_lab1/ras_lab1_distance_sensor/CMakeFiles/distance_sensor_test_node.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_lab1/ras_lab1_distance_sensor/CMakeFiles/generate_distance_node.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_lab1/ras_lab1_distance_sensor/CMakeFiles/generate_distance_node.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_lab1/ras_lab1_motors/CMakeFiles/kobuki_motors_node.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_lab1/ras_lab1_motors/CMakeFiles/kobuki_motors_node.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_lab1/ras_lab1_motors/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_lab1/ras_lab1_motors/Makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_lab1/ras_lab1_msgs/CMakeFiles/ras_lab1_msgs_generate_messages_cpp.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_lab1/ras_lab1_msgs/CMakeFiles/ras_lab1_msgs_generate_messages_cpp.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_lab1/ras_lab1_msgs/CMakeFiles/ras_lab1_msgs_generate_messages_eus.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_lab1/ras_lab1_msgs/CMakeFiles/ras_lab1_msgs_generate_messages_eus.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_project/ras_maze/ras_maze_distance_sensor/CMakeFiles/distance_sensor_maze.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_project/ras_maze/ras_maze_distance_sensor/CMakeFiles/distance_sensor_maze.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_project/ras_maze/ras_maze_distance_sensor/CMakeFiles/generate_distance_node_maze.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_project/ras_maze/ras_maze_distance_sensor/CMakeFiles/generate_distance_node_maze.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_project/ras_msgs/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_project/ras_msgs/Makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_project/ras_phidget/CMakeFiles/interface_kit.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_project/ras_phidget/CMakeFiles/interface_kit.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_project/ras_phidget/CMakeFiles/interface_kit_client.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_project/ras_phidget/CMakeFiles/interface_kit_client.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_project/ras_phidget/CMakeFiles/motor.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_project/ras_phidget/CMakeFiles/motor.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_project/ras_phidget/CMakeFiles/phidgets_generate_messages_cpp.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_project/ras_phidget/CMakeFiles/phidgets_generate_messages_cpp.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_project/ras_phidget/CMakeFiles/phidgets_generate_messages_eus.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_project/ras_phidget/CMakeFiles/phidgets_generate_messages_eus.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_project/ras_phidget/CMakeFiles/phidgets_generate_messages_lisp.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_project/ras_phidget/CMakeFiles/phidgets_generate_messages_lisp.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_project/ras_phidget/CMakeFiles/phidgets_generate_messages_nodejs.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_project/ras_phidget/CMakeFiles/phidgets_generate_messages_nodejs.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_project/ras_phidget/CMakeFiles/phidgets_generate_messages_py.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_project/ras_phidget/CMakeFiles/phidgets_generate_messages_py.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_project/ras_phidget/CMakeFiles/progress.marks" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_project/ras_phidget/CMakeFiles/progress.marks" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_project/ras_phidget/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_project/ras_phidget/Makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_project/ras_realsense/realsense_camera/CMakeFiles/get_debug_info.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_project/ras_realsense/realsense_camera/CMakeFiles/get_debug_info.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_project/ras_realsense/realsense_camera/CMakeFiles/progress.marks" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_project/ras_realsense/realsense_camera/CMakeFiles/progress.marks" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_project/ras_realsense/realsense_camera/CMakeFiles/realsense_camera_gencfg.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_project/ras_realsense/realsense_camera/CMakeFiles/realsense_camera_gencfg.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_project/ras_realsense/realsense_camera/CMakeFiles/realsense_camera_generate_messages_cpp.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_project/ras_realsense/realsense_camera/CMakeFiles/realsense_camera_generate_messages_cpp.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_project/ras_realsense/realsense_camera/CMakeFiles/realsense_camera_generate_messages_lisp.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_project/ras_realsense/realsense_camera/CMakeFiles/realsense_camera_generate_messages_lisp.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_project/ras_realsense/realsense_camera/CMakeFiles/realsense_camera_generate_messages_nodejs.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_project/ras_realsense/realsense_camera/CMakeFiles/realsense_camera_generate_messages_nodejs.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_project/ras_realsense/realsense_camera/CMakeFiles/realsense_camera_generate_messages_py.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_project/ras_realsense/realsense_camera/CMakeFiles/realsense_camera_generate_messages_py.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_project/ras_realsense/realsense_camera/CMakeFiles/realsense_camera_nodelet.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_project/ras_realsense/realsense_camera/CMakeFiles/realsense_camera_nodelet.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_project/ras_realsense/realsense_camera/CMakeFiles/tests_camera_core.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_project/ras_realsense/realsense_camera/CMakeFiles/tests_camera_core.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_project/ras_realsense/realsense_camera/CMakeFiles/tests_rgbd_topics.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_project/ras_realsense/realsense_camera/CMakeFiles/tests_rgbd_topics.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_project/ras_rplidar/CMakeFiles/rplidarNode.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_project/ras_rplidar/CMakeFiles/rplidarNode.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_project/ras_rplidar/CMakeFiles/rplidarNodeClient.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_project/ras_rplidar/CMakeFiles/rplidarNodeClient.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_project/ras_uarm/CMakeFiles/uarm_generate_messages_cpp.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_project/ras_uarm/CMakeFiles/uarm_generate_messages_cpp.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_project/ras_uarm/CMakeFiles/uarm_generate_messages_eus.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_project/ras_uarm/CMakeFiles/uarm_generate_messages_eus.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_project/ras_uarm/CMakeFiles/uarm_generate_messages_lisp.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_project/ras_uarm/CMakeFiles/uarm_generate_messages_lisp.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_project/ras_uarm/CMakeFiles/uarm_generate_messages_nodejs.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_project/ras_uarm/CMakeFiles/uarm_generate_messages_nodejs.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/ras_project/ras_uarm/CMakeFiles/uarm_generate_messages_py.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/ras_project/ras_uarm/CMakeFiles/uarm_generate_messages_py.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/transforms/CMakeFiles/tf_map_robot.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/transforms/CMakeFiles/tf_map_robot.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/transforms/CMakeFiles/tf_robot_laser.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/build/transforms/CMakeFiles/tf_robot_laser.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/transforms/CMakeFiles/tf_robot_laser.dir/src/tf_robot_laser.cpp.o" beforeDir="false" afterPath="$PROJECT_DIR$/build/transforms/CMakeFiles/tf_robot_laser.dir/src/tf_robot_laser.cpp.o" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/devel/lib/transforms/tf_robot_laser" beforeDir="false" afterPath="$PROJECT_DIR$/devel/lib/transforms/tf_robot_laser" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gp9_path_follower/src/path_follower.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/gp9_path_follower/src/path_follower.cpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -108,28 +60,74 @@
         </counts>
       </usages-collector>
     </session>
+    <session id="-1624402821">
+      <usages-collector id="statistics.lifecycle.project">
+        <counts>
+          <entry key="project.open.time.10" value="1" />
+          <entry key="project.opened" value="1" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.extensions.open">
+        <counts>
+          <entry key="cpp" value="1" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.types.open">
+        <counts>
+          <entry key="ObjectiveC" value="1" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.extensions.edit">
+        <counts>
+          <entry key="cpp" value="1471" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.types.edit">
+        <counts>
+          <entry key="ObjectiveC" value="1471" />
+        </counts>
+      </usages-collector>
+    </session>
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+    <leaf>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/ras_project/ras_maze/ras_maze_map/maps/lab_maze_2018.txt">
+        <entry file="file://$PROJECT_DIR$/src/gp9_path_follower/src/path_follower.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="165">
-              <caret line="11" lean-forward="true" selection-start-line="11" selection-end-line="11" />
+            <state relative-caret-position="-107">
+              <caret line="211" column="8" selection-start-line="211" selection-start-column="8" selection-end-line="211" selection-end-column="8" />
             </state>
           </provider>
         </entry>
       </file>
     </leaf>
   </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>gains_tran</find>
+      <find>turnFlag</find>
+      <find>error_distance</find>
+      <find>error_previous_dist</find>
+      <find>error_int_dist</find>
+      <find>error_angle</find>
+      <find>pose</find>
+      <find>dist_travelled</find>
+      <find>sqrt</find>
+    </findStrings>
+    <replaceStrings>
+      <replace>turn_flag</replace>
+      <replace>distance_travelled</replace>
+    </replaceStrings>
+  </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/src/ras_project/ras_maze" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/src/map_representation/scripts/map_representation.py" />
         <option value="$PROJECT_DIR$/.gitignore" />
+        <option value="$PROJECT_DIR$/src/gp9_path_follower/src/path_follower.cpp" />
       </list>
     </option>
   </component>
@@ -139,7 +137,7 @@
     <detection-done>true</detection-done>
     <sorting>DEFINITION_ORDER</sorting>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
+  <component name="ProjectFrameBounds" fullScreen="true">
     <option name="x" value="75" />
     <option name="y" value="16" />
     <option name="width" value="1195" />
@@ -157,12 +155,25 @@
         <subPane>
           <expand>
             <path>
-              <item name="catkin_ws" type="b2602c69:ProjectViewProjectNode" />
-              <item name="catkin_ws" type="462c0819:PsiDirectoryNode" />
+              <item name="RAS-GROUP-9" type="b2602c69:ProjectViewProjectNode" />
+              <item name="RAS-GROUP-9" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
-              <item name="catkin_ws" type="b2602c69:ProjectViewProjectNode" />
-              <item name="catkin_ws" type="462c0819:PsiDirectoryNode" />
+              <item name="RAS-GROUP-9" type="b2602c69:ProjectViewProjectNode" />
+              <item name="RAS-GROUP-9" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="RAS-GROUP-9" type="b2602c69:ProjectViewProjectNode" />
+              <item name="RAS-GROUP-9" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="gp9_path_follower" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="RAS-GROUP-9" type="b2602c69:ProjectViewProjectNode" />
+              <item name="RAS-GROUP-9" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="gp9_path_follower" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
@@ -228,27 +239,32 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1539011481050</updated>
+      <workItem from="1540892101654" duration="4692000" />
     </task>
     <servers />
   </component>
+  <component name="TimeTrackingManager">
+    <option name="totallyTimeSpent" value="4692000" />
+  </component>
   <component name="ToolWindowManager">
-    <frame x="64" y="-11" width="1217" height="1036" extended-state="6" />
+    <frame x="0" y="0" width="1280" height="800" extended-state="0" />
+    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.24978614" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.25767368" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32876712" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.38333333" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Version Control" order="8" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Version Control" order="8" />
       <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="11" visible="true" weight="0.30555555" />
+      <window_info anchor="bottom" id="Terminal" order="11" weight="0.3041096" />
       <window_info anchor="bottom" id="Python Console" order="12" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -265,11 +281,18 @@
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/src/map_representation/scripts/map_representation.py" />
-    <entry file="file://$PROJECT_DIR$/.gitignore" />
-    <entry file="file://$PROJECT_DIR$/src/ras_project/ras_maze/ras_maze_map/maps/lab_maze_2018.txt">
+    <entry file="file://$PROJECT_DIR$/src/ras_project/ras_maze/ras_maze_map/maps/lab_maze_2018.txt" />
+    <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="165">
-          <caret line="11" lean-forward="true" selection-start-line="11" selection-end-line="11" />
+        <state relative-caret-position="60">
+          <caret line="4" lean-forward="true" selection-start-line="4" selection-end-line="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/gp9_path_follower/src/path_follower.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-107">
+          <caret line="211" column="8" selection-start-line="211" selection-start-column="8" selection-end-line="211" selection-end-column="8" />
         </state>
       </provider>
     </entry>

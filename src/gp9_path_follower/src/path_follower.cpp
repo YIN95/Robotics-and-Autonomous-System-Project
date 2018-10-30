@@ -41,7 +41,7 @@ public:
 		stopped = false;
 		same_point = false;
 		other_angle = false;
-		turnFlag = false;
+		turn_flag = false;
 		control_frequency = control_frequency_;
 		dt = 1 / control_frequency;
 
@@ -50,10 +50,11 @@ public:
 		every_lidar_value = every_lidar_value_;
 
 		pose = std::vector<double>(3, 0);
-		pose_previous = std::vector<double>(3, 0);
-		pose_desired = std::vector<double>(3, 0);
+        pose_desired = std::vector<double>(3, 0);
+        pose_previous = std::vector<double>(3, 0);
+        last_checkpoint = std::vector<double>(2, 0);
 
-		// HAS TO BE THE SAME AS FOR ODOMETRY! TAKE FROM PARAM SERVER
+		// HAS TO BE THE SAME AS FOR STARTING POSITION IN ODOMETRY! TAKE FROM PARAM SERVER
 		pose_desired[0] = 0.225;
 		pose_desired[1] = 0.225;
 		pose_desired[2] = M_PI / 2;
@@ -62,15 +63,17 @@ public:
 		pose_previous[1] = 0.225;
 		pose_previous[2] = M_PI / 2;
 
+        last_checkpoint[0] = 0.225;
+        last_checkpoint[1] = 0.225;
+
 		degrees = 5;
 		angle_threshold = degrees * M_PI / 180;
-		distance_threshold = 0.05;
-		distance = 1000;
+
+       	        distance = 1000;
+       		distance_threshold = 0.01;
 		desired_angle = 0;
 
 		error_angle = M_PI;
-		error_distance = 100;
-		error_previous_dist = 0;
 
 		error_int_angle = 0;
 		error_previous_angle = 0;
@@ -79,23 +82,19 @@ public:
 
 		// Gains
 		gains_rotation = std::vector<double>(3, 0);
-		gains_translation = std::vector<double>(6, 0);
+		gains_translation = std::vector<double>(3, 0);
 
-		// ROTATION
+		// ROTATION ONLY
 		gains_rotation[0] = 10.0;	//3 more or less fine (value of yesterday)
 		gains_rotation[1] = 0.01;	//0.5 more or less fine (value of yesterday)
 		gains_rotation[2] = 0;
 
 		// TRANSLATION+ROTATION
-		//Translation, these gains are good!
-		gains_translation[0] = 5;
-		gains_translation[1] = 0.007;
-		gains_translation[2] = 0;
 		
-		//Rotation, these gains are good!
-		gains_translation[3] = 20.0;
-		gains_translation[4] = 0.01;
-		gains_translation[5] = 0;
+		// Rotation, these gains are good!
+		gains_translation[0] = 20.0;
+		gains_translation[1] = 0.01;
+		gains_translation[2] = 0;
 		
 	}
 
@@ -103,18 +102,12 @@ public:
 		pose[0] = pose_msg->x;
 		pose[1] = pose_msg->y;
 		pose[2] = pose_msg->theta;
-
-		// ROS_INFO("pose x: %f", pose[0]);
-		// ROS_INFO("pose y: %f", pose[1]);
-		// ROS_INFO("pose theta: %f", pose[2]);
 	}
 
 	void desiredPoseCallBack(const geometry_msgs::Pose2D::ConstPtr& desired_pose_msg) {
 		pose_desired[0] = desired_pose_msg->x;
 		pose_desired[1] = desired_pose_msg->y;
 		pose_desired[2] = desired_pose_msg->theta;
-		//ROS_INFO("pose_desired x: %f", pose_desired[0]);
-		//ROS_INFO("pose_desired y: %f", pose_desired[1]);
 		bool x_close = fabs(pose_previous[0] - pose_desired[0]) < 1e-6;
 		bool y_close = fabs(pose_previous[1] - pose_desired[1]) < 1e-6;
 		same_point = (x_close && y_close);
@@ -150,36 +143,17 @@ public:
 		return radians * 180 / M_PI;
 	}
 
-
 	void updateErrors(){
-		double delta_x = pose_desired[0] - pose[0];
-		double delta_y = pose_desired[1] - pose[1];
-		// ROS_INFO("delta x: %f", delta_x);
-		// ROS_INFO("delta y: %f", delta_y);
-		distance = sqrt(pow(delta_x, 2) + pow(delta_y, 2));
-		desired_angle = atan2(delta_y, delta_x); // aim to goal point
-		// ROS_INFO("desired angle: %f", radToDeg(desired_angle));
-		error_angle = desired_angle - pose[2];
-		// ROS_INFO("desired angle: %f", desired_angle);
-		// ROS_INFO("actual angle : %f", pose[2]);
-		// ROS_INFO("error angle before: %f", error_angle);
-		if (error_angle <= -M_PI) {
-			error_angle += 2*M_PI;
-		}
-
-		else if (error_angle > M_PI) {
-			error_angle -= 2*M_PI;
-		}
-		// ROS_INFO("error angle after: %f", error_angle);
-
-		// ROS_INFO("actual angle : %f", radToDeg(pose[2]));
-		// ROS_INFO("error angle  : %f", radToDeg(error_angle));
+		double dx = pose_desired[0] - pose[0];
+		double dy = pose_desired[1] - pose[1];
+		distance = sqrt(pow(dx, 2) + pow(dy, 2));
+		desired_angle = atan2(dy, dx); // aim to goal point
+        error_angle = getErrorAngle(desired_angle);
 	}
-
 
 	void moveToPoint() {
 		
-		if (!turnFlag) {
+		if (!turn_flag) {
 
 			updateErrors();
 			ROS_INFO("distance error: %f", distance);
@@ -198,7 +172,6 @@ public:
 				closeEnough();
 			}
 		}
-		
 	}
 
 	void PID_rotation() {
@@ -224,36 +197,47 @@ public:
 
 	void PID_translation(double distance) {
 
-		error_distance = distance; // desired distance is 0
-		double derror_distance = (error_distance - error_previous_dist) * control_frequency;
-		error_int_dist += error_distance;
-		error_previous_dist = error_distance;
-
-//		ROS_INFO("error angle : %f", error_angle);
-
-		double P = gains_translation[0] * error_distance;
-		double I = gains_translation[1] * error_int_dist;
-		double D = gains_translation[2] * derror_distance;
-		
-		double v = P + I + D;
-
-//		ROS_INFO("v P part: %f", P);
-//		ROS_INFO("v D part: %f", D);
-//		ROS_INFO("v I part: %f", I);
-
 		double derror_angle = (error_angle - error_previous_angle_translation) * control_frequency;
 		error_int_angle_translation = error_int_angle_translation + error_angle;
 		error_previous_angle_translation = error_angle;
 
-		double PW = gains_translation[3] * error_angle;
-		double IW = gains_translation[4] * error_int_angle_translation;
-		double DW = gains_translation[5] * derror_angle;
-
-//		ROS_INFO("w P part: %f", PW);
-//		ROS_INFO("w D part: %f", DW);
-//		ROS_INFO("w I part: %f", IW);
+		double PW = gains_translation[0] * error_angle;
+		double IW = gains_translation[1] * error_int_angle_translation;
+		double DW = gains_translation[2] * derror_angle;
 
 		double w = PW + IW + DW;
+
+		double v;
+		double v_max = 0.50;
+		double v_min = 0.2;
+		double slow_dist = 0.10;
+
+		double dx = last_checkpoint[0] - pose[0];
+		double dy = last_checkpoint[1] - pose[1];
+		double distance_travelled = sqrt(pow(dx, 2) + pow(dy, 2));
+
+		ROS_INFO("dist travelled: %f", distance_travelled);
+
+		bool just_started = distance > slow_dist;
+		bool short_drive = (distance < slow_dist && distance_travelled < slow_dist);
+
+        // To start slowly. v: v_min --> v_max, distance_travelled: 0 --> slow_dist.
+		if (just_started) { // IS THE IF STATEMENT CORRECT?
+			ROS_INFO("Slow start");
+		    v = v_min + (v_max - v_min) * (distance_travelled / slow_dist);
+		}
+
+		// When just driving a short distance, drive slowly
+		else if (short_drive) {
+			ROS_INFO("Short drive");
+		    v = v_min;
+		}
+
+		// To slow down in the end. v: v_max --> v_min, distance: slow_dist --> 0.
+		else {
+			ROS_INFO("Slowing down");
+		    v = v_max - (v_max - v_min) * ((slow_dist - distance) / slow_dist);
+		}
 
 		velocity_msg.linear.x = v;
 		velocity_msg.angular.z = w;
@@ -262,10 +246,10 @@ public:
 	void resetErrors() {
 		error_previous_angle = 0;
 		error_int_angle = 0;
-		error_previous_dist = 0;
-		error_int_dist = 0;
 		error_previous_angle_translation = 0;
 		error_int_angle_translation = 0;
+		last_checkpoint[0] = pose[0];
+	    last_checkpoint[1] = pose[1];
 	}
 
 	void closeEnough() {
@@ -277,17 +261,13 @@ public:
 	}
 
 	void stop() {
-		ROS_INFO("Has Stopped");
 		velocity_msg.linear.x = 0;
 		velocity_msg.angular.z = 0;
 		stopped = true;
+        ROS_INFO("Has Stopped");
 	}
 
 	void move() {
-
-		// double delta_x = pose_desired[0] - pose[0];
-		// double delta_y = pose_desired[1] - pose[1];
-		// error_distance = sqrt(pow(delta_x, 2) + pow(delta_y, 2));
 
 		bool obstacle_in_the_way = obstacleCheck();
 		if (obstacle_in_the_way) {
@@ -299,11 +279,11 @@ public:
 			moveToPoint();
 		}
 
+		ROS_INFO("last checkpoint: %f, %f", last_checkpoint[0], last_checkpoint[1]);
 		ROS_INFO("v : %f", velocity_msg.linear.x);
 		ROS_INFO("w : %f", velocity_msg.angular.z);
-
-
 		ROS_INFO("publishing");
+
 		pub_velocity.publish(velocity_msg);
 		ROS_INFO("=============================================");
 	}
@@ -342,40 +322,46 @@ public:
 		ROS_INFO("other angle: %d", other_angle);
 
 		if (same_point && other_angle) {
-			turnFlag = true;
+			turn_flag = true;
 			resetErrors();
 		}
 
-		ROS_INFO("turn flag: %d", turnFlag);
+		ROS_INFO("turn flag: %d", turn_flag);
 
-		if (turnFlag) {
-				error_angle = pose_desired[2] - pose[2];
-				if (error_angle <= -M_PI) {
-					error_angle += 2*M_PI;
-				}
+		if (turn_flag) {
+            desired_angle = pose_desired[2];
+            error_angle = getErrorAngle(desired_angle);
 
-				else if (error_angle > M_PI) {
-					error_angle -= 2*M_PI;
-				}
-				if (fabs(error_angle) > angle_threshold) {
-					PID_rotation();
-				}
+            if (fabs(error_angle) > angle_threshold) {
+                PID_rotation();
+            }
 
-				else {
-					ROS_INFO("turning off turn flag");
-					turnFlag = false;
-				}
-				
-			}
+            else {
+                ROS_INFO("turning off turn flag");
+                turn_flag = false;
+            }
+
+        }
 		
+	}
+
+	double getErrorAngle(double desired_angle) {
+        error_angle = desired_angle - pose[2];
+        if (error_angle <= -M_PI) {
+            error_angle += 2*M_PI;
+        }
+
+        else if (error_angle > M_PI) {
+            error_angle -= 2*M_PI;
+        }
+
+        return error_angle;
 	}
 
 
 private:
-
-	
-
-	bool turnFlag;
+    
+	bool turn_flag;
 	bool point_flag;
 	bool stopped;
 	bool same_point;
@@ -385,8 +371,8 @@ private:
 
 	double degrees;
 	double angle_threshold;
-	double distance_threshold;
-	double distance;
+    double distance;
+    double distance_threshold;
 	double desired_angle;
 	
 	geometry_msgs::Twist velocity_msg;
@@ -395,16 +381,14 @@ private:
 	double min_distance_to_obstacle;
 	int every_lidar_value;
 
-	double error_angle;
-	
-	double error_distance;
-	double error_previous_dist;
-	
-	double error_int_dist;
+
+    std::vector<double> last_checkpoint;
 	std::vector<double> pose;
 	std::vector<double> pose_previous;
 	std::vector<double> pose_desired;
-	
+
+    double error_angle;
+
 	double error_int_angle;
 	double error_previous_angle;
 
