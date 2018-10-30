@@ -1,8 +1,0 @@
-prefix=/home/ras19/catkin_ws/install
-
-Name: phidgets
-Description: Description of phidgets
-Version: 1.5.0
-Cflags: -I/home/ras19/catkin_ws/install/include
-Libs: -L/home/ras19/catkin_ws/install/lib 
-Requires: roscpp rospy std_msgs sensor_msgs nav_msgs tf sound_play move_base_msgs actionlib rviz message_runtime roscpp_serialization

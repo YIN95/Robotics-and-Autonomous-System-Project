@@ -43,9 +43,12 @@ private:
 	const static double wheel_radius = 0.05;
 	// Best empirical value of the CPR is 875! Could be tuned more
 	const static double ticks_per_rev = 875; // 898 or 979.62
-	const static double clip_value = 100;
+	const static double clip_value = 50;
     int control_frequency;
 	
+	double v_threshold;
+	double w_threshold;
+
     double dt;
 	double v_robot_desired;
 	double w_robot_desired;

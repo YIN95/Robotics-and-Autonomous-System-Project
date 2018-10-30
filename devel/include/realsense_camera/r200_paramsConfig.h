@@ -369,27 +369,27 @@ int r200_dc_lr_threshold;
       int r200_auto_exposure_right_edge;
 //#line 292 "/opt/ros/kinetic/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       int r200_emitter_enabled;
-//#line 56 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 56 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       int r200_dc_preset;
-//#line 58 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 58 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       int r200_dc_estimate_median_decrement;
-//#line 60 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 60 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       int r200_dc_estimate_median_increment;
-//#line 62 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 62 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       int r200_dc_median_threshold;
-//#line 64 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 64 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       int r200_dc_score_minimum_threshold;
-//#line 66 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 66 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       int r200_dc_score_maximum_threshold;
-//#line 68 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 68 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       int r200_dc_texture_count_threshold;
-//#line 70 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 70 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       int r200_dc_texture_difference_threshold;
-//#line 72 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 72 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       int r200_dc_second_peak_threshold;
-//#line 74 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 74 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       int r200_dc_neighbor_threshold;
-//#line 76 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 76 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       int r200_dc_lr_threshold;
 //#line 218 "/opt/ros/kinetic/share/dynamic_reconfigure/cmake/../templates/ConfigType.h.template"
 
@@ -740,115 +740,115 @@ r200_paramsConfig::GroupDescription<r200_paramsConfig::DEFAULT, r200_paramsConfi
 //#line 292 "/opt/ros/kinetic/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __param_descriptions__.push_back(r200_paramsConfig::AbstractParamDescriptionConstPtr(new r200_paramsConfig::ParamDescription<int>("r200_emitter_enabled", "int", 0, "Emitter Enabled", "", &r200_paramsConfig::r200_emitter_enabled)));
 r200_paramsConfig::GroupDescription<r200_paramsConfig::DEFAULT::R200_DEPTH_CONTROL, r200_paramsConfig::DEFAULT> R200_Depth_Control("R200_Depth_Control", "", 0, 1, true, &r200_paramsConfig::DEFAULT::r200_depth_control);
-//#line 56 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 56 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __min__.r200_dc_preset = -1;
-//#line 56 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 56 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __max__.r200_dc_preset = 5;
-//#line 56 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 56 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __default__.r200_dc_preset = 5;
-//#line 56 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
-      R200_Depth_Control.abstract_parameters.push_back(r200_paramsConfig::AbstractParamDescriptionConstPtr(new r200_paramsConfig::ParamDescription<int>("r200_dc_preset", "int", 64, "R200 Depth Control Preset", "{'enum_description': 'Depth Control Preset Choices', 'enum': [{'srcline': 45, 'description': 'Individual Depth Control was changed', 'srcfile': '/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg', 'cconsttype': 'const int', 'value': -1, 'ctype': 'int', 'type': 'int', 'name': 'UNUSED'}, {'srcline': 46, 'description': 'Default settings on chip. Similar to Medium. Best for Outdoors.', 'srcfile': '/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg', 'cconsttype': 'const int', 'value': 0, 'ctype': 'int', 'type': 'int', 'name': 'Default'}, {'srcline': 47, 'description': 'Disable almost all hardware-based outlier removal.', 'srcfile': '/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg', 'cconsttype': 'const int', 'value': 1, 'ctype': 'int', 'type': 'int', 'name': 'Off'}, {'srcline': 48, 'description': 'Lower number of outliers removed. Minimal false negatives.', 'srcfile': '/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg', 'cconsttype': 'const int', 'value': 2, 'ctype': 'int', 'type': 'int', 'name': 'Low'}, {'srcline': 49, 'description': 'Medium number of outliers removed. Balanced approach.', 'srcfile': '/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg', 'cconsttype': 'const int', 'value': 3, 'ctype': 'int', 'type': 'int', 'name': 'Medium'}, {'srcline': 50, 'description': 'Medium-High number of outliers removed. Derived optimization function.', 'srcfile': '/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg', 'cconsttype': 'const int', 'value': 4, 'ctype': 'int', 'type': 'int', 'name': 'Optimized'}, {'srcline': 51, 'description': 'Higher number of outliers removed. Minimal false positives.', 'srcfile': '/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg', 'cconsttype': 'const int', 'value': 5, 'ctype': 'int', 'type': 'int', 'name': 'High'}]}", &r200_paramsConfig::r200_dc_preset)));
-//#line 56 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
-      __param_descriptions__.push_back(r200_paramsConfig::AbstractParamDescriptionConstPtr(new r200_paramsConfig::ParamDescription<int>("r200_dc_preset", "int", 64, "R200 Depth Control Preset", "{'enum_description': 'Depth Control Preset Choices', 'enum': [{'srcline': 45, 'description': 'Individual Depth Control was changed', 'srcfile': '/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg', 'cconsttype': 'const int', 'value': -1, 'ctype': 'int', 'type': 'int', 'name': 'UNUSED'}, {'srcline': 46, 'description': 'Default settings on chip. Similar to Medium. Best for Outdoors.', 'srcfile': '/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg', 'cconsttype': 'const int', 'value': 0, 'ctype': 'int', 'type': 'int', 'name': 'Default'}, {'srcline': 47, 'description': 'Disable almost all hardware-based outlier removal.', 'srcfile': '/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg', 'cconsttype': 'const int', 'value': 1, 'ctype': 'int', 'type': 'int', 'name': 'Off'}, {'srcline': 48, 'description': 'Lower number of outliers removed. Minimal false negatives.', 'srcfile': '/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg', 'cconsttype': 'const int', 'value': 2, 'ctype': 'int', 'type': 'int', 'name': 'Low'}, {'srcline': 49, 'description': 'Medium number of outliers removed. Balanced approach.', 'srcfile': '/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg', 'cconsttype': 'const int', 'value': 3, 'ctype': 'int', 'type': 'int', 'name': 'Medium'}, {'srcline': 50, 'description': 'Medium-High number of outliers removed. Derived optimization function.', 'srcfile': '/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg', 'cconsttype': 'const int', 'value': 4, 'ctype': 'int', 'type': 'int', 'name': 'Optimized'}, {'srcline': 51, 'description': 'Higher number of outliers removed. Minimal false positives.', 'srcfile': '/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg', 'cconsttype': 'const int', 'value': 5, 'ctype': 'int', 'type': 'int', 'name': 'High'}]}", &r200_paramsConfig::r200_dc_preset)));
-//#line 58 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 56 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+      R200_Depth_Control.abstract_parameters.push_back(r200_paramsConfig::AbstractParamDescriptionConstPtr(new r200_paramsConfig::ParamDescription<int>("r200_dc_preset", "int", 64, "R200 Depth Control Preset", "{'enum_description': 'Depth Control Preset Choices', 'enum': [{'srcline': 45, 'description': 'Individual Depth Control was changed', 'srcfile': '/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg', 'cconsttype': 'const int', 'value': -1, 'ctype': 'int', 'type': 'int', 'name': 'UNUSED'}, {'srcline': 46, 'description': 'Default settings on chip. Similar to Medium. Best for Outdoors.', 'srcfile': '/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg', 'cconsttype': 'const int', 'value': 0, 'ctype': 'int', 'type': 'int', 'name': 'Default'}, {'srcline': 47, 'description': 'Disable almost all hardware-based outlier removal.', 'srcfile': '/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg', 'cconsttype': 'const int', 'value': 1, 'ctype': 'int', 'type': 'int', 'name': 'Off'}, {'srcline': 48, 'description': 'Lower number of outliers removed. Minimal false negatives.', 'srcfile': '/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg', 'cconsttype': 'const int', 'value': 2, 'ctype': 'int', 'type': 'int', 'name': 'Low'}, {'srcline': 49, 'description': 'Medium number of outliers removed. Balanced approach.', 'srcfile': '/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg', 'cconsttype': 'const int', 'value': 3, 'ctype': 'int', 'type': 'int', 'name': 'Medium'}, {'srcline': 50, 'description': 'Medium-High number of outliers removed. Derived optimization function.', 'srcfile': '/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg', 'cconsttype': 'const int', 'value': 4, 'ctype': 'int', 'type': 'int', 'name': 'Optimized'}, {'srcline': 51, 'description': 'Higher number of outliers removed. Minimal false positives.', 'srcfile': '/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg', 'cconsttype': 'const int', 'value': 5, 'ctype': 'int', 'type': 'int', 'name': 'High'}]}", &r200_paramsConfig::r200_dc_preset)));
+//#line 56 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+      __param_descriptions__.push_back(r200_paramsConfig::AbstractParamDescriptionConstPtr(new r200_paramsConfig::ParamDescription<int>("r200_dc_preset", "int", 64, "R200 Depth Control Preset", "{'enum_description': 'Depth Control Preset Choices', 'enum': [{'srcline': 45, 'description': 'Individual Depth Control was changed', 'srcfile': '/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg', 'cconsttype': 'const int', 'value': -1, 'ctype': 'int', 'type': 'int', 'name': 'UNUSED'}, {'srcline': 46, 'description': 'Default settings on chip. Similar to Medium. Best for Outdoors.', 'srcfile': '/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg', 'cconsttype': 'const int', 'value': 0, 'ctype': 'int', 'type': 'int', 'name': 'Default'}, {'srcline': 47, 'description': 'Disable almost all hardware-based outlier removal.', 'srcfile': '/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg', 'cconsttype': 'const int', 'value': 1, 'ctype': 'int', 'type': 'int', 'name': 'Off'}, {'srcline': 48, 'description': 'Lower number of outliers removed. Minimal false negatives.', 'srcfile': '/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg', 'cconsttype': 'const int', 'value': 2, 'ctype': 'int', 'type': 'int', 'name': 'Low'}, {'srcline': 49, 'description': 'Medium number of outliers removed. Balanced approach.', 'srcfile': '/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg', 'cconsttype': 'const int', 'value': 3, 'ctype': 'int', 'type': 'int', 'name': 'Medium'}, {'srcline': 50, 'description': 'Medium-High number of outliers removed. Derived optimization function.', 'srcfile': '/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg', 'cconsttype': 'const int', 'value': 4, 'ctype': 'int', 'type': 'int', 'name': 'Optimized'}, {'srcline': 51, 'description': 'Higher number of outliers removed. Minimal false positives.', 'srcfile': '/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg', 'cconsttype': 'const int', 'value': 5, 'ctype': 'int', 'type': 'int', 'name': 'High'}]}", &r200_paramsConfig::r200_dc_preset)));
+//#line 58 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __min__.r200_dc_estimate_median_decrement = 0;
-//#line 58 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 58 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __max__.r200_dc_estimate_median_decrement = 255;
-//#line 58 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 58 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __default__.r200_dc_estimate_median_decrement = 5;
-//#line 58 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 58 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       R200_Depth_Control.abstract_parameters.push_back(r200_paramsConfig::AbstractParamDescriptionConstPtr(new r200_paramsConfig::ParamDescription<int>("r200_dc_estimate_median_decrement", "int", 32, "Estimate Median Decrement", "", &r200_paramsConfig::r200_dc_estimate_median_decrement)));
-//#line 58 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 58 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __param_descriptions__.push_back(r200_paramsConfig::AbstractParamDescriptionConstPtr(new r200_paramsConfig::ParamDescription<int>("r200_dc_estimate_median_decrement", "int", 32, "Estimate Median Decrement", "", &r200_paramsConfig::r200_dc_estimate_median_decrement)));
-//#line 60 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 60 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __min__.r200_dc_estimate_median_increment = 0;
-//#line 60 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 60 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __max__.r200_dc_estimate_median_increment = 255;
-//#line 60 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 60 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __default__.r200_dc_estimate_median_increment = 5;
-//#line 60 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 60 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       R200_Depth_Control.abstract_parameters.push_back(r200_paramsConfig::AbstractParamDescriptionConstPtr(new r200_paramsConfig::ParamDescription<int>("r200_dc_estimate_median_increment", "int", 32, "Estimate Median Increment", "", &r200_paramsConfig::r200_dc_estimate_median_increment)));
-//#line 60 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 60 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __param_descriptions__.push_back(r200_paramsConfig::AbstractParamDescriptionConstPtr(new r200_paramsConfig::ParamDescription<int>("r200_dc_estimate_median_increment", "int", 32, "Estimate Median Increment", "", &r200_paramsConfig::r200_dc_estimate_median_increment)));
-//#line 62 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 62 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __min__.r200_dc_median_threshold = 0;
-//#line 62 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 62 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __max__.r200_dc_median_threshold = 1023;
-//#line 62 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 62 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __default__.r200_dc_median_threshold = 235;
-//#line 62 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 62 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       R200_Depth_Control.abstract_parameters.push_back(r200_paramsConfig::AbstractParamDescriptionConstPtr(new r200_paramsConfig::ParamDescription<int>("r200_dc_median_threshold", "int", 32, "Median Threshold", "", &r200_paramsConfig::r200_dc_median_threshold)));
-//#line 62 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 62 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __param_descriptions__.push_back(r200_paramsConfig::AbstractParamDescriptionConstPtr(new r200_paramsConfig::ParamDescription<int>("r200_dc_median_threshold", "int", 32, "Median Threshold", "", &r200_paramsConfig::r200_dc_median_threshold)));
-//#line 64 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 64 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __min__.r200_dc_score_minimum_threshold = 0;
-//#line 64 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 64 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __max__.r200_dc_score_minimum_threshold = 1023;
-//#line 64 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 64 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __default__.r200_dc_score_minimum_threshold = 27;
-//#line 64 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 64 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       R200_Depth_Control.abstract_parameters.push_back(r200_paramsConfig::AbstractParamDescriptionConstPtr(new r200_paramsConfig::ParamDescription<int>("r200_dc_score_minimum_threshold", "int", 32, "Score Minimum Threshold", "", &r200_paramsConfig::r200_dc_score_minimum_threshold)));
-//#line 64 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 64 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __param_descriptions__.push_back(r200_paramsConfig::AbstractParamDescriptionConstPtr(new r200_paramsConfig::ParamDescription<int>("r200_dc_score_minimum_threshold", "int", 32, "Score Minimum Threshold", "", &r200_paramsConfig::r200_dc_score_minimum_threshold)));
-//#line 66 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 66 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __min__.r200_dc_score_maximum_threshold = 0;
-//#line 66 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 66 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __max__.r200_dc_score_maximum_threshold = 1023;
-//#line 66 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 66 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __default__.r200_dc_score_maximum_threshold = 420;
-//#line 66 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 66 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       R200_Depth_Control.abstract_parameters.push_back(r200_paramsConfig::AbstractParamDescriptionConstPtr(new r200_paramsConfig::ParamDescription<int>("r200_dc_score_maximum_threshold", "int", 32, "Score Maximum Threshold", "", &r200_paramsConfig::r200_dc_score_maximum_threshold)));
-//#line 66 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 66 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __param_descriptions__.push_back(r200_paramsConfig::AbstractParamDescriptionConstPtr(new r200_paramsConfig::ParamDescription<int>("r200_dc_score_maximum_threshold", "int", 32, "Score Maximum Threshold", "", &r200_paramsConfig::r200_dc_score_maximum_threshold)));
-//#line 68 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 68 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __min__.r200_dc_texture_count_threshold = 0;
-//#line 68 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 68 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __max__.r200_dc_texture_count_threshold = 31;
-//#line 68 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 68 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __default__.r200_dc_texture_count_threshold = 8;
-//#line 68 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 68 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       R200_Depth_Control.abstract_parameters.push_back(r200_paramsConfig::AbstractParamDescriptionConstPtr(new r200_paramsConfig::ParamDescription<int>("r200_dc_texture_count_threshold", "int", 32, "Texture Count Threshold", "", &r200_paramsConfig::r200_dc_texture_count_threshold)));
-//#line 68 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 68 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __param_descriptions__.push_back(r200_paramsConfig::AbstractParamDescriptionConstPtr(new r200_paramsConfig::ParamDescription<int>("r200_dc_texture_count_threshold", "int", 32, "Texture Count Threshold", "", &r200_paramsConfig::r200_dc_texture_count_threshold)));
-//#line 70 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 70 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __min__.r200_dc_texture_difference_threshold = 0;
-//#line 70 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 70 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __max__.r200_dc_texture_difference_threshold = 1023;
-//#line 70 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 70 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __default__.r200_dc_texture_difference_threshold = 80;
-//#line 70 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 70 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       R200_Depth_Control.abstract_parameters.push_back(r200_paramsConfig::AbstractParamDescriptionConstPtr(new r200_paramsConfig::ParamDescription<int>("r200_dc_texture_difference_threshold", "int", 32, "Texture Difference Threshold", "", &r200_paramsConfig::r200_dc_texture_difference_threshold)));
-//#line 70 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 70 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __param_descriptions__.push_back(r200_paramsConfig::AbstractParamDescriptionConstPtr(new r200_paramsConfig::ParamDescription<int>("r200_dc_texture_difference_threshold", "int", 32, "Texture Difference Threshold", "", &r200_paramsConfig::r200_dc_texture_difference_threshold)));
-//#line 72 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 72 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __min__.r200_dc_second_peak_threshold = 0;
-//#line 72 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 72 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __max__.r200_dc_second_peak_threshold = 1023;
-//#line 72 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 72 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __default__.r200_dc_second_peak_threshold = 70;
-//#line 72 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 72 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       R200_Depth_Control.abstract_parameters.push_back(r200_paramsConfig::AbstractParamDescriptionConstPtr(new r200_paramsConfig::ParamDescription<int>("r200_dc_second_peak_threshold", "int", 32, "Second Peak Threshold", "", &r200_paramsConfig::r200_dc_second_peak_threshold)));
-//#line 72 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 72 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __param_descriptions__.push_back(r200_paramsConfig::AbstractParamDescriptionConstPtr(new r200_paramsConfig::ParamDescription<int>("r200_dc_second_peak_threshold", "int", 32, "Second Peak Threshold", "", &r200_paramsConfig::r200_dc_second_peak_threshold)));
-//#line 74 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 74 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __min__.r200_dc_neighbor_threshold = 0;
-//#line 74 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 74 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __max__.r200_dc_neighbor_threshold = 1023;
-//#line 74 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 74 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __default__.r200_dc_neighbor_threshold = 90;
-//#line 74 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 74 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       R200_Depth_Control.abstract_parameters.push_back(r200_paramsConfig::AbstractParamDescriptionConstPtr(new r200_paramsConfig::ParamDescription<int>("r200_dc_neighbor_threshold", "int", 32, "Neighbor Threshold", "", &r200_paramsConfig::r200_dc_neighbor_threshold)));
-//#line 74 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 74 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __param_descriptions__.push_back(r200_paramsConfig::AbstractParamDescriptionConstPtr(new r200_paramsConfig::ParamDescription<int>("r200_dc_neighbor_threshold", "int", 32, "Neighbor Threshold", "", &r200_paramsConfig::r200_dc_neighbor_threshold)));
-//#line 76 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 76 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __min__.r200_dc_lr_threshold = 0;
-//#line 76 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 76 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __max__.r200_dc_lr_threshold = 2047;
-//#line 76 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 76 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __default__.r200_dc_lr_threshold = 12;
-//#line 76 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 76 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       R200_Depth_Control.abstract_parameters.push_back(r200_paramsConfig::AbstractParamDescriptionConstPtr(new r200_paramsConfig::ParamDescription<int>("r200_dc_lr_threshold", "int", 32, "LR Threshold", "", &r200_paramsConfig::r200_dc_lr_threshold)));
-//#line 76 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 76 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       __param_descriptions__.push_back(r200_paramsConfig::AbstractParamDescriptionConstPtr(new r200_paramsConfig::ParamDescription<int>("r200_dc_lr_threshold", "int", 32, "LR Threshold", "", &r200_paramsConfig::r200_dc_lr_threshold)));
 //#line 124 "/opt/ros/kinetic/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       R200_Depth_Control.convertParams();
@@ -935,19 +935,19 @@ r200_paramsConfig::GroupDescription<r200_paramsConfig::DEFAULT::R200_DEPTH_CONTR
     return statics;
   }
 
-//#line 45 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 45 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       const int r200_params_UNUSED = -1;
-//#line 46 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 46 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       const int r200_params_Default = 0;
-//#line 47 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 47 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       const int r200_params_Off = 1;
-//#line 48 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 48 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       const int r200_params_Low = 2;
-//#line 49 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 49 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       const int r200_params_Medium = 3;
-//#line 50 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 50 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       const int r200_params_Optimized = 4;
-//#line 51 "/home/ras19/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
+//#line 51 "/home/ras29/catkin_ws/src/ras_project/ras_realsense/realsense_camera/cfg/r200_params.cfg"
       const int r200_params_High = 5;
 }
 

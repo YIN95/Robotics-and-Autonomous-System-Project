@@ -1,0 +1,8 @@
+<launch>
+    <!-- <include file="$(find ras_camera)/launch/ras_camera_nodelet.launch"/> -->
+    <!-- <node pkg="phidgets" name="phidgets_left" type="motor" args="_serial:=482685 __name:=motor_left _name:=motor_left _frequency:=125"/>
+    <node pkg="phidgets" name="phidgets_right" type="motor" args="_serial:=490601 __name:=motor_right _name:=motor_right _frequency:=125"/> -->
+    <node pkg="gp9_objects_detection" name="objects_detection" type="objects_detection"/>
+     
+</launch>
+<!-- realsense_camera sr300_nodelet_rgbd.launch -->

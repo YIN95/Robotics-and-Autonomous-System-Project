@@ -1,4 +1,4 @@
-#include "odometry.h"
+#include <gp9_odometry/odometry.h>
 #include <math.h>
 
 int main(int argc, char** argv){
@@ -22,6 +22,8 @@ Odometry::Odometry(int control_frequency_){
     dt = (current_time - last_time).toSec();
     estimatedSpeed = nh.subscribe<geometry_msgs::Twist>("/velocity_estimate", 1, &Odometry::motorCallbackSpeed, this);
     pub_pose = nh.advertise<geometry_msgs::Pose2D>("/pose", 1);
+    pub_robot_marker = nh.advertise<visualization_msgs::Marker>("/robot/marker", 1);
+
     current_time = ros::Time::now();
     last_time = ros::Time::now();
 
@@ -42,6 +44,7 @@ void Odometry::updateEstimatedOdometry(){
     pose.theta = rob_theta;
 
     pub_pose.publish(pose);
+    pub_robot_Pose(rob_x, rob_y);
     last_time = current_time;
     ROS_INFO("rob_x     : %f", rob_x);
     ROS_INFO("rob_y     : %f", rob_y);
@@ -56,6 +59,13 @@ void Odometry::updateEstimatedPosition(){
     rob_x = rob_x + rob_x_delta;
     rob_y = rob_y + rob_y_delta;
     rob_theta = rob_theta + rob_theta_delta;
+    if (rob_theta < 0) {
+        rob_theta += 2*M_PI;
+    }
+    else if (rob_theta > 2*M_PI) {
+        rob_theta -= 2*M_PI;
+    }
+
     return;
 }
 
@@ -89,4 +99,35 @@ void Odometry::motorCallbackSpeed(const geometry_msgs::Twist::ConstPtr &msg){
     ROS_INFO("estimated_v : %f", estimated_v);
     ROS_INFO("estimated_w : %f", estimated_w);
     return;
+}
+
+void Odometry::pub_robot_Pose(double x, double y){
+    visualization_msgs::Marker marker;
+    geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(rob_theta);
+    geometry_msgs::TransformStamped odom_trans;
+ 
+    
+    marker.header.frame_id = "map";
+    marker.header.stamp = ros::Time();
+    marker.ns = "my_namespace";
+    marker.id = 0;
+    marker.type = visualization_msgs::Marker::ARROW;
+    marker.action = visualization_msgs::Marker::ADD;
+    marker.pose.position.x = x;
+    marker.pose.position.y = y;
+    marker.pose.position.z = 0;
+    // marker.pose.orientation.x = 0.0;
+    // marker.pose.orientation.y = 0.0;
+    // marker.pose.orientation.z = 3.1415926/2;
+    // marker.pose.orientation.w = 1.0;
+    marker.pose.orientation = odom_quat;
+    marker.scale.x = 0.2;
+    marker.scale.y = 0.1;
+    marker.scale.z = 0.1;
+    marker.color.a = 0.9; 
+    marker.color.r = 1.0;
+    marker.color.g = 0;
+    marker.color.b = 1.0;
+    // marker.mesh_resource = "package://pr2_description/meshes/base_v0/base.dae";
+    pub_robot_marker.publish(marker);
 }

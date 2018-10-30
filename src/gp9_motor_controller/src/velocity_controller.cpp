@@ -1,4 +1,4 @@
-#include "velocity_controller.h"
+#include <gp9_motor_controller/velocity_controller.h>
 
 // when w > 0, turn left
 // when w < 0 turn right
