@@ -8,9 +8,11 @@ int main(int argc, char** argv)
 
 	ros::init(argc, argv, "object_detection");
 	ObjectDetection objectDetection;
+
 	ros::Rate rate(10);
 	
 	while (objectDetection.nh.ok()) {
+        
 		ros::spinOnce();
 		rate.sleep();
 	}
@@ -18,6 +20,7 @@ int main(int argc, char** argv)
 }
 
 ObjectDetection::ObjectDetection(){
+    
     object_depth = 99999;
     preDetectColor = 0;
 	sub_image_rgb = nh.subscribe<sensor_msgs::Image>("/camera/rgb/image_rect_color", 1, &ObjectDetection::imageRGBCallback, this);
@@ -27,6 +30,7 @@ ObjectDetection::ObjectDetection(){
     pub_object_marker = nh.advertise<visualization_msgs::Marker>("/object/marker", 1);
     pub_object_marker_array = nh.advertise<visualization_msgs::MarkerArray>("/object/marker_array", 10);
     pose_pub = nh.advertise<geometry_msgs::Pose2D>("/global_pose/object", 1);
+    //pub_classification_target = nh.advertise<geometry_msgs::Pose2D>("/classification/target", 1);
 
     char *buffer;
     buffer = getcwd(NULL, 0);
@@ -71,7 +75,7 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
 {
     try{
         bool only_detect_one = true;
-        int detect_size = 1;
+        int detect_size = 3;
         Mat frame = ptr->image;
         Mat frame_gray;
         Mat frame_target;
@@ -106,6 +110,7 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                     pub_object_pose.publish(pose);
 
                     frame_target = cropTarget(center_x, center_y);
+                    publishClassificationTarget(frame_target);
                     imshow("target", frame_target);
                     char keyt = (char)waitKey(1);
 
@@ -441,4 +446,25 @@ void ObjectDetection::saveTrainingData(Mat target){
     
 }
 
- 
+void ObjectDetection::publishClassificationTarget(Mat target){
+    static image_transport::ImageTransport it(nh);
+    static image_transport::Publisher pub_classification_target = it.advertise("/classification/image", 1);
+    sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", target).toImageMsg();
+    pub_classification_target.publish(msg);
+    
+    /*
+    try{
+        cv_bridge::CvImagePtr ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+        Mat frame = ptr->image;
+        cv::imshow("target-pub", frame);
+        cv::waitKey(3); 
+    }
+    catch (...){
+        return;
+    }*/
+    // cv::imshow("RGB_WINDOW", cv_rgb_ptr->image);
+    // cv::waitKey(3);  
+
+    //ROS_INFO("???,");                                                                             
+    return;
+}

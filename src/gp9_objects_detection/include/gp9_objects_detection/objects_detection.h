@@ -33,12 +33,13 @@ public: /* ros */
     ros::Publisher pub_object_marker;
     ros::Publisher pub_object_marker_array;
     ros::Publisher pose_pub;
+    //ros::Publisher pub_classification_target;
 
     visualization_msgs::Marker marker;
     visualization_msgs::MarkerArray marker_array;
 
     tf::TransformListener listener;
-
+    
 public:
     ObjectDetection();
     void imageRGBCallback(const sensor_msgs::ImageConstPtr &msg);
@@ -57,6 +58,8 @@ public:
     int getTrueDepth(int depth);
     Mat cropTarget(int x, int y);
     void saveTrainingData(Mat target);
+    void publishClassificationTarget(Mat target);
+    
 
 public:
     static const int img_rgb_height = 480;

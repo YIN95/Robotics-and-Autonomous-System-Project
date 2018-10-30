@@ -7,6 +7,8 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   cv_bridge
   tf
+  image_transport
+  sensor_msgs
 )
 
 catkin_package(
@@ -14,6 +16,7 @@ catkin_package(
 #  LIBRARIES motor_controller
 #  CATKIN_DEPENDS other_catkin_pkg
 #  DEPENDS system_lib
+#  image_transport
 )
 
 # OpenCV
