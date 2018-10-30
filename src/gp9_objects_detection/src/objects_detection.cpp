@@ -34,8 +34,9 @@ ObjectDetection::ObjectDetection(){
     string filePath = "/gp9_objects_detection/src/cascade.xml";
     string fullPath = path + filePath;
     
-    fullPath = "/home/ras19/catkin_ws/src/gp9_objects_detection/src/cascade.xml";
+    fullPath = "/home/ras19/catkin_ws/src/gp9_objects_detection/src/cascade2.xml";
     cascade_name = fullPath;
+    //cascade.mode = ;
     if(!cascade.load(cascade_name)){ 
         ROS_ERROR("Error loading cascade!"); 
     };
@@ -44,6 +45,7 @@ ObjectDetection::ObjectDetection(){
 void ObjectDetection::imageRGBCallback(const sensor_msgs::ImageConstPtr &msg){
     try{
         cv_rgb_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+        origin_frame = (cv_rgb_ptr->image).clone();
         detectAndDisplay(cv_rgb_ptr);
     }
     catch (...){
@@ -429,7 +431,7 @@ Mat ObjectDetection::cropTarget(int x, int y){
     ROS_INFO("x, %d ; y, %d", x, y);
     ROS_INFO("sx, %d ; sy, %d", sx, sy);
     Rect rect(sx, sy, cropsize, cropsize);
-    frame_target = frame_global(rect);
+    frame_target = origin_frame(rect);
     //imshow("RESULT", frame_global);
     //char key = (char)waitKey(1);
     return frame_target;
@@ -438,3 +440,5 @@ Mat ObjectDetection::cropTarget(int x, int y){
 void ObjectDetection::saveTrainingData(Mat target){
     
 }
+
+ 

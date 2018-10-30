@@ -57,6 +57,7 @@ public:
     int getTrueDepth(int depth);
     Mat cropTarget(int x, int y);
     void saveTrainingData(Mat target);
+
 public:
     static const int img_rgb_height = 480;
     static const int img_rgb_width = 640;
@@ -70,8 +71,8 @@ public:
     CascadeClassifier cascade;
     std::vector<Rect> objects;
     ObjectColorShape obj;
-
     geometry_msgs::Pose2D pose;
-    
+    Mat origin_frame;
+
 };
 
