@@ -3,6 +3,7 @@
 #include <vector>
 #include <math.h>
 #include <visualization_msgs/Marker.h>
+#include <std_msgs/Bool.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Pose2D.h>
 #include <geometry_msgs/Quaternion.h>
@@ -24,6 +25,7 @@ public:
 	ros::Subscriber sub_odom;
 	ros::Subscriber sub_lidar;
 
+    ros::Publisher pub_close_enough;
 	ros::Publisher pub_desired_pose;
 	ros::Publisher pub_velocity;
 
@@ -36,6 +38,8 @@ public:
 
 		pub_desired_pose = nh.advertise<visualization_msgs::Marker>("/visualization_marker", 1);
 		pub_velocity = nh.advertise<geometry_msgs::Twist>("/motor_controller/velocity", 1);
+		pub_close_enough = nh.advertise<std_msgs::Bool>("/close_enough", 1);
+
 
 		point_flag = false;
 		stopped = false;
@@ -256,6 +260,7 @@ public:
 		velocity_msg.linear.x = 0;
 		velocity_msg.angular.z = 0;
 		resetErrors();
+        close_enough_msg.data = true;
 		ROS_INFO("Close Enough");
 		
 	}
@@ -285,6 +290,7 @@ public:
 		ROS_INFO("publishing");
 
 		pub_velocity.publish(velocity_msg);
+		pub_close_enough.publish(close_enough_msg);
 		ROS_INFO("=============================================");
 	}
 
@@ -318,6 +324,7 @@ public:
 	}
 
 	void turnOnSpot() {
+	    close_enough_msg.data = false;
 		ROS_INFO("same point:  %d", same_point);
 		ROS_INFO("other angle: %d", other_angle);
 
@@ -376,11 +383,11 @@ private:
 	double desired_angle;
 	
 	geometry_msgs::Twist velocity_msg;
+	std_msgs::Bool close_enough_msg;
 
 	std::vector<double> laser_distances;
 	double min_distance_to_obstacle;
 	int every_lidar_value;
-
 
     std::vector<double> last_checkpoint;
 	std::vector<double> pose;
