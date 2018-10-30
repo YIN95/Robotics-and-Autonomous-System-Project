@@ -1,4 +1,7 @@
 {
+<<<<<<< HEAD
+    "python.pythonPath": "venv/bin/python"
+=======
     "python.pythonPath": "venv/bin/python",
     "python.linting.enabled": false,
     "files.associations": {
@@ -10,4 +13,5 @@
         "type_traits": "cpp",
         "tuple": "cpp"
     }
+>>>>>>> master
 }
