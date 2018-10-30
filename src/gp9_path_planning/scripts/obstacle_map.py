@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from __future__ import division
 from __future__ import print_function
 
@@ -219,7 +221,8 @@ if __name__ == '__main__':
     r = 0.1
 
     obstacle_map = ObstacleMap(r)
-    obstacle_map.construct_obstacle_map('../maps/maze3.txt')
+    #obstacle_map.construct_obstacle_map('../maps/maze.txt')
+    obstacle_map.construct_obstacle_map('/home/ras19/catkin_ws/src/gp9_path_planning/maps/maze3.txt')
     obstacle_map.plot_map([-0.5, 3, -0.5, 6])
 
 

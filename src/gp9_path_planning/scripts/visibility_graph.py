@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from __future__ import division
 from __future__ import print_function
 
@@ -255,7 +257,8 @@ if __name__ == "__main__":
     axis = [-0.5, 3, -0.5, 5.5]
 
     obst_map = ObstacleMap(r)
-    obst_map.construct_obstacle_map("../maps/maze3.txt")
+    obst_map.construct_obstacle_map("/home/ras19/catkin_ws/src/gp9_path_planning/maps/maze3.txt")
+    
     # obstacles = obst_map.obstacles
     # dims = obst_map.map_dimensions
 
