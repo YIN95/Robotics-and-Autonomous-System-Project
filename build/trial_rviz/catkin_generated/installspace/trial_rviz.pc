@@ -1,8 +1,0 @@
-prefix=/home/ras19/catkin_ws/install
-
-Name: trial_rviz
-Description: Description of trial_rviz
-Version: 0.0.0
-Cflags: 
-Libs: -L/home/ras19/catkin_ws/install/lib 
-Requires: roscpp visualization_msgs

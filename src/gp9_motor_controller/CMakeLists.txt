@@ -16,11 +16,11 @@ catkin_package(
 )
 
 include_directories(
-# include
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
-include_directories(./include/gp9_motor_controller/)
+#include_directories(./include/gp9_motor_controller/)
 
 add_executable(motor_controller src/motor_controller.cpp)
 target_link_libraries(motor_controller ${catkin_LIBRARIES})
