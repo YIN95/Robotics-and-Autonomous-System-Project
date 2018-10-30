@@ -27,10 +27,10 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+  include
   ${catkin_INCLUDE_DIRS}
 )
-include_directories(./include/gp9_odometry/)
+# include_directories(./include/gp9_odometry/)
 
 
 add_executable(odometry src/odometry.cpp)

@@ -180,7 +180,7 @@ class SimpleKeyTeleop():
         self._interface = interface
         self._pub_cmd = rospy.Publisher('key_vel', Twist)
 
-        self._hz = rospy.get_param('~hz', 10)
+        self._hz = rospy.get_param('~hz', 125)
 
         self._forward_rate = rospy.get_param('~forward_rate', 0.15)
         self._backward_rate = rospy.get_param('~backward_rate', 0.15)

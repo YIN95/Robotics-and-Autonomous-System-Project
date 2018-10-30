@@ -143,8 +143,20 @@ target_link_libraries(tf_map_robot ${catkin_LIBRARIES})
 add_executable(tf_robot_laser src/tf_robot_laser.cpp)
 target_link_libraries(tf_robot_laser ${catkin_LIBRARIES})
 
+add_executable(tf_robot_camera src/tf_robot_camera.cpp)
+target_link_libraries(tf_robot_camera ${catkin_LIBRARIES})
 
+add_executable(tf_camera_object src/tf_camera_object.cpp)
+target_link_libraries(tf_camera_object ${catkin_LIBRARIES})
 
+# add_executable(tf_object_listener src/tf_object_listener.cpp)
+# target_link_libraries(tf_object_listener ${catkin_LIBRARIES})
+
+# add_executable(tf_robot_listener src/tf_robot_listener.cpp)
+# target_link_libraries(tf_robot_listener ${catkin_LIBRARIES})
+
+add_executable(robotPathPose src/robotPathPose.cpp)
+target_link_libraries(robotPathPose ${catkin_LIBRARIES})
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use

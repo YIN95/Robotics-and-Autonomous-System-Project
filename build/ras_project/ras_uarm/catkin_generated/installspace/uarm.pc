@@ -1,8 +1,0 @@
-prefix=/home/ras19/catkin_ws/install
-
-Name: uarm
-Description: Description of uarm
-Version: 1.0.1
-Cflags: -I/home/ras19/catkin_ws/install/include
-Libs: -L/home/ras19/catkin_ws/install/lib 
-Requires: rospy std_msgs geometry_msgs sensor_msgs

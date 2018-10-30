@@ -1,8 +1,0 @@
-prefix=/home/ras19/catkin_ws/install
-
-Name: ras_maze_map
-Description: Description of ras_maze_map
-Version: 0.1.0
-Cflags: 
-Libs: -L/home/ras19/catkin_ws/install/lib 
-Requires: roscpp std_msgs
