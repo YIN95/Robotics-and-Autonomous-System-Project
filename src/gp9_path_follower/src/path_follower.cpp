@@ -69,8 +69,8 @@ public:
 		degrees = 5;
 		angle_threshold = degrees * M_PI / 180;
 
-        distance = 1000;
-        distance_threshold = 0.05;
+       	        distance = 1000;
+       		distance_threshold = 0.01;
 		desired_angle = 0;
 
 		error_angle = M_PI;
@@ -148,7 +148,7 @@ public:
 		double dy = pose_desired[1] - pose[1];
 		distance = sqrt(pow(dx, 2) + pow(dy, 2));
 		desired_angle = atan2(dy, dx); // aim to goal point
-        error_angle = getErrorAngle(desired_angle)
+        error_angle = getErrorAngle(desired_angle);
 	}
 
 	void moveToPoint() {
@@ -175,9 +175,6 @@ public:
 	}
 
 	void PID_rotation() {
-
-	    last_checkpoint[0] = pose[0];
-	    last_checkpoint[1] = pose[1];
 
 		double derror_angle = (error_angle - error_previous_angle) * control_frequency;
 		error_int_angle = error_int_angle + error_angle;
@@ -211,28 +208,34 @@ public:
 		double w = PW + IW + DW;
 
 		double v;
-		double v_max = 0.4;
-		double v_min = 0.1;
-		double slow_dist = 0.3;
+		double v_max = 0.50;
+		double v_min = 0.2;
+		double slow_dist = 0.10;
 
 		double dx = last_checkpoint[0] - pose[0];
 		double dy = last_checkpoint[1] - pose[1];
 		double distance_travelled = sqrt(pow(dx, 2) + pow(dy, 2));
 
-        // To start slowly. v: v_min --> v_max, distance_travelled: 0 --> slow_dist.
+		ROS_INFO("dist travelled: %f", distance_travelled);
+
 		bool just_started = distance > slow_dist;
+		bool short_drive = (distance < slow_dist && distance_travelled < slow_dist);
+
+        // To start slowly. v: v_min --> v_max, distance_travelled: 0 --> slow_dist.
 		if (just_started) { // IS THE IF STATEMENT CORRECT?
+			ROS_INFO("Slow start");
 		    v = v_min + (v_max - v_min) * (distance_travelled / slow_dist);
 		}
 
 		// When just driving a short distance, drive slowly
-		bool short_drive = (distance < slow_dist && distance_travelled < slow_dist);
 		else if (short_drive) {
+			ROS_INFO("Short drive");
 		    v = v_min;
 		}
 
 		// To slow down in the end. v: v_max --> v_min, distance: slow_dist --> 0.
 		else {
+			ROS_INFO("Slowing down");
 		    v = v_max - (v_max - v_min) * ((slow_dist - distance) / slow_dist);
 		}
 
@@ -245,6 +248,8 @@ public:
 		error_int_angle = 0;
 		error_previous_angle_translation = 0;
 		error_int_angle_translation = 0;
+		last_checkpoint[0] = pose[0];
+	    last_checkpoint[1] = pose[1];
 	}
 
 	void closeEnough() {
@@ -274,6 +279,7 @@ public:
 			moveToPoint();
 		}
 
+		ROS_INFO("last checkpoint: %f, %f", last_checkpoint[0], last_checkpoint[1]);
 		ROS_INFO("v : %f", velocity_msg.linear.x);
 		ROS_INFO("w : %f", velocity_msg.angular.z);
 		ROS_INFO("publishing");
@@ -324,7 +330,7 @@ public:
 
 		if (turn_flag) {
             desired_angle = pose_desired[2];
-            error_angle = getErrorAngle(desired_angle)
+            error_angle = getErrorAngle(desired_angle);
 
             if (fabs(error_angle) > angle_threshold) {
                 PID_rotation();
