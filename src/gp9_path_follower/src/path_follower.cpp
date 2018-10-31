@@ -71,12 +71,12 @@ public:
         last_checkpoint[1] = 0.225;
         last_checkpoint[2] = M_PI / 2;
 
-		degrees = 5;
+		degrees = 3;
 		angle_threshold = degToRad(degrees);
 
 		distance = 1000;
 		desired_angle = 0;
-		distance_threshold = 0.01;
+		distance_threshold = 0.005;
 
 		error_angle = M_PI;
 
@@ -198,35 +198,38 @@ public:
 
 	void rotate() {
 
+		ROS_INFO("IN ROTATE!!!!!!!!!!!!!!!");
+		
+		double sign = error_angle / fabs(error_angle);
 		double w;
 		double w_max = 2.00;
-		double w_min = 1.2;
-		double slow_degrees = 15.0; // slowing down distance
+		double w_min = 1.6;
+		double slow_degrees = 10.0; // slowing down distance
 		double slow_rads = degToRad(slow_degrees);
 
 		double angle_travelled = last_checkpoint[2] - pose[2];
 
 		ROS_INFO("angle travelled: %f", angle_travelled);
 
-		bool just_started = error_angle > slow_rads;
-		bool short_drive = (error_angle < slow_rads && angle_travelled < slow_rads);
+		bool just_started = fabs(error_angle) > slow_rads;
+		bool short_drive = (fabs(error_angle) < slow_rads && angle_travelled < slow_rads);
 
 		// To start slowly. w: w_min --> w_max, angle_travelled: 0 --> slow_rads.
 		if (just_started) {
 			ROS_INFO("Slow start");
-			w = w_min + (w_max - w_min) * (angle_travelled / slow_rads);
+			w = sign * (w_min + (w_max - w_min) * (angle_travelled / slow_rads));
 		}
 
 			// When just driving a short distance, drive slowly
 		else if (short_drive) {
 			ROS_INFO("Short drive");
-			w = w_min;
+			w = sign * w_min;
 		}
 
 			// To slow down in the end. w: w_max --> w_min, error_angle: slow_rads --> 0.
 		else {
 			ROS_INFO("Slowing down");
-			w = w_max - (w_max - w_min) * ((slow_rads - error_angle) / slow_rads);
+			w = sign * (w_max - (w_max - w_min) * ((slow_rads - fabs(error_angle)) / slow_rads));
 		}
 
 		ROS_INFO("error angle : %f", error_angle);
@@ -250,7 +253,7 @@ public:
 		double v;
 		double v_max = 0.50;
 		double v_min = 0.2;
-		double slow_dist = 0.10;
+		double slow_dist = 0.15;
 
 		double dx = last_checkpoint[0] - pose[0];
 		double dy = last_checkpoint[1] - pose[1];
