@@ -82,7 +82,7 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
         cvtColor(frame, frame_gray, COLOR_BGR2GRAY);
         equalizeHist(frame_gray, frame_gray);
         //-- Detect objects
-        cascade.detectMultiScale(frame_gray, objects, 1.1, 5, 0|CASCADE_SCALE_IMAGE, Size(50, 50), Size(140, 140));
+        cascade.detectMultiScale(frame_gray, objects, 1.1, 5, 0|CASCADE_SCALE_IMAGE, Size(90, 90), Size(140, 140));
         detect_size = std::min(int(objects.size()), detect_size);
         if (only_detect_one && objects.size()>0){
             int i;

@@ -62,6 +62,7 @@ def main():
     path_cross = '/home/ras19/Data/4'
     path_triangle = '/home/ras19/Data/5'
     path_star = '/home/ras19/Data/6'
+    path_others = '/home/ras19/Data/0'
 
     label_ball = 'ball'
     label_cube = 'cube'
@@ -69,6 +70,7 @@ def main():
     label_cross = 'cross'
     label_triangle = 'triangle'
     label_star = 'star'
+    label_others = 'others'
 
     while(cap.isOpened()):
         ret, frame = cap.read()
@@ -96,6 +98,9 @@ def main():
             elif key & 0xFF == ord('6'):
                 path = path_star
                 label = label_star
+            elif key & 0xFF == ord('0'):
+                path = path_others
+                label = label_others
                 
         
 
