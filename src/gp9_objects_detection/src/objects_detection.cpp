@@ -286,7 +286,7 @@ int ObjectDetection::colorClassifier(int h, int s, int v, int b, int g, int r){
     }
     else{
         // return 1;
-        if (s <95){
+        if (s <40){
             return -1;
         }
         if (35 <= h && h <= 69 && 0 <= s && s <= 255 && 0 <= v && v <= 255){

@@ -3,8 +3,8 @@
     <node pkg="phidgets" name="phidgets_left" type="motor" args="_serial:=482685 __name:=motor_left _name:=motor_left _frequency:=125"/>
     <node pkg="phidgets" name="phidgets_right" type="motor" args="_serial:=490601 __name:=motor_right _name:=motor_right _frequency:=125"/>
     <node pkg="gp9_motor_controller" name="motor_controller" type="motor_controller"/>
-    <!-- <node pkg="gp9_motor_controller" name="velocity_controller" type="velocity_controller"/>
-    <node pkg="key_teleop" name="key_teleop" type="key_teleop.py" output="screen"/> -->
+    <node pkg="gp9_motor_controller" name="velocity_controller" type="velocity_controller"/>
+    <node pkg="key_teleop" name="key_teleop" type="key_teleop.py" output="screen"/>
     
  
 </launch>
