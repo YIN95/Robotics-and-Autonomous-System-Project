@@ -66,7 +66,7 @@ class PathPublisher:
 
 if __name__ == '__main__':
     rospy.init_node('planner_publisher')
-    control_frequency = 10
+    control_frequency = 30
     rate = rospy.Rate(control_frequency)
 
     path_to_map = "/home/ras19/catkin_ws/src/gp9_path_planning/maps/maze.txt"

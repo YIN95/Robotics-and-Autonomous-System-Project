@@ -70,11 +70,11 @@ public:
         last_checkpoint[0] = 0.225;
         last_checkpoint[1] = 0.225;
 
-		degrees = 5;
+		degrees = 3;
 		angle_threshold = degrees * M_PI / 180;
 
-       	        distance = 1000;
-       		distance_threshold = 0.01;
+		distance = 1000;
+		distance_threshold = 0.005;
 		desired_angle = 0;
 
 		error_angle = M_PI;
@@ -214,7 +214,7 @@ public:
 		double v;
 		double v_max = 0.50;
 		double v_min = 0.2;
-		double slow_dist = 0.10;
+		double slow_dist = 0.15;
 
 		double dx = last_checkpoint[0] - pose[0];
 		double dy = last_checkpoint[1] - pose[1];
