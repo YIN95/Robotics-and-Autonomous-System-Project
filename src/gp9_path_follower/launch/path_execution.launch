@@ -3,9 +3,6 @@
     <node pkg="gp9_path_follower" name="path_follower" type="path_follower"/>
     <node pkg="gp9_path_follower" name="execute_path" type="execute_path.py"/>
     <node pkg="gp9_path_planning" name="path_publisher" type="path_publisher.py"/>
-    <node pkg="gp9_motor_controller" name="motor_controller" type="motor_controller"/>
-    <!-- <node pkg="gp9_motor_controller" name="velocity_controller" type="velocity_controller"/>
-    <node pkg="key_teleop" name="key_teleop" type="key_teleop.py" output="screen"/> -->
     
- 
+
 </launch>

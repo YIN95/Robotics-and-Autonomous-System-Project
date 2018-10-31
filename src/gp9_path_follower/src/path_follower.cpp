@@ -312,8 +312,6 @@ public:
 	}
 
 	void resetErrors() {
-		error_previous_angle = 0;
-		error_int_angle = 0;
 		error_previous_angle_translation = 0;
 		error_int_angle_translation = 0;
 		last_checkpoint[0] = pose[0];
