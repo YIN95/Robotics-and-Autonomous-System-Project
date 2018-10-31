@@ -253,11 +253,11 @@ class Graph:
 
 if __name__ == "__main__":
 
-    r = 0.10
+    r = 0.15
     axis = [-0.5, 3, -0.5, 5.5]
 
     obst_map = ObstacleMap(r)
-    obst_map.construct_obstacle_map("/home/ras19/catkin_ws/src/gp9_path_planning/maps/maze3.txt")
+    obst_map.construct_obstacle_map("/home/ras19/catkin_ws/src/gp9_path_planning/maps/maze.txt")
     
     # obstacles = obst_map.obstacles
     # dims = obst_map.map_dimensions
@@ -269,7 +269,7 @@ if __name__ == "__main__":
     # start = graph.vertices[35]
     start = Vertex(0.225, 0.225)
     print(start)
-    goal = Vertex(2, 3)
+    goal = Vertex(2, 0.225)
     print(goal)
 
     path = graph.shortest_path(start, goal)
