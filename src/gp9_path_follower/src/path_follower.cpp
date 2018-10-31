@@ -200,42 +200,42 @@ public:
 
 		ROS_INFO("IN ROTATE!!!!!!!!!!!!!!!");
 		
-		double sign = error_angle / fabs(error_angle);
-		double w;
-		double w_max = 2.00;
-		double w_min = 1.6;
-		double slow_degrees = 10.0; // slowing down distance
-		double slow_rads = degToRad(slow_degrees);
+		 double sign = error_angle / fabs(error_angle);
+		// double w;
+		// double w_max = 2.00;
+		// double w_min = 1.6;
+		// double slow_degrees = 10.0; // slowing down distance
+		// double slow_rads = degToRad(slow_degrees);
 
-		double angle_travelled = last_checkpoint[2] - pose[2];
+		// double angle_travelled = last_checkpoint[2] - pose[2];
 
-		ROS_INFO("angle travelled: %f", angle_travelled);
+		// ROS_INFO("angle travelled: %f", angle_travelled);
 
-		bool just_started = fabs(error_angle) > slow_rads;
-		bool short_drive = (fabs(error_angle) < slow_rads && angle_travelled < slow_rads);
+		// bool just_started = fabs(error_angle) > slow_rads;
+		// bool short_drive = (fabs(error_angle) < slow_rads && angle_travelled < slow_rads);
 
-		// To start slowly. w: w_min --> w_max, angle_travelled: 0 --> slow_rads.
-		if (just_started) {
-			ROS_INFO("Slow start");
-			w = sign * (w_min + (w_max - w_min) * (angle_travelled / slow_rads));
-		}
+		// // To start slowly. w: w_min --> w_max, angle_travelled: 0 --> slow_rads.
+		// if (just_started) {
+		// 	ROS_INFO("Slow start");
+		// 	w = sign * (w_min + (w_max - w_min) * (angle_travelled / slow_rads));
+		// }
 
-			// When just driving a short distance, drive slowly
-		else if (short_drive) {
-			ROS_INFO("Short drive");
-			w = sign * w_min;
-		}
+		// 	// When just driving a short distance, drive slowly
+		// else if (short_drive) {
+		// 	ROS_INFO("Short drive");
+		// 	w = sign * w_min;
+		// }
 
-			// To slow down in the end. w: w_max --> w_min, error_angle: slow_rads --> 0.
-		else {
-			ROS_INFO("Slowing down");
-			w = sign * (w_max - (w_max - w_min) * ((slow_rads - fabs(error_angle)) / slow_rads));
-		}
+		// 	// To slow down in the end. w: w_max --> w_min, error_angle: slow_rads --> 0.
+		// else {
+		// 	ROS_INFO("Slowing down");
+		// 	w = sign * (w_max - (w_max - w_min) * ((slow_rads - fabs(error_angle)) / slow_rads));
+		// }
 
-		ROS_INFO("error angle : %f", error_angle);
+		// ROS_INFO("error angle : %f", error_angle);
 
 		velocity_msg.linear.x = 0;
-		velocity_msg.angular.z = w;
+		velocity_msg.angular.z = sign * 1.2;
 	}
 
 	void translate(double distance) {
