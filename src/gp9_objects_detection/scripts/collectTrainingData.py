@@ -29,7 +29,16 @@ def OnMouseAction(event, x, y, flags, param):
         print y
         print path
         print label
+        if ((x-64) < 0):
+            x = 64
+        if ((y-64) < 0):
+            y = 64
+        if ((x+64) > 640):
+            x = 640-64
+        if ((y+64) > 480):
+            y = 480-64
         image = img[y-64:y+64, x-64:x+64, :]
+        
         collect(x, y, path, label, image)
 
 ######################################
