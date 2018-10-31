@@ -46,8 +46,8 @@ public:
 		same_point = false;
 		other_angle = false;
 
-		dt = 1 / control_frequency;
 		control_frequency = control_frequency_;
+		dt = 1.0 / control_frequency;
 
 		every_lidar_value = every_lidar_value_;
 		laser_distances = std::vector<double>(360, 0);
