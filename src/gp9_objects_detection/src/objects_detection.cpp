@@ -148,11 +148,13 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                     if (now_see > 0){
                         bool is_new_object = check_pre_object(now_object);
                         bool is_new_object_p = check_pre_object_by_position(now_object, pose.x, pose.y);
-                        if (is_new_object && is_new_object_p && (object_depth >= 50) && (object_depth <=650)){
+                        if (is_new_object && (object_depth >= 50) && (object_depth <=650)){
                             //frame_target = cropTarget(pose.x, pose.y);
                             speakResult();
+                            evidence_frame = frame_target;
                             listen_obj_map(pose.x, pose.y, now_object);
-                            publishEvidence("test", frame_target, 1, 1);
+                            evidence_id = getEvidenceID(now_object);
+                            publishEvidence(evidence_id, evidence_frame, evidence_x, evidence_y);
                             ROS_INFO("now::: %d", now_object);
                             //preDetectColor = now_object;
                         }
@@ -194,6 +196,8 @@ void ObjectDetection::listen_obj_map(double x, double y, int type){
         geometry_msgs::Pose2D pose_;
         pose_.x = obj_tf_map.point.x;
         pose_.y = obj_tf_map.point.y;
+        evidence_x = pose_.x;
+        evidence_y = pose_.y;
         pose_pub.publish(pose_);
         pubPose(pose_.x, pose_.y, type);
     }
@@ -599,11 +603,14 @@ int ObjectDetection::check_now_object(){
                 now_object = obj.Green_Cube;
                 ROS_INFO("I SEE GREEN CUBE");
             }
-            else if (now_color == obj.COLOR_BLUE){
+            else if (now_color == obj.COLOR_BLUE) {
                 now_object = obj.Blue_Cube;
                 ROS_INFO("I SEE BLUE CUBE");
             }
-
+            else if (now_color == obj.COLOR_LIGHT_BLUE) {
+                now_object = obj.Blue_Cube;
+                ROS_INFO("I SEE BLUE CUBE");
+            }
             else{
                 now_object = obj.UNKNOWN;
             }    
@@ -770,4 +777,53 @@ void ObjectDetection::publishEvidence(String object_id, Mat image, int x, int y)
     location.transform.translation.x = x;
     location.transform.translation.y = y;
     pub_evidence.publish(msg);
+}
+
+String ObjectDetection::getEvidenceID(int index){
+    switch(index) {
+        case 1 :
+            return "Yellow Ball";
+
+        case 2 :
+            return "Yellow Cube";
+        
+        case 3 :
+            return "Green Cube";
+        
+        case 4 :
+            return "Green Cylinder";
+        
+        case 5 :
+            return "Green Hollow Cube";
+
+        case 6 :
+            return "Orange Cross";
+
+        case 7 :
+            return "Patric";
+
+        case 8 :
+            return "Red Cylinder";
+
+        case 9 :
+            return "Red Hollow Cube";
+        
+        case 10 :
+            return "Red Ball";
+        
+        case 11 :
+            return "Blue Cube";
+        
+        case 12 :
+            return "Blue Triangle";
+
+        case 13 :
+            return "Purple Cross";
+
+        case 14 :
+            return "Purple Star";
+        
+        default :
+            return "error";
+    }
 }

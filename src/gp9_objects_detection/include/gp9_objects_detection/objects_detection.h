@@ -73,6 +73,7 @@ public:
     void speakResult();
     bool check_pre_object_by_position(int temp, int x, int y);
     void publishEvidence(String object_id, Mat image, int x, int y);
+    String getEvidenceID(int index);
 
 public:
     static const int img_rgb_height = 480;
@@ -90,6 +91,10 @@ public:
     ObjectColorShape obj;
     geometry_msgs::Pose2D pose;
     Mat origin_frame;
+    Mat evidence_frame;
+    double evidence_x;
+    double evidence_y;
+    String evidence_id;
     int now_color;
     int now_shape;
     int now_object;
