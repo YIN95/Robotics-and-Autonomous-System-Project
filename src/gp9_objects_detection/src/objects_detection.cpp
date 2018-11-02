@@ -38,7 +38,7 @@ ObjectDetection::ObjectDetection(){
     pub_object_marker_array = nh.advertise<visualization_msgs::MarkerArray>("/object/marker_array", 10);
     pose_pub = nh.advertise<geometry_msgs::Pose2D>("/global_pose/object", 1);
     pub_speak = nh.advertise<std_msgs::String>("/espeak/string", 30);
-
+    pub_evidence = nh.advertise<ras_msgs::RAS_Evidence>("/evidence", 5);
     //pub_classification_target = nh.advertise<geometry_msgs::Pose2D>("/classification/target", 1);
 
     char *buffer;
@@ -152,6 +152,7 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                             //frame_target = cropTarget(pose.x, pose.y);
                             speakResult();
                             listen_obj_map(pose.x, pose.y, now_object);
+                            publishEvidence("test", frame_target, 1, 1);
                             ROS_INFO("now::: %d", now_object);
                             //preDetectColor = now_object;
                         }
@@ -751,4 +752,22 @@ void ObjectDetection::speakResult(){
     }
     msg.data = result;
     pub_speak.publish(msg);
+}
+
+void ObjectDetection::publishEvidence(String object_id, Mat image, int x, int y){
+    cv_bridge::CvImage img;
+    img.header.stamp = ros::Time::now();
+    img.encoding = sensor_msgs::image_encodings::BGR8;
+    img.image = image;
+
+    ras_msgs::RAS_Evidence msg;
+    msg.stamp = ros::Time::now();
+    msg.group_number = 9;
+    msg.image_evidence = *img.toImageMsg();
+    msg.object_id = object_id;
+
+    geometry_msgs::TransformStamped location;
+    location.transform.translation.x = x;
+    location.transform.translation.y = y;
+    pub_evidence.publish(msg);
 }

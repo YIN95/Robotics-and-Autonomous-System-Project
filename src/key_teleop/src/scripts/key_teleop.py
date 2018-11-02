@@ -184,7 +184,7 @@ class SimpleKeyTeleop():
 
         self._forward_rate = rospy.get_param('~forward_rate', 0.15)
         self._backward_rate = rospy.get_param('~backward_rate', 0.15)
-        self._rotation_rate = rospy.get_param('~rotation_rate', 0.2)
+        self._rotation_rate = rospy.get_param('~rotation_rate', 0.15)
         self._last_pressed = {}
         self._angular = 0
         self._linear = 0

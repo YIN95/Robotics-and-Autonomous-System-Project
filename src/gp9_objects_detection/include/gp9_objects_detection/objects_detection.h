@@ -22,6 +22,8 @@
 #include <string>
 #include <std_msgs/Int32.h>
 #include <std_msgs/String.h>
+#include <geometry_msgs/TransformStamped.h>
+#include <ras_msgs/RAS_Evidence.h>
 
 using namespace cv;
 using namespace std;
@@ -38,7 +40,7 @@ public: /* ros */
     ros::Publisher pub_object_marker_array;
     ros::Publisher pose_pub;
     ros::Publisher pub_speak;
-
+    ros::Publisher pub_evidence;
     //ros::Publisher pub_classification_target;
 
     visualization_msgs::Marker marker;
@@ -70,7 +72,8 @@ public:
     int check_now_object();
     void speakResult();
     bool check_pre_object_by_position(int temp, int x, int y);
-    
+    void publishEvidence(String object_id, Mat image, int x, int y);
+
 public:
     static const int img_rgb_height = 480;
     static const int img_rgb_width = 640;

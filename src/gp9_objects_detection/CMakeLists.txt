@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   image_transport
   sensor_msgs
+  ras_msgs
 )
 
 catkin_package(
