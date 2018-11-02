@@ -21,7 +21,7 @@
 #include <geometry_msgs/PointStamped.h>
 #include <string>
 #include <std_msgs/Int32.h>
-
+#include <std_msgs/String.h>
 
 using namespace cv;
 using namespace std;
@@ -37,6 +37,8 @@ public: /* ros */
     ros::Publisher pub_object_marker;
     ros::Publisher pub_object_marker_array;
     ros::Publisher pose_pub;
+    ros::Publisher pub_speak;
+
     //ros::Publisher pub_classification_target;
 
     visualization_msgs::Marker marker;
@@ -66,7 +68,9 @@ public:
     void stateCallback(const std_msgs::Int32ConstPtr &msg);
     void shapeCallback(const std_msgs::Int32ConstPtr &msg);
     int check_now_object();
-
+    void speakResult();
+    bool check_pre_object_by_position(int temp, int x, int y);
+    
 public:
     static const int img_rgb_height = 480;
     static const int img_rgb_width = 640;
