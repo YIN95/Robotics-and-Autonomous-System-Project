@@ -22,10 +22,12 @@ int main(int argc, char** argv)
 ObjectDetection::ObjectDetection(){
     
     object_depth = 99999;
+    tensorflowState = 0;
     preDetectColor = 0;
 	sub_image_rgb = nh.subscribe<sensor_msgs::Image>("/camera/rgb/image_rect_color", 1, &ObjectDetection::imageRGBCallback, this);
 	// sub_image_depth = nh.subscribe<sensor_msgs::Image>("/camera/depth_registered/sw_registered/image_rect", 1, &ObjectDetection::imageDepthCallback, this);
    	sub_image_depth = nh.subscribe<sensor_msgs::Image>("/camera/depth/image_raw", 1, &ObjectDetection::imageDepthCallback, this);
+    tensorflow_state = nh.subscribe<std_msgs::Int32>("/classification/state", 1, &ObjectDetection::stateCallback, this);
     pub_object_pose = nh.advertise<geometry_msgs::Pose2D>("/object/pose", 1);
     pub_object_marker = nh.advertise<visualization_msgs::Marker>("/object/marker", 1);
     pub_object_marker_array = nh.advertise<visualization_msgs::MarkerArray>("/object/marker_array", 10);
@@ -46,6 +48,11 @@ ObjectDetection::ObjectDetection(){
     };
 }
 
+void ObjectDetection::stateCallback(const std_msgs::Int32ConstPtr &msg){
+    tensorflowState = msg->data;
+
+    ROS_INFO("tensorflow_state: %d", tensorflowState);
+}
 void ObjectDetection::imageRGBCallback(const sensor_msgs::ImageConstPtr &msg){
     try{
         cv_rgb_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
@@ -110,16 +117,22 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                     pub_object_pose.publish(pose);
 
                     frame_target = cropTarget(center_x, center_y);
-                    publishClassificationTarget(frame_target);
-                    imshow("target", frame_target);
-                    char keyt = (char)waitKey(1);
+                    if (tensorflowState == 0){
+                        publishClassificationTarget(frame_target);
+                        imshow("target", frame_target);
+                        char keyt = (char)waitKey(1);
 
-                    // if (preDetectColor != color_result){
-                    if (check_pre_object(color_result)&& object_depth >= 50 && object_depth <=650){
-                        //frame_target = cropTarget(pose.x, pose.y);
-                        listen_obj_map(pose.x, pose.y, color_result);
-                        preDetectColor = color_result;
+                        // listen_obj_map(pose.x, pose.y, color_result);
+                        // preDetectColor = color_result;
+
+                        // if (preDetectColor != color_result){
+                        if (check_pre_object(color_result)&& object_depth >= 50 && object_depth <=650){
+                            //frame_target = cropTarget(pose.x, pose.y);
+                            listen_obj_map(pose.x, pose.y, color_result);
+                            preDetectColor = color_result;
+                        }
                     }
+                    
 
                     
                 }
@@ -335,28 +348,28 @@ void ObjectDetection::showResult(int index, int obi){
     String text;
     switch(index) {
         case 1:
-            text = "COLOR_YELLOW";
+            text = "YELLOW";
             break; 
         case 2:
-            text = "COLOR_GREEN";
+            text = "GREEN";
             break;
         case 3:
-            text = "COLOR_LIGHT_GREEN";
+            text = "LIGHT_GREEN";
             break; 
         case 4:
-            text = "COLOR_ORANGE";
+            text = "ORANGE";
             break;
         case 5:
-            text = "COLOR_RED";
+            text = "RED";
             break; 
         case 6:
-            text = "COLOR_BLUE";
+            text = "BLUE";
             break;
         case 7:
-            text = "COLOR_BLUE";
+            text = "BLUE";
             break; 
         case 8:
-            text = "COLOR_PURPLE";
+            text = "PURPLE";
             break;
         default : //Optional
             return;
@@ -437,8 +450,7 @@ Mat ObjectDetection::cropTarget(int x, int y){
     ROS_INFO("sx, %d ; sy, %d", sx, sy);
     Rect rect(sx, sy, cropsize, cropsize);
     frame_target = origin_frame(rect);
-    //imshow("RESULT", frame_global);
-    //char key = (char)waitKey(1);
+
     return frame_target;
 }
 
@@ -452,19 +464,15 @@ void ObjectDetection::publishClassificationTarget(Mat target){
     sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", target).toImageMsg();
     pub_classification_target.publish(msg);
     
-    /*
-    try{
-        cv_bridge::CvImagePtr ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
-        Mat frame = ptr->image;
-        cv::imshow("target-pub", frame);
-        cv::waitKey(3); 
-    }
-    catch (...){
-        return;
-    }*/
-    // cv::imshow("RGB_WINDOW", cv_rgb_ptr->image);
-    // cv::waitKey(3);  
-
-    //ROS_INFO("???,");                                                                             
+    
+    // try{
+    //     cv_bridge::CvImagePtr ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+    //     Mat frame = ptr->image;
+    //     cv::imshow("target-pub", frame);
+    //     cv::waitKey(3); 
+    // }
+    // catch (...){
+    //     return;
+    // }
     return;
 }

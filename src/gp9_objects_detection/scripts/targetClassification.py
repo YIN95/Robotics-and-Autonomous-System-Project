@@ -12,22 +12,25 @@ import argparse
 import numpy as np
 import os
 import tensorflow as tf
+import copy
 
 from std_msgs.msg import String
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
+from std_msgs.msg import Int32
 
 class TargetClassification:
     
     def __init__(self):
         self.bridge = CvBridge()
-        self.sub_detection = rospy.Subscriber("/classification/image", Image, self.subdetectionCallback)
+        self.sub_detection = rospy.Subscriber("/classification/image", Image, self.subdetectionCallback, queue_size=1)
         #self.pub_detection = rospy.Publisher("/classification/img_subbed",Image)
-        # self.pub_shape = rospy.Publisher("/classification/shape", Int32)
+        self.pub_state = rospy.Publisher("/classification/state", Int32, queue_size=1)
+        self.pub_shape = rospy.Publisher("/classification/shape", Int32, queue_size=1)
 
         ### parapeters ###
-        self.model_file = "/home/ras19/catkin_ws/src/gp9_objects_detection/tf_files/retrained_graph.pb"
-        self.label_file = "/home/ras19/catkin_ws/src/gp9_objects_detection/tf_files/retrained_labels.txt"
+        self.model_file = "/home/ras19/catkin_ws/src/gp9_objects_detection/tf_files/graph_shape.pb"
+        self.label_file = "/home/ras19/catkin_ws/src/gp9_objects_detection/tf_files/labels_shape.txt"
         self.input_height = 128
         self.input_width = 128
         self.input_mean = 128
@@ -43,6 +46,9 @@ class TargetClassification:
         self.classification_result = -1
         self.green = (0, 255, 0)
         self.template = "{} (score={:0.5f})"
+        self.count = 1
+        self.traget = []
+        self.busy = 0
 
     def load_graph(self, model_file):
         graph = tf.Graph()
@@ -74,6 +80,12 @@ class TargetClassification:
 
     def subdetectionCallback(self, data):
         try:
+            self.busy = 1
+            self.pub_state.publish(self.busy)
+        except Exception, e:
+            print(e)
+
+        try:
             target = self.bridge.imgmsg_to_cv2(data, "bgr8")
         except CvBridgeError as e:
             print(e)
@@ -89,24 +101,38 @@ class TargetClassification:
         top_k = results.argsort()[-5:][::-1]
         
         self.classification_result = top_k[0]
-        cv2.putText(target, self.template.format(self.labels[self.classification_result], results[self.classification_result]), (20, 20), cv2.FONT_HERSHEY_COMPLEX, 0.8, self.green, 1)
+        # cv2.putText(target, self.template.format(self.labels[self.classification_result], results[self.classification_result]), (20, 20), cv2.FONT_HERSHEY_COMPLEX, 0.8, self.green, 1)
         # self.pub_shape.publish(self.classification_result)
-
+        cv2.putText(target, self.labels[self.classification_result], (10, 25), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 0, 255), 2)
+        rospy.loginfo("index: %d",self.classification_result)
         cv2.imshow("target-sub", target)
         cv2.waitKey(3)
-
+        try:
+            self.busy = 0
+            self.pub_shape.publish(self.classification_result)
+            self.pub_state.publish(self.busy)
+        except Exception, e:
+            print(e)
         # try:
         #     self.pub_detection.publish(self.bridge.cv2_to_imgmsg(target, "bgr8"))
         # except CvBridgeError as e:
         #     print(e)
 
 def main(args):
+    
+    
     tc = TargetClassification()
     rospy.init_node('target_classification', anonymous=True)
-    try:
-        rospy.spin()
-    except KeyboardInterrupt:
-        print("Shutting down")
+    rate = rospy.Rate(0.5)
+    while not rospy.is_shutdown():
+        rate.sleep()
 
+    # try:
+    #     rospy.spin()
+    # except KeyboardInterrupt:
+    #     print("Shutting down")
+
+
+  
 if __name__ == '__main__':
     main(sys.argv)

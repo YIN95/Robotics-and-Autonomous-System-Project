@@ -20,6 +20,8 @@
 #include <tf/transform_listener.h>
 #include <geometry_msgs/PointStamped.h>
 #include <string>
+#include <std_msgs/Int32.h>
+
 
 using namespace cv;
 using namespace std;
@@ -28,6 +30,7 @@ public: /* ros */
 	ros::NodeHandle nh;
     ros::Subscriber sub_image_rgb;
     ros::Subscriber sub_image_depth;
+    ros::Subscriber tensorflow_state;
 
     ros::Publisher pub_object_pose;
     ros::Publisher pub_object_marker;
@@ -59,7 +62,7 @@ public:
     Mat cropTarget(int x, int y);
     void saveTrainingData(Mat target);
     void publishClassificationTarget(Mat target);
-    
+    void stateCallback(const std_msgs::Int32ConstPtr &msg);
 
 public:
     static const int img_rgb_height = 480;
@@ -68,6 +71,7 @@ public:
     static const double cx = 304.5382995605469;
     int preDetectColor;
     int object_depth;
+    int tensorflowState;
     cv_bridge::CvImagePtr cv_rgb_ptr;
     cv_bridge::CvImagePtr cv_depth_ptr;
     string cascade_name;
