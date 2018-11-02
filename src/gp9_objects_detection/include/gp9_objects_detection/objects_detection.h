@@ -30,7 +30,8 @@ public: /* ros */
 	ros::NodeHandle nh;
     ros::Subscriber sub_image_rgb;
     ros::Subscriber sub_image_depth;
-    ros::Subscriber tensorflow_state;
+    ros::Subscriber sub_tensorflow_state;
+    ros::Subscriber sub_classification_shape;
 
     ros::Publisher pub_object_pose;
     ros::Publisher pub_object_marker;
@@ -63,6 +64,8 @@ public:
     void saveTrainingData(Mat target);
     void publishClassificationTarget(Mat target);
     void stateCallback(const std_msgs::Int32ConstPtr &msg);
+    void shapeCallback(const std_msgs::Int32ConstPtr &msg);
+    int check_now_object();
 
 public:
     static const int img_rgb_height = 480;
@@ -80,6 +83,9 @@ public:
     ObjectColorShape obj;
     geometry_msgs::Pose2D pose;
     Mat origin_frame;
+    int now_color;
+    int now_shape;
+    int now_object;
 
 };
 

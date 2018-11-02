@@ -24,10 +24,15 @@ ObjectDetection::ObjectDetection(){
     object_depth = 99999;
     tensorflowState = 0;
     preDetectColor = 0;
+    now_color = -1;
+    now_shape = -1;
+    now_object = -1;
+
 	sub_image_rgb = nh.subscribe<sensor_msgs::Image>("/camera/rgb/image_rect_color", 1, &ObjectDetection::imageRGBCallback, this);
 	// sub_image_depth = nh.subscribe<sensor_msgs::Image>("/camera/depth_registered/sw_registered/image_rect", 1, &ObjectDetection::imageDepthCallback, this);
    	sub_image_depth = nh.subscribe<sensor_msgs::Image>("/camera/depth/image_raw", 1, &ObjectDetection::imageDepthCallback, this);
-    tensorflow_state = nh.subscribe<std_msgs::Int32>("/classification/state", 1, &ObjectDetection::stateCallback, this);
+    sub_tensorflow_state = nh.subscribe<std_msgs::Int32>("/classification/state", 1, &ObjectDetection::stateCallback, this);
+    sub_classification_shape = nh.subscribe<std_msgs::Int32>("/classification/shape", 1, &ObjectDetection::shapeCallback, this);
     pub_object_pose = nh.advertise<geometry_msgs::Pose2D>("/object/pose", 1);
     pub_object_marker = nh.advertise<visualization_msgs::Marker>("/object/marker", 1);
     pub_object_marker_array = nh.advertise<visualization_msgs::MarkerArray>("/object/marker_array", 10);
@@ -53,6 +58,12 @@ void ObjectDetection::stateCallback(const std_msgs::Int32ConstPtr &msg){
 
     ROS_INFO("tensorflow_state: %d", tensorflowState);
 }
+
+void ObjectDetection::shapeCallback(const std_msgs::Int32ConstPtr &msg){
+    now_shape = msg->data;
+    ROS_INFO("shape: %d", now_shape);
+}
+
 void ObjectDetection::imageRGBCallback(const sensor_msgs::ImageConstPtr &msg){
     try{
         cv_rgb_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
@@ -117,7 +128,9 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                     pub_object_pose.publish(pose);
 
                     frame_target = cropTarget(center_x, center_y);
+
                     if (tensorflowState == 0){
+                        now_color = color_result;
                         publishClassificationTarget(frame_target);
                         imshow("target", frame_target);
                         char keyt = (char)waitKey(1);
@@ -126,12 +139,16 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                         // preDetectColor = color_result;
 
                         // if (preDetectColor != color_result){
-                        if (check_pre_object(color_result)&& object_depth >= 50 && object_depth <=650){
-                            //frame_target = cropTarget(pose.x, pose.y);
-                            listen_obj_map(pose.x, pose.y, color_result);
-                            preDetectColor = color_result;
-                        }
                     }
+                    check_now_object();
+                    
+
+                    if (check_pre_object(color_result)&& object_depth >= 50 && object_depth <=650){
+                        //frame_target = cropTarget(pose.x, pose.y);
+                        listen_obj_map(pose.x, pose.y, color_result);
+                        preDetectColor = color_result;
+                    }
+                    
                     
 
                     
@@ -475,4 +492,119 @@ void ObjectDetection::publishClassificationTarget(Mat target){
     //     return;
     // }
     return;
+}
+
+int ObjectDetection::check_now_object(){
+    
+    switch(now_shape) {
+        // BALL
+        case 0 :
+            if (now_color == obj.COLOR_YELLOW){
+                now_object = obj.Yellow_Ball;
+                ROS_INFO("I SEE YELLOW BALL");
+            }
+            else if (now_color == obj.COLOR_RED){
+                now_object = obj.Red_Ball;
+                ROS_INFO("I SEE RED BALL");
+            }
+            else{
+                now_object = obj.UNKNOWN;
+            }
+            break;
+
+        // CROSS    
+        case 1 :
+            if (now_color == obj.COLOR_ORANGE){
+                now_object = obj.Orange_Cross;
+                ROS_INFO("I SEE ORANGE CROSS");
+            }
+            else if (now_color == obj.COLOR_PURPLE){
+                now_object = obj.Purple_Cross;
+                ROS_INFO("I SEE PURPLE CROSS");
+            }
+            else{
+                now_object = obj.UNKNOWN;
+            }  
+            break;
+        
+        // CUBE        
+        case 2 :
+            if (now_color == obj.COLOR_YELLOW){
+                now_object = obj.Yellow_Cube;
+                ROS_INFO("I SEE YELLOW CUBE");
+            }
+            else if (now_color == obj.COLOR_GREEN){
+                now_object = obj.Green_Cube;
+                ROS_INFO("I SEE GREEN CUBE");
+            }
+            else if (now_color == obj.COLOR_BLUE){
+                now_object = obj.Blue_Cube;
+                ROS_INFO("I SEE BLUE CUBE");
+            }
+
+            else{
+                now_object = obj.UNKNOWN;
+            }    
+            break;
+
+        // CYLINDER        
+        case 3 :
+            if (now_color == obj.COLOR_GREEN || now_color == obj.COLOR_LIGHT_GREEN){
+                now_object = obj.Green_Cylinder;
+                ROS_INFO("I SEE GREEN CYLINDER");
+            }
+            else if (now_color == obj.COLOR_RED){
+                now_object = obj.Red_Cylinder;
+                ROS_INFO("I SEE RED CYLINDER");
+            }
+            else{
+                now_object = obj.UNKNOWN;
+            }    
+            break;
+
+        // HOLLOW CUBE        
+        case 4 :
+            if (now_color == obj.COLOR_GREEN || now_color == obj.COLOR_LIGHT_GREEN){
+                now_object = obj.Green_Hollow_Cube;
+                ROS_INFO("I SEE GREEN HOLLOW CUBE");
+            }
+            else if (now_color == obj.COLOR_RED){
+                now_object = obj.Red_Hollow_Cube;
+                ROS_INFO("I SEE RED HOLLOW CUBE");
+            }
+            else{
+                now_object = obj.UNKNOWN;
+            }    
+            break;
+
+        // STAR
+        case 6 :
+            if (now_color == obj.COLOR_ORANGE){
+                now_object = obj.Patric;
+                ROS_INFO("I SEE PATRIC");
+            }
+            else if (now_color == obj.COLOR_PURPLE){
+                now_object = obj.Purple_Star;
+                ROS_INFO("I SEE PURPLE STAR");
+            }
+            else{
+                now_object = obj.UNKNOWN;
+            }  
+            break;
+
+        // TRIANGLE
+        case 7 :
+            if (now_color == obj.COLOR_BLUE || now_color == obj.COLOR_LIGHT_BLUE){
+                now_object = obj.Blue_Triangle;
+                ROS_INFO("I SEE BLUE TRIANGLE");
+            }
+            else{
+                now_object = obj.UNKNOWN;
+            }  
+            break;
+        default :
+            ROS_INFO("???");
+    }
+ 
+    return now_object;
 }

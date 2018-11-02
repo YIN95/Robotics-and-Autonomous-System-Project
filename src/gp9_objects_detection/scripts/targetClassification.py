@@ -105,11 +105,13 @@ class TargetClassification:
         # self.pub_shape.publish(self.classification_result)
         cv2.putText(target, self.labels[self.classification_result], (10, 25), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 0, 255), 2)
         rospy.loginfo("index: %d",self.classification_result)
+        rospy.loginfo("index: %f",results[self.classification_result])
         cv2.imshow("target-sub", target)
         cv2.waitKey(3)
         try:
             self.busy = 0
-            self.pub_shape.publish(self.classification_result)
+            if (results[self.classification_result] > 0.70):
+                self.pub_shape.publish(self.classification_result)
             self.pub_state.publish(self.busy)
         except Exception, e:
             print(e)
