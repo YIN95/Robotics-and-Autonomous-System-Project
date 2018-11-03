@@ -124,15 +124,11 @@ public:
 
 	void turnOnSpot() {
 		close_enough_msg.data = false;
-		ROS_INFO("same point:  %d", same_point);
-		ROS_INFO("other angle: %d", other_angle);
 
 		if (same_point && other_angle) {
 			turn_flag = true;
 			resetErrors();
 		}
-
-		ROS_INFO("turn flag: %d", turn_flag);
 
 		if (turn_flag) {
 			desired_angle = pose_desired[2];
@@ -143,7 +139,6 @@ public:
 			}
 
 			else {
-				ROS_INFO("turning off turn flag");
 				turn_flag = false;
 			}
 
@@ -163,14 +158,14 @@ public:
 			moveToPoint();
 		}
 
-		ROS_INFO("last checkpoint: %f, %f", last_checkpoint[0], last_checkpoint[1]);
-		ROS_INFO("v : %f", velocity_msg.linear.x);
-		ROS_INFO("w : %f", velocity_msg.angular.z);
-		ROS_INFO("publishing");
+		// ROS_INFO("last checkpoint: %f, %f, %f", last_checkpoint[0], last_checkpoint[1], last_checkpoint[2]);
+		// ROS_INFO("v : %f", velocity_msg.linear.x);
+		// ROS_INFO("w : %f", velocity_msg.angular.z);
+		// ROS_INFO("publishing");
 
 		pub_velocity.publish(velocity_msg);
 		pub_close_enough.publish(close_enough_msg);
-		ROS_INFO("=============================================");
+		// ROS_INFO("=============================================");
 	}
 
 	void moveToPoint() {
@@ -178,7 +173,7 @@ public:
 		if (!turn_flag) {
 
 			updateErrors();
-			ROS_INFO("distance error: %f", distance);
+			// ROS_INFO("distance error: %f", distance);
 
 			if ((fabs(error_angle) > angle_threshold) && (distance > distance_threshold) ) {
 				ROS_INFO("first turn");
@@ -186,7 +181,7 @@ public:
 			}
 
 			else if (distance > distance_threshold) {
-				ROS_INFO("translation");
+				// ROS_INFO("translation");
 				translate(distance);
 			}
 
@@ -204,16 +199,23 @@ public:
 
 		double w;
 		double w_max = 2.00;
-		double w_min = 1.2;
-		double slow_degrees = 10.0; // slowing down distance
+		double w_min = 1.6;
+		double slow_degrees = 15.0; // slowing down distance
 		double slow_rads = degToRad(slow_degrees);
 
-		double angle_travelled = last_checkpoint[2] - pose[2];
+		double angle_travelled = fabs(last_checkpoint[2] - pose[2]);
+
+
+        if (angle_travelled > M_PI) {
+            angle_travelled -= M_PI;
+        }
+
+
 
 		ROS_INFO("angle travelled: %f", angle_travelled);
 
 		bool just_started = fabs(error_angle) > slow_rads;
-		bool short_drive = (fabs(error_angle) < slow_rads && angle_travelled < slow_rads);
+		bool short_drive = (fabs(error_angle) < slow_rads && angle_travelled < (slow_rads + angle_threshold));
 
 		// To start slowly. w: w_min --> w_max, angle_travelled: 0 --> slow_rads.
 		if (just_started) {
@@ -230,13 +232,14 @@ public:
 			// To slow down in the end. w: w_max --> w_min, error_angle: slow_rads --> 0.
 		else {
 			ROS_INFO("Slowing down");
-			w = sign * (w_max - (w_max - w_min) * ((slow_rads - fabs(error_angle)) / slow_rads));
+			w = sign * (w_max - (w_max - w_min) * (((slow_rads + angle_threshold) - fabs(error_angle)) / (slow_rads + angle_threshold)));
 		}
 
 		ROS_INFO("error angle : %f", error_angle);
 
+		ROS_INFO("w : %f", w);
 		velocity_msg.linear.x = 0;
-		velocity_msg.angular.z = sign * w; // 1.2 is a okay value
+		velocity_msg.angular.z = w; // 1.2 is a okay value
 	}
 
 	void translate(double distance) {
@@ -260,26 +263,26 @@ public:
 		double dy = last_checkpoint[1] - pose[1];
 		double distance_travelled = sqrt(pow(dx, 2) + pow(dy, 2));
 
-		ROS_INFO("dist travelled: %f", distance_travelled);
+		// ROS_INFO("dist travelled: %f", distance_travelled);
 
 		bool just_started = distance > slow_dist;
 		bool short_drive = (distance < slow_dist && distance_travelled < slow_dist);
 
 		// To start slowly. v: v_min --> v_max, distance_travelled: 0 --> slow_dist.
 		if (just_started) { // IS THE IF STATEMENT CORRECT?
-			ROS_INFO("Slow start");
+			// ROS_INFO("Slow start");
 			v = v_min + (v_max - v_min) * (distance_travelled / slow_dist);
 		}
 
 			// When just driving a short distance, drive slowly
 		else if (short_drive) {
-			ROS_INFO("Short drive");
+			// ROS_INFO("Short drive");
 			v = v_min;
 		}
 
 			// To slow down in the end. v: v_max --> v_min, distance: slow_dist --> 0.
 		else {
-			ROS_INFO("Slowing down");
+			// ROS_INFO("Slowing down");
 			v = v_max - (v_max - v_min) * ((slow_dist - distance) / slow_dist);
 		}
 
