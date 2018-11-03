@@ -223,7 +223,7 @@ public:
 
         double delta_angle = 2 * M_PI / num_measurements;
 
-        for (double angle = 0; angle < 2 * M_PI; angle += delta_angle) {
+        for (double angle = M_PI; angle < 3 * M_PI; angle += delta_angle) {
             Line extended_line = extendLine(pose, angle);
             double min_distance = 1000;
 
