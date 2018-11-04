@@ -6,6 +6,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  random_numbers
 )
 
 catkin_package(
@@ -19,6 +20,9 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
 )
+
+add_executable(particle_filter src/particle_filter.cpp)
+target_link_libraries(particle_filter ${catkin_LIBRARIES})
 
 add_executable(intersection src/intersection.cpp)
 target_link_libraries(intersection ${catkin_LIBRARIES})
