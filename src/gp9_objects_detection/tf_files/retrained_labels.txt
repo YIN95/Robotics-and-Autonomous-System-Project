@@ -1,0 +1,15 @@
+blue cube
+blue triangle
+green cube
+green cylinder
+green hollow cube
+orange cross
+others
+patric
+purple cross
+purple star
+red ball
+red cylinder
+red hollow cube
+yellow ball
+yellow cube

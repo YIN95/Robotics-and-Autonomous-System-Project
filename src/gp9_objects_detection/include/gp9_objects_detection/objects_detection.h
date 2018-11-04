@@ -34,6 +34,7 @@ public: /* ros */
     ros::Subscriber sub_image_depth;
     ros::Subscriber sub_tensorflow_state;
     ros::Subscriber sub_classification_shape;
+    ros::Subscriber sub_rob_position;
 
     ros::Publisher pub_object_pose;
     ros::Publisher pub_object_marker;
@@ -70,11 +71,14 @@ public:
     void stateCallback(const std_msgs::Int32ConstPtr &msg);
     void shapeCallback(const std_msgs::Int32ConstPtr &msg);
     int check_now_object();
+    int check_now_object_color_shape();
     void speakResult();
     bool check_pre_object_by_position(int temp, int x, int y);
     void publishEvidence(String object_id, Mat image, int x, int y);
     String getEvidenceID(int index);
-
+    void robotCallback(const geometry_msgs::Pose2D::ConstPtr &msg);
+    double calculateDiatance(double x1, double y1, double x2, double y2);
+    
 public:
     static const int img_rgb_height = 480;
     static const int img_rgb_width = 640;
@@ -98,6 +102,8 @@ public:
     int now_color;
     int now_shape;
     int now_object;
+    double robot_x;
+    double robot_y;
 
 };
 

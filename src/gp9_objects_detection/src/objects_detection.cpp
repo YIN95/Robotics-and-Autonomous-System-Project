@@ -33,6 +33,8 @@ ObjectDetection::ObjectDetection(){
    	sub_image_depth = nh.subscribe<sensor_msgs::Image>("/camera/depth/image_raw", 1, &ObjectDetection::imageDepthCallback, this);
     sub_tensorflow_state = nh.subscribe<std_msgs::Int32>("/classification/state", 1, &ObjectDetection::stateCallback, this);
     sub_classification_shape = nh.subscribe<std_msgs::Int32>("/classification/shape", 1, &ObjectDetection::shapeCallback, this);
+    sub_rob_position = nh.subscribe<geometry_msgs::Pose2D>("/pose", 1, &ObjectDetection::robotCallback, this);
+    
     pub_object_pose = nh.advertise<geometry_msgs::Pose2D>("/object/pose", 1);
     pub_object_marker = nh.advertise<visualization_msgs::Marker>("/object/marker", 1);
     pub_object_marker_array = nh.advertise<visualization_msgs::MarkerArray>("/object/marker_array", 10);
@@ -53,6 +55,12 @@ ObjectDetection::ObjectDetection(){
     if(!cascade.load(cascade_name)){ 
         ROS_ERROR("Error loading cascade!"); 
     };
+}
+
+void ObjectDetection::robotCallback(const geometry_msgs::Pose2D::ConstPtr &msg){
+    robot_x = msg->x;
+    robot_y = msg->y;
+    return;
 }
 
 void ObjectDetection::stateCallback(const std_msgs::Int32ConstPtr &msg){
@@ -95,15 +103,17 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
 {
     try{
         bool only_detect_one = true;
-        int detect_size = 3;
+        int detect_size = 5;
         Mat frame = ptr->image;
         Mat frame_gray;
         Mat frame_target;
         cvtColor(frame, frame_gray, COLOR_BGR2GRAY);
         equalizeHist(frame_gray, frame_gray);
         //-- Detect objects
-        cascade.detectMultiScale(frame_gray, objects, 1.1, 5, 0|CASCADE_SCALE_IMAGE, Size(90, 90), Size(140, 140));
+        cascade.detectMultiScale(frame_gray, objects, 1.1, 5, 0|CASCADE_SCALE_IMAGE, Size(80, 80), Size(140, 140));
         detect_size = std::min(int(objects.size()), detect_size);
+
+
         if (only_detect_one && objects.size()>0){
             int i;
             for (i=0; i<detect_size; i++){
@@ -115,50 +125,54 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                 object_depth = getDepth(center_x, center_y);
                 object_depth = getTrueDepth(object_depth);
                 ROS_INFO("DEPTH: %d", object_depth);
-                if (color_result > 0 && object_depth >= 0){
-                    //ellipse(ptr->image, center, Size(4, 4), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
-                    Point pt1(objects[i].x, objects[i].y);
-                    Point pt2(objects[i].x + objects[i].width, objects[i].y + objects[i].height);
-                    
-                    
-                    //rectangle(ptr->image, pt1, pt2, Scalar( 255, 0, 255 ), 4, 8, 0 );
-                    //showResult(color_result, i+1);
+                // if (color_result > 0 && object_depth >= 0){
 
-                    pose.x = 1.0 * object_depth / 1000;
-                    pose.y = -1.0 * pose.x / fx * (center_x - cx);
-                    pose.theta = 0;
-                    pub_object_pose.publish(pose);
+                if (color_result > 0){
 
-                    frame_target = cropTarget(center_x, center_y);
+                ellipse(ptr->image, center, Size(4, 4), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
+                Point pt1(objects[i].x, objects[i].y);
+                Point pt2(objects[i].x + objects[i].width, objects[i].y + objects[i].height);
+                
+                
+                rectangle(ptr->image, pt1, pt2, Scalar( 255, 0, 255 ), 4, 8, 0 );
+                showResult(color_result, i+1);
 
-                    if (tensorflowState == 0){
-                        now_color = color_result;
-                        publishClassificationTarget(frame_target);
-                        imshow("target", frame_target);
-                        char keyt = (char)waitKey(1);
+                pose.x = 1.0 * object_depth / 1000;
+                pose.y = -1.0 * pose.x / fx * (center_x - cx);
+                pose.theta = 0;
+                pub_object_pose.publish(pose);
 
-                        // listen_obj_map(pose.x, pose.y, color_result);
-                        // preDetectColor = color_result;
+                frame_target = cropTarget(center_x, center_y);
 
-                        // if (preDetectColor != color_result){
+                if (tensorflowState == 0){
+                    now_color = color_result;
+                    publishClassificationTarget(frame_target);
+                    imshow("target", frame_target);
+                    char keyt = (char)waitKey(1);
+
+                    // listen_obj_map(pose.x, pose.y, color_result);
+                    // preDetectColor = color_result;
+
+                    // if (preDetectColor != color_result){
+                }
+                int now_see = check_now_object();
+                // int now_see = check_now_object_color_shape();
+                
+                if (now_see > 0){
+                    bool is_new_object = check_pre_object(now_object);
+                    bool is_new_object_p = check_pre_object_by_position(now_object, pose.x, pose.y);
+                    if (is_new_object_p){
+                    // if (is_new_object && (object_depth >= 50) && (object_depth <=650)){
+                        //frame_target = cropTarget(pose.x, pose.y);
+                        speakResult();
+                        evidence_frame = frame_target;
+                        listen_obj_map(pose.x, pose.y, now_object);
+                        evidence_id = getEvidenceID(now_object);
+                        publishEvidence(evidence_id, evidence_frame, evidence_x, evidence_y);
+                        ROS_INFO("now::: %d", now_object);
+                        //preDetectColor = now_object;
                     }
-                    int now_see = check_now_object();
-                    
-                    
-                    if (now_see > 0){
-                        bool is_new_object = check_pre_object(now_object);
-                        bool is_new_object_p = check_pre_object_by_position(now_object, pose.x, pose.y);
-                        if (is_new_object && (object_depth >= 50) && (object_depth <=650)){
-                            //frame_target = cropTarget(pose.x, pose.y);
-                            speakResult();
-                            evidence_frame = frame_target;
-                            listen_obj_map(pose.x, pose.y, now_object);
-                            evidence_id = getEvidenceID(now_object);
-                            publishEvidence(evidence_id, evidence_frame, evidence_x, evidence_y);
-                            ROS_INFO("now::: %d", now_object);
-                            //preDetectColor = now_object;
-                        }
-                    }
+                }
                                         
                 }
             }
@@ -228,8 +242,8 @@ void ObjectDetection::pubPose(double x, double y, int type){
     marker.pose.position.x = x;
     marker.pose.position.y = y;
     marker.pose.position.z = 0;
-    marker.pose.orientation.x = 0.0;
-    marker.pose.orientation.y = 0.0;
+    marker.pose.orientation.x = robot_x;
+    marker.pose.orientation.y = robot_y;
     marker.pose.orientation.z = type;
     marker.pose.orientation.w = 1.0;
     marker.scale.x = 0.1;
@@ -330,7 +344,7 @@ int ObjectDetection::colorClassifier(int h, int s, int v, int b, int g, int r){
         if (s <40){
             return -1;
         }
-        if (35 <= h && h <= 64 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
+        if (35 <= h && h <= 54 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
             ROS_INFO("COLOR_GREEN");
             return obj.COLOR_GREEN;
         }
@@ -338,7 +352,7 @@ int ObjectDetection::colorClassifier(int h, int s, int v, int b, int g, int r){
             ROS_INFO("COLOR_YELLOW");
             return obj.COLOR_YELLOW;
         }
-        else if ((65 <= h && h <= 89) && 0 <= s && s <= 255 && 0 <= v && v <= 255){
+        else if ((55 <= h && h <= 89) && 0 <= s && s <= 255 && 0 <= v && v <= 255){
             ROS_INFO("COLOR_LIGHT_GREEN");
             return obj.COLOR_LIGHT_GREEN;
         }
@@ -346,7 +360,7 @@ int ObjectDetection::colorClassifier(int h, int s, int v, int b, int g, int r){
             ROS_INFO("COLOR_ORANGE");
             return obj.COLOR_ORANGE;
         }
-        else if (0 <= h && h < 17 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
+        else if (4 <= h && h < 17 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
             ROS_INFO("COLOR_RED");
             return obj.COLOR_RED;
         }
@@ -358,11 +372,15 @@ int ObjectDetection::colorClassifier(int h, int s, int v, int b, int g, int r){
             ROS_INFO("COLOR_LIGHT_BLUE");
             return obj.COLOR_LIGHT_BLUE;
         }
-        else if (18 <= h && h <= 35 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
+        else if (19 <= h && h <= 35 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
             ROS_INFO("COLOR_BLUE");
             return obj.COLOR_BLUE;
         }
         else if (129 <= h && h < 170 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
+            ROS_INFO("COLOR_PURPLE");
+            return obj.COLOR_PURPLE;
+        }
+        else if (0 <= h && h < 4 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
             ROS_INFO("COLOR_PURPLE");
             return obj.COLOR_PURPLE;
         }
@@ -444,7 +462,7 @@ bool ObjectDetection::check_pre_object(int temp){
 
     
 
-    while((index <= 2) && (size - index >= 0)){
+    while((index <= 3) && (size - index >= 0)){
         // ROS_INFO("!!!%d , %s", temp, arker_array.markers[size-index].ns);
         if (marker_array.markers[size-index].pose.orientation.z == temp){
             return false;
@@ -457,24 +475,12 @@ bool ObjectDetection::check_pre_object(int temp){
 bool ObjectDetection::check_pre_object_by_position(int temp, int x, int y){
     double gx;
     double gy;
+    double Dis;
+    double nx, ny;
+    gx = robot_x;
+    gy = robot_y;
     int size = marker_array.markers.size();
     int index = 1;
-    geometry_msgs::PointStamped obj_tf_camera;
-    obj_tf_camera.header.frame_id = "camera";
-    obj_tf_camera.header.stamp = ros::Time();
-    obj_tf_camera.point.x = x;
-    obj_tf_camera.point.y = y;
-    obj_tf_camera.point.z = 0.0;
-    
-    try{
-        geometry_msgs::PointStamped obj_tf_map;
-        listener.transformPoint("map", obj_tf_camera, obj_tf_map);
-        gx = obj_tf_map.point.x;
-        gy = obj_tf_map.point.y;
-    }
-    catch(tf::TransformException& ex){
-        ROS_ERROR("Received an exception trying to transform a point");
-    }
     
     if (size == 0){
         return true;
@@ -482,14 +488,14 @@ bool ObjectDetection::check_pre_object_by_position(int temp, int x, int y){
 
     while (size - index >= 0){
         if(marker_array.markers[size-index].pose.orientation.z == temp){
-            ROS_INFO("X1, %f, X2, %f", marker_array.markers[size-index].pose.position.x, gx);
-            if((marker_array.markers[size-index].pose.position.x - gx) < 0.5){
-                
-                ROS_INFO("y1, %f, y2, %f", marker_array.markers[size-index].pose.position.y, gy);
-                if((marker_array.markers[size-index].pose.position.y - gy)< 0.5){
-                    
-                    return false;
-                }
+            nx = marker_array.markers[size-index].pose.orientation.x;
+            ny = marker_array.markers[size-index].pose.orientation.y;
+            ROS_INFO("X1, %f, X2, %f", nx, gx);
+            ROS_INFO("y1, %f, y2, %f", ny, gy);
+            Dis = calculateDiatance(gx, gy, nx, ny);
+            ROS_INFO("Dis, %f", Dis);
+            if (Dis < 0.4){
+                return false;
             }
         }
         index++;
@@ -558,6 +564,90 @@ void ObjectDetection::publishClassificationTarget(Mat target){
     //     return;
     // }
     return;
+}
+
+int ObjectDetection::check_now_object_color_shape(){
+    switch(now_shape) {
+        case 0 :
+            now_object = obj.Blue_Cube;
+            ROS_INFO("I SEE BLUE CUBE");
+            break;
+        
+        case 1 :
+            now_object = obj.Blue_Triangle;
+            ROS_INFO("I SEE BLUE TRIANGLE");
+            break;
+        
+        case 2 :
+            now_object = obj.Green_Cube;
+            ROS_INFO("I SEE GREEN CUBE");
+            break;
+        
+        case 3 :
+            now_object = obj.Green_Cylinder;
+            ROS_INFO("I SEE GREEN CYLINDER");
+            break;
+        
+        case 4 :
+            now_object = obj.Green_Hollow_Cube;
+            ROS_INFO("I SEE GREEN HOLLOW CUBE");
+            break;
+        
+        case 5 :
+            now_object = obj.Orange_Cross;
+            ROS_INFO("I SEE ORANGE CROSS");
+            break;
+        
+        case 6 :
+            now_object = obj.UNKNOWN;
+            ROS_INFO("I SEE BLUE CUBE");
+            break;
+        
+        case 7 :
+            now_object = obj.Patric;
+            ROS_INFO("I SEE PATRIC");
+            break;
+        
+        case 8 :
+            now_object = obj.Purple_Cross;
+            ROS_INFO("I SEE PURPLE CROSS");
+            break;
+        
+        case 9 :
+            now_object = obj.Purple_Star;
+            ROS_INFO("I SEE PURPLE STAR");
+            break;
+        
+        case 10 :
+            now_object = obj.Red_Ball;
+            ROS_INFO("I SEE RED BA;;");
+            break;
+        
+        case 11 :
+            now_object = obj.Red_Cylinder;
+            ROS_INFO("I SEE RED CYLINDER");
+            break;
+        
+        case 12 :
+            now_object = obj.Red_Hollow_Cube;
+            ROS_INFO("I SEE RED HOLLOW CUBE");
+            break;
+        
+        case 13 :
+            now_object = obj.Yellow_Ball;
+            ROS_INFO("I SEE YELLOW BALL");
+            break;
+        
+        case 14 :
+            now_object = obj.Yellow_Cube;
+            ROS_INFO("I SEE YELLOW CUBE");
+            break;
+        
+        default :
+            ROS_INFO("classification error");
+    }
+ 
+    return now_object;
 }
 
 int ObjectDetection::check_now_object(){
@@ -644,6 +734,14 @@ int ObjectDetection::check_now_object(){
             else if (now_color == obj.COLOR_GREEN){
                 now_object = obj.Green_Cube;
                 ROS_INFO("I SEE GREEN CUBE");
+            }
+            else if (now_color == obj.COLOR_BLUE){
+                now_object = obj.Blue_Cube;
+                ROS_INFO("I SEE BLUE CUBE");
+            }
+            else if (now_color == obj.COLOR_LIGHT_BLUE){
+                now_object = obj.Blue_Triangle;
+                ROS_INFO("I SEE BLUE TRIANGLE");
             }
             else{
                 now_object = obj.UNKNOWN;
@@ -826,4 +924,12 @@ String ObjectDetection::getEvidenceID(int index){
         default :
             return "error";
     }
+}
+
+double ObjectDetection::calculateDiatance(double x1, double y1, double x2, double y2){
+    double dis;
+    double l1 = x1 - x2;
+    double l2 = y1 - y2;
+    dis = sqrt(l1*l1 + l2*l2);
+    return dis;
 }
