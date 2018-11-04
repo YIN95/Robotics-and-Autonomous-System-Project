@@ -110,8 +110,13 @@ class TargetClassification:
         cv2.waitKey(3)
         try:
             self.busy = 0
-            if (results[self.classification_result] > 0.70):
+            if ((self.classification_result == 5) and (results[self.classification_result] > 0.80)):
                 self.pub_shape.publish(self.classification_result)
+            
+            elif (results[self.classification_result] > 0.88):
+                self.pub_shape.publish(self.classification_result)
+            else:
+                self.pub_shape.publish(99)
             self.pub_state.publish(self.busy)
         except Exception, e:
             print(e)

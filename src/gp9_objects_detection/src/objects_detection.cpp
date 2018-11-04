@@ -34,7 +34,8 @@ ObjectDetection::ObjectDetection(){
     sub_tensorflow_state = nh.subscribe<std_msgs::Int32>("/classification/state", 1, &ObjectDetection::stateCallback, this);
     sub_classification_shape = nh.subscribe<std_msgs::Int32>("/classification/shape", 1, &ObjectDetection::shapeCallback, this);
     sub_rob_position = nh.subscribe<geometry_msgs::Pose2D>("/pose", 1, &ObjectDetection::robotCallback, this);
-    
+    sub_moving_state = nh.subscribe<std_msgs::Int32>("/state/ismoving", 1, &ObjectDetection::stateMovingCallback, this);
+
     pub_object_pose = nh.advertise<geometry_msgs::Pose2D>("/object/pose", 1);
     pub_object_marker = nh.advertise<visualization_msgs::Marker>("/object/marker", 1);
     pub_object_marker_array = nh.advertise<visualization_msgs::MarkerArray>("/object/marker_array", 10);
@@ -67,6 +68,11 @@ void ObjectDetection::stateCallback(const std_msgs::Int32ConstPtr &msg){
     tensorflowState = msg->data;
 
     ROS_INFO("tensorflow_state: %d", tensorflowState);
+}
+
+void ObjectDetection::stateMovingCallback(const std_msgs::Int32ConstPtr &msg){
+    movingState = msg->data;
+
 }
 
 void ObjectDetection::shapeCallback(const std_msgs::Int32ConstPtr &msg){
@@ -129,50 +135,53 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
 
                 if (color_result > 0){
 
-                ellipse(ptr->image, center, Size(4, 4), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
-                Point pt1(objects[i].x, objects[i].y);
-                Point pt2(objects[i].x + objects[i].width, objects[i].y + objects[i].height);
-                
-                
-                rectangle(ptr->image, pt1, pt2, Scalar( 255, 0, 255 ), 4, 8, 0 );
-                showResult(color_result, i+1);
+                    ellipse(ptr->image, center, Size(4, 4), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
+                    Point pt1(objects[i].x, objects[i].y);
+                    Point pt2(objects[i].x + objects[i].width, objects[i].y + objects[i].height);
+                    
+                    
+                    rectangle(ptr->image, pt1, pt2, Scalar( 255, 0, 255 ), 4, 8, 0 );
+                    showResult(color_result, i+1);
 
-                pose.x = 1.0 * object_depth / 1000;
-                pose.y = -1.0 * pose.x / fx * (center_x - cx);
-                pose.theta = 0;
-                pub_object_pose.publish(pose);
+                    pose.x = 1.0 * object_depth / 1000;
+                    pose.y = -1.0 * pose.x / fx * (center_x - cx);
+                    pose.theta = 0;
+                    pub_object_pose.publish(pose);
 
-                frame_target = cropTarget(center_x, center_y);
+                    frame_target = cropTarget(center_x, center_y);
 
-                if (tensorflowState == 0){
-                    now_color = color_result;
-                    publishClassificationTarget(frame_target);
-                    imshow("target", frame_target);
-                    char keyt = (char)waitKey(1);
+                    if (tensorflowState == 0){
+                        if (movingState == 0){
+                            now_color = color_result;
+                            publishClassificationTarget(frame_target);
+                            imshow("target", frame_target);
+                            char keyt = (char)waitKey(1);
+                        }
+                        
 
-                    // listen_obj_map(pose.x, pose.y, color_result);
-                    // preDetectColor = color_result;
+                        // listen_obj_map(pose.x, pose.y, color_result);
+                        // preDetectColor = color_result;
 
-                    // if (preDetectColor != color_result){
-                }
-                int now_see = check_now_object();
-                // int now_see = check_now_object_color_shape();
-                
-                if (now_see > 0){
-                    bool is_new_object = check_pre_object(now_object);
-                    bool is_new_object_p = check_pre_object_by_position(now_object, pose.x, pose.y);
-                    if (is_new_object_p){
-                    // if (is_new_object && (object_depth >= 50) && (object_depth <=650)){
-                        //frame_target = cropTarget(pose.x, pose.y);
-                        speakResult();
-                        evidence_frame = frame_target;
-                        listen_obj_map(pose.x, pose.y, now_object);
-                        evidence_id = getEvidenceID(now_object);
-                        publishEvidence(evidence_id, evidence_frame, evidence_x, evidence_y);
-                        ROS_INFO("now::: %d", now_object);
-                        //preDetectColor = now_object;
+                        // if (preDetectColor != color_result){
                     }
-                }
+                    int now_see = check_now_object();
+                    // int now_see = check_now_object_color_shape();
+                    
+                    if ((now_see > 0)){
+                        bool is_new_object = check_pre_object(now_object);
+                        bool is_new_object_p = check_pre_object_by_position(now_object, pose.x, pose.y);
+                        if (is_new_object_p){
+                        // if (is_new_object && (object_depth >= 50) && (object_depth <=650)){
+                            //frame_target = cropTarget(pose.x, pose.y);
+                            speakResult();
+                            evidence_frame = frame_target;
+                            listen_obj_map(pose.x, pose.y, now_object);
+                            evidence_id = getEvidenceID(now_object);
+                            publishEvidence(evidence_id, evidence_frame, evidence_x, evidence_y);
+                            ROS_INFO("now::: %d", now_object);
+                            //preDetectColor = now_object;
+                        }
+                    }
                                         
                 }
             }
@@ -494,7 +503,7 @@ bool ObjectDetection::check_pre_object_by_position(int temp, int x, int y){
             ROS_INFO("y1, %f, y2, %f", ny, gy);
             Dis = calculateDiatance(gx, gy, nx, ny);
             ROS_INFO("Dis, %f", Dis);
-            if (Dis < 0.4){
+            if (Dis < 0.5){
                 return false;
             }
         }
@@ -783,7 +792,10 @@ int ObjectDetection::check_now_object(){
                 now_object = obj.UNKNOWN;
             }
             break;
+        
+
         default :
+            now_object = 99;
             ROS_INFO("classification error");
     }
  
@@ -850,9 +862,13 @@ void ObjectDetection::speakResult(){
         case 14 :
             result = "I see a purple star";
             break;
-
+        
+        case 99 :
+            // result = "I see an object";
+            result = "";
+            break;
         default :
-            result = "error";
+            result = "";
             ROS_INFO("speak error");
     }
     msg.data = result;

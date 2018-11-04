@@ -23,6 +23,7 @@ Odometry::Odometry(int control_frequency_){
     estimatedSpeed = nh.subscribe<geometry_msgs::Twist>("/velocity_estimate", 1, &Odometry::motorCallbackSpeed, this);
     pub_pose = nh.advertise<geometry_msgs::Pose2D>("/pose", 1);
     pub_robot_marker = nh.advertise<visualization_msgs::Marker>("/robot/marker", 1);
+    pub_moving_state = nh.advertise<std_msgs::Int32>("/state/ismoving", 1);
 
     current_time = ros::Time::now();
     last_time = ros::Time::now();
@@ -87,10 +88,39 @@ void Odometry::updateEstimatedSpeed(){
     rob_x_v = estimated_v * cos(rob_theta); 
     rob_y_v = estimated_v * sin(rob_theta); 
     rob_w = estimated_w;
+    ismoving(rob_x_v, rob_y_v, rob_w);
+
+    if (_ismoving){
+        std_msgs::Int32 msg;
+        msg.data = 1;
+        pub_moving_state.publish(msg);
+        ROS_INFO("MOVING");
+    }
+    else{
+        std_msgs::Int32 msg;
+        msg.data = 0;
+        pub_moving_state.publish(msg);  
+        ROS_INFO("STOP");
+    }
     ROS_INFO("rob_x_v : %f", rob_x_v);
     ROS_INFO("rob_y_v : %f", rob_y_v);
     ROS_INFO("rob_w : %f", rob_w);
     return;
+}
+
+void Odometry::ismoving(double vx, double vy, double w){
+    double v1, v2, v3;
+    v1 = std::fabs(vx);
+    v2 = std::fabs(vy);
+    v3 = std::fabs(w);
+    if ((v1 > 0.00001) || (v2 > 0.00001) || (v3 > 0.00001)){
+        _ismoving = true;
+    }
+    else{
+        _ismoving = false;
+    }
+    // _ismoving = true;
+    
 }
 
 void Odometry::motorCallbackSpeed(const geometry_msgs::Twist::ConstPtr &msg){

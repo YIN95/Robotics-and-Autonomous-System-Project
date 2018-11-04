@@ -12,6 +12,7 @@ import math
 
 import rospy
 from geometry_msgs.msg import Twist
+from std_msgs.msg import Int32
 
 class Velocity(object):
 
@@ -138,6 +139,9 @@ class KeyTeleop():
         if keycode in movement_bindings:
             acc = movement_bindings[keycode]
             ok = False
+
+
+
             if acc[0]:
                 linear = self._linear + acc[0]
                 if abs(linear) <= self._num_steps:
@@ -179,7 +183,7 @@ class SimpleKeyTeleop():
     def __init__(self, interface):
         self._interface = interface
         self._pub_cmd = rospy.Publisher('key_vel', Twist)
-
+        self._pub_moving = rospy.Publisher('/state/is_keyboard_moving', Int32, queue_size=1)
         self._hz = rospy.get_param('~hz', 125)
 
         self._forward_rate = rospy.get_param('~forward_rate', 0.15)
@@ -188,6 +192,8 @@ class SimpleKeyTeleop():
         self._last_pressed = {}
         self._angular = 0
         self._linear = 0
+        self._ismoving = 0
+
 
     movement_bindings = {
         curses.KEY_UP:    ( 1,  0),
@@ -204,9 +210,12 @@ class SimpleKeyTeleop():
                 keycode = self._interface.read_key()
                 if keycode is None:
                     break
+                
                 self._key_pressed(keycode)
             self._set_velocity()
             self._publish()
+            self._pub_moving.publish(self._ismoving)
+            self._ismoving = 0;
             rate.sleep()
 
     def _get_twist(self, linear, angular):
@@ -241,6 +250,7 @@ class SimpleKeyTeleop():
             rospy.signal_shutdown('Bye')
         elif keycode in self.movement_bindings:
             self._last_pressed[keycode] = rospy.get_time()
+            self._ismoving = 1;
 
     def _publish(self):
         self._interface.clear()

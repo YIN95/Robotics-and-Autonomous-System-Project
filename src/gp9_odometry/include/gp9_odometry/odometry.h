@@ -2,6 +2,7 @@
 #include <math.h>
 #include <vector>
 #include <std_msgs/Float32.h>
+#include <std_msgs/Int32.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Pose2D.h>
 #include <tf/transform_broadcaster.h>
@@ -18,6 +19,8 @@ public: /* ros */
 	/* Publishers */
     ros::Publisher pub_pose;
     ros::Publisher pub_robot_marker;
+    ros::Publisher pub_moving_state;
+
     /* Subscribers */
 	ros::Subscriber estimatedSpeed;
 
@@ -33,7 +36,7 @@ public: /* Functions */
     void motorCallbackSpeed(const geometry_msgs::Twist::ConstPtr &msg);
     void pub_robot_Pose(double x, double y);
     // void cal
-
+    void ismoving(double vx, double vy, double w);
 private: /* robot pose */
     // the odometry of robot relative map
     
@@ -44,7 +47,7 @@ private: /* robot pose */
 
     int control_frequency;
     double dt;
-
+    bool _ismoving;
     double rob_x_on_map;
     double rob_y_on_map;
     double rob_theta_on_map;
