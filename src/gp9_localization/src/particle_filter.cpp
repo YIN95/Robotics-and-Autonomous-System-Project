@@ -301,12 +301,12 @@ ParticleFilter::ParticleFilter() {
     frequency = 5;
     dt = 1.0/frequency;
     n_measurements = 30;
-    n_particles = 4000;
+    n_particles = 800;
     particles = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
     particles_res = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
-    std_x = 0.2;
-    std_y = 0.2;
-    std_theta = 0.2;
+    std_x = 0.02;
+    std_y = 0.02;
+    std_theta = 0.1;
     std_meas = 0.000001;
     lambda = 0.0001;
 
