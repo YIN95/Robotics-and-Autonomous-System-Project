@@ -292,11 +292,11 @@ ParticleFilter::ParticleFilter() {
     n_measurements = 30;
     n_particles = 800;
     particles = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
-    std_x = 0.005;
-    std_y = 0.005;
-    std_theta = 0.1;
-    std_meas = 0.0000001;
-    lambda = 0.001;
+    std_x = 0.2;
+    std_y = 0.2;
+    std_theta = 0.2;
+    std_meas = 0.000001;
+    lambda = 0.0001;
 
     current_time = ros::Time::now();
     last_time = ros::Time::now();
@@ -338,7 +338,27 @@ void ParticleFilter::predict() {
     random_numbers::RandomNumberGenerator gen;
     for(int i = 0; i < n_particles; i++) {
         particles[0][i] += gen.gaussian(dx, std_x);
+
+        // TODO: for whole bounding box
+        if (particles[0][i] < 0) {
+            particles[0][i] = 0.0001;
+        }
+	
+	else if (particles[0][i] > 2.4) {
+	    particles[0][i] = 2.3999;
+	}
+
+
         particles[1][i] += gen.gaussian(dy, std_y);
+
+        if (particles[1][i] < 0) {
+            particles[1][i] = 0.0001;
+        }
+
+	else if (particles[1][i] > 2.4) {
+	    particles[1][i] = 2.3999;
+	}
+
         particles[2][i] += gen.gaussian(dtheta, std_theta);
 
         if(particles[2][i] < 0) {
@@ -394,7 +414,7 @@ void ParticleFilter::associate() {
     
     for(int i = 0; i < n_particles; i++) {
         particles[3][i] /= weight_sum;
-        //ROS_INFO("x: %f, y: %f, theta: %f, w: %lf", particles[0][i], particles[1][i], particles[2][i], particles[3][i]);
+        ROS_INFO("x: %f, y: %f, theta: %f, w: %lf", particles[0][i], particles[1][i], particles[2][i], particles[3][i]);
     }
 
 }
@@ -488,7 +508,6 @@ void ParticleFilter::odometryCallBack(const geometry_msgs::Pose2D::ConstPtr &msg
     dx = x_new - x_old;
     dy = y_new - y_old;
     dtheta = theta_new - theta_old;
-
     x_old = x_new;
     y_old = y_new;
     theta_old = theta_new;
