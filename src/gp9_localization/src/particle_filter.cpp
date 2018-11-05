@@ -10,6 +10,7 @@
 #include <boost/foreach.hpp>
 #include <boost/tokenizer.hpp>
 #include <std_msgs/Bool.h>
+#include <time.h>
 
 class Point{
     public:
@@ -269,14 +270,24 @@ public:
         std::deque<Line> walls;
 
 };
-
+////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////
 int main(int argc, char** argv) {
-    int control_frequency = 5;
+    int control_frequency = 1;
 
     ros::init(argc, argv, "particle_filter");
     ParticleFilter pf;
     ros::Rate rate(control_frequency);
-
+    
     while (pf.nh.ok()) {
         ros::spinOnce();
         pf.MCL();
@@ -290,8 +301,9 @@ ParticleFilter::ParticleFilter() {
     frequency = 5;
     dt = 1.0/frequency;
     n_measurements = 30;
-    n_particles = 800;
+    n_particles = 4000;
     particles = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
+    particles_res = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
     std_x = 0.2;
     std_y = 0.2;
     std_theta = 0.2;
@@ -318,6 +330,7 @@ ParticleFilter::ParticleFilter() {
     sub_lidar = nh.subscribe<sensor_msgs::LaserScan>("/scan", 1, &ParticleFilter::lidarCallBack, this);
     pub_weight_pose = nh.advertise<geometry_msgs::Pose2D>("/corrected_pose", 1);
     pub_corrected_pose = nh.advertise<visualization_msgs::Marker>("/visualization_filter", 1);
+    pub_object_marker_array = nh.advertise<visualization_msgs::Marker>("/particle/points", 100);
     initParticles();
 }
 
@@ -388,6 +401,7 @@ void ParticleFilter::associate() {
             psi_means[j] += psi[i][j]/n_particles;
         }
     }
+
     for(int i = 0; i < n_measurements; i++){
         if(psi_means[i] < lambda) {
             outliers[i] = true;
@@ -414,7 +428,7 @@ void ParticleFilter::associate() {
     
     for(int i = 0; i < n_particles; i++) {
         particles[3][i] /= weight_sum;
-        ROS_INFO("x: %f, y: %f, theta: %f, w: %lf", particles[0][i], particles[1][i], particles[2][i], particles[3][i]);
+        
     }
 
 }
@@ -464,20 +478,26 @@ double ParticleFilter::calcInnovation() {
 }
 
 void ParticleFilter::systematicResample() {
-    random_numbers::RandomNumberGenerator gen;
-    particles_res = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
+        
 
+    // random_numbers::RandomNumberGenerator gen;
+        
+    
     double cumsum[n_particles];
     cumsum[0] = particles[3][0];
     for(int i = 1; i < n_particles ; i++) {
         cumsum[i] = cumsum[i-1] + particles[3][i];
     }
+    
+    // double r_0 = gen.uniform01()/n_particles;
 
-    double r_0 = gen.uniform01()/n_particles;
+    srand(time(0));
+    double r_0 = (rand()%100 / (double)101) /n_particles;
+    ROS_INFO("R0: %f", r_0);
     int ind = 0;
     for(int i = 0; i < n_particles ; i++) {
         for(int j = 0; j < n_particles ; j++) {
-            if(r_0 >= cumsum[j]) {
+            if(r_0 <= cumsum[j]) {
                 ind = j;
                 break;
             }
@@ -490,12 +510,18 @@ void ParticleFilter::systematicResample() {
     }
     
     particles = particles_res;
+    
 }
 
 void ParticleFilter::MCL() {
     predict();
+    // pubParticles();
     associate();
+    pubParticles(0);
     systematicResample();
+            
+    pubParticles(1);
+
     weightedAveragePosePublisher();
 }
 
@@ -539,6 +565,7 @@ void ParticleFilter::weightedAveragePosePublisher() {
 
         sum_sin += sin(particles[2][i]);
         sum_cos += cos(particles[2][i]);
+        // ROS_INFO("x: %f, y: %f, theta: %f, w: %lf", particles[0][i], particles[1][i], particles[2][i], particles[3][i]);
     }
     pose.theta = atan2(sum_sin, sum_cos);
     if(pose.theta < 0) {
@@ -552,27 +579,73 @@ void ParticleFilter::weightedAveragePosePublisher() {
     showPose(pose);
 }
 
-	void ParticleFilter::showPose(geometry_msgs::Pose2D &corrected_pose) {
+void ParticleFilter::showPose(geometry_msgs::Pose2D &corrected_pose) {
 
-		visualization_msgs::Marker marker;
-		geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(corrected_pose.theta);
-		
-		marker.header.frame_id = "map";
-		marker.header.stamp = ros::Time();
-		marker.ns = "my_namespace";
-		marker.id = 0;
-		marker.type = visualization_msgs::Marker::ARROW;
-		marker.action = visualization_msgs::Marker::ADD;
-		marker.pose.position.x = corrected_pose.x;
-		marker.pose.position.y = corrected_pose.y;
-		marker.pose.position.z = 0;
-		marker.pose.orientation = odom_quat;
-		marker.scale.x = 0.2;
-		marker.scale.y = 0.05;
-		marker.scale.z = 0.05;
-		marker.color.a = 0.5; // Don't forget to set the alpha!
-		marker.color.r = 0.0;
-		marker.color.g = 1.0;
-		marker.color.b = 0.2;
-		pub_corrected_pose.publish(marker);
-	}
+    visualization_msgs::Marker marker;
+    geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(corrected_pose.theta);
+    
+    marker.header.frame_id = "map";
+    marker.header.stamp = ros::Time();
+    marker.ns = "my_namespace";
+    marker.id = 0;
+    marker.type = visualization_msgs::Marker::ARROW;
+    marker.action = visualization_msgs::Marker::ADD;
+    marker.pose.position.x = corrected_pose.x;
+    marker.pose.position.y = corrected_pose.y;
+    marker.pose.position.z = 0;
+    marker.pose.orientation = odom_quat;
+    marker.scale.x = 0.2;
+    marker.scale.y = 0.05;
+    marker.scale.z = 0.05;
+    marker.color.a = 0.5; // Don't forget to set the alpha!
+    marker.color.r = 0.0;
+    marker.color.g = 1.0;
+    marker.color.b = 0.2;
+    pub_corrected_pose.publish(marker);
+}
+
+
+void ParticleFilter::pubParticles(int before){
+
+    visualization_msgs::Marker points;
+    points.header.frame_id = "map";
+    points.header.stamp = ros::Time::now();
+    points.ns = "points_and_lines";
+    points.action = visualization_msgs::Marker::ADD;
+    points.pose.orientation.w = 1.0;
+
+    points.id = 1;
+
+    points.type = visualization_msgs::Marker::POINTS;
+
+    points.scale.x = 0.02;
+    points.scale.y = 0.02;
+    if(before == 0){
+        points.color.r = 1.0f;
+        points.color.g = 1.0f;
+        points.color.b = 1.0f;
+    }
+    if(before == 1){
+        points.color.r = 0;
+        points.color.g = 1.0f;
+        points.color.b = 0;
+    }
+    
+    points.color.a = 0.4;
+    
+    
+
+    for(int i = 0; i < n_particles ; i++) {
+        geometry_msgs::Point p;
+        p.x = particles_res[0][i];
+        p.y = particles_res[1][i];
+        p.z = 0;
+        points.points.push_back(p);
+        pub_object_marker_array.publish(points);
+        // ROS_INFO("!!! %d", points.points.size());
+
+    }
+    // marker_array.markers.size()
+    
+    
+}

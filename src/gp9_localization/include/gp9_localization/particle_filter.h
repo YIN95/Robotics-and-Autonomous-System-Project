@@ -4,7 +4,9 @@
 #include <math.h>
 #include <vector>
 #include <deque>
-
+#include <visualization_msgs/Marker.h>
+// #include <visualization_msgs/points.h>
+#include <visualization_msgs/MarkerArray.h>
 
 class ParticleFilter{
 public: /* ros */
@@ -18,8 +20,10 @@ public: /* ros */
         ros::Time current_time;
         ros::Time last_time;
 
-
-
+        visualization_msgs::Marker marker;
+        visualization_msgs::MarkerArray marker_array;
+        
+        ros::Publisher pub_object_marker_array;
 public: /* Functions */
 	/* Constructor Functions */
         ParticleFilter();
@@ -34,6 +38,7 @@ public: /* Functions */
         void lidarCallBack(const sensor_msgs::LaserScan::ConstPtr &msg);
         void weightedAveragePosePublisher();
         void showPose(geometry_msgs::Pose2D &corrected_pose);
+        void pubParticles(int before);
 
 private:
         double frequency;
