@@ -282,7 +282,7 @@ public:
 ////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////
 int main(int argc, char** argv) {
-    int control_frequency = 1;
+    int control_frequency = 10;
 
     ros::init(argc, argv, "particle_filter");
     ParticleFilter pf;
@@ -301,7 +301,7 @@ ParticleFilter::ParticleFilter() {
     frequency = 5;
     dt = 1.0/frequency;
     n_measurements = 30;
-    n_particles = 800;
+    n_particles = 500;
     particles = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
     particles_res = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
     std_x = 0.02;
@@ -597,7 +597,7 @@ void ParticleFilter::showPose(geometry_msgs::Pose2D &corrected_pose) {
     marker.scale.x = 0.2;
     marker.scale.y = 0.05;
     marker.scale.z = 0.05;
-    marker.color.a = 0.5; // Don't forget to set the alpha!
+    marker.color.a = 0.9; // Don't forget to set the alpha!
     marker.color.r = 0.0;
     marker.color.g = 1.0;
     marker.color.b = 0.2;
@@ -627,11 +627,11 @@ void ParticleFilter::pubParticles(int before){
     }
     if(before == 1){
         points.color.r = 0;
-        points.color.g = 1.0f;
-        points.color.b = 0;
+        points.color.g = 0;
+        points.color.b = 1.0;
     }
     
-    points.color.a = 0.4;
+    points.color.a = 0.2;
     
     
 
