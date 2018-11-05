@@ -292,10 +292,10 @@ ParticleFilter::ParticleFilter() {
     n_measurements = 30;
     n_particles = 800;
     particles = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
-    std_x = 0.05;
-    std_y = 0.05;
+    std_x = 0.005;
+    std_y = 0.005;
     std_theta = 0.1;
-    std_meas = 0.1;
+    std_meas = 0.0000001;
     lambda = 0.001;
 
     current_time = ros::Time::now();
@@ -355,7 +355,6 @@ void ParticleFilter::associate() {
     double psi_means[n_measurements];
     bool outliers[n_measurements];
     for(int i = 0; i < n_particles; i++) {
-
         Pose pose = Pose(particles[0][i], particles[1][i], particles[2][i]);
         std::deque<double> z_hat = intersections.findIntersections(pose, n_measurements);
         for(int j = 0; j < n_measurements; j++) {
@@ -363,8 +362,8 @@ void ParticleFilter::associate() {
                 psi[i][j] = 0;
             } else {
                 double nu = measurements[j] - z_hat[j];
-                ROS_INFO("DIFFERENCE INNOVATION \n MODEL: %f \n MEASUREMENT: %f \n", z_hat[j],measurements[j]);
-                psi[i][j] = exp(-(0.5*pow(nu, 2))/std_meas)/(std_meas*sqrt(2*M_PI));
+                //ROS_INFO("DIFFERENCE INNOVATION \n MODEL: %f \n MEASUREMENT: %f \n", z_hat[j],measurements[j]);
+                psi[i][j] = exp(-(0.5*pow(nu, 2))/std_meas);
             }
             psi_means[j] += psi[i][j]/n_particles;
         }
@@ -378,22 +377,24 @@ void ParticleFilter::associate() {
         }
     }
 
-    double prod_sum = 0;
+    double weight_sum = 0;
     for(int i = 0; i < n_particles; i++) {
-        double prod_psi = 1;
+        double sum_psi = 0;
         for(int j = 0; j < n_measurements; j++) {
-            if (!outliers[j] && psi[i][j]!=0) {
-                prod_psi *= psi[i][j];
+            if (!outliers[j]) {
+                sum_psi += psi[i][j];
             }
         }
-        prod_sum += prod_psi;
-        particles[3][i] = prod_psi;
+        weight_sum += sum_psi;
+        particles[3][i] = sum_psi;
+        //ROS_INFO("WEIGHT: %lf", particles[3][i]);
     }
 
     //ROS_INFO("WEIGHT SUM: %f", prod_sum);
     
     for(int i = 0; i < n_particles; i++) {
-        particles[3][i] /= prod_sum;
+        particles[3][i] /= weight_sum;
+        //ROS_INFO("x: %f, y: %f, theta: %f, w: %lf", particles[0][i], particles[1][i], particles[2][i], particles[3][i]);
     }
 
 }
@@ -408,7 +409,7 @@ void ParticleFilter::associate2() {
         if (nu == 0) {
             psi[i] = 0;
         } else {
-            psi[i] = exp(-0.5*pow(nu, 2)/std_meas);
+            psi[i] = pow(10, 20)*exp(-0.5*pow(nu, 2)/std_meas);
             //ROS_INFO("PSI %f",  psi[i]);
         }
         
@@ -419,13 +420,13 @@ void ParticleFilter::associate2() {
     for(int i = 0; i < n_particles; i++) {
         norm_sum += psi[i];
         particles[3][i] = psi[i];
-        ROS_INFO("WEIGHT: %f", particles[3][i]);
+        //ROS_INFO("WEIGHT: %f", particles[3][i]);
     }
     
     //ROS_INFO("NORM %f", norm_sum);
     for(int i = 0; i < n_particles; i++) {
         particles[3][i] /= norm_sum;
-        ROS_INFO("x: %f, y: %f, theta: %f, w: %lf", particles[0][i], particles[1][i], particles[2][i], particles[3][i]);
+        //ROS_INFO("x: %f, y: %f, theta: %f, w: %lf", particles[0][i], particles[1][i], particles[2][i], particles[3][i]);
     }
 
 }
@@ -473,7 +474,7 @@ void ParticleFilter::systematicResample() {
 
 void ParticleFilter::MCL() {
     predict();
-    associate2();
+    associate();
     systematicResample();
     weightedAveragePosePublisher();
 }
