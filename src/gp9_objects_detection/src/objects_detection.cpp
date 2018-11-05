@@ -83,6 +83,15 @@ void ObjectDetection::shapeCallback(const std_msgs::Int32ConstPtr &msg){
 void ObjectDetection::imageRGBCallback(const sensor_msgs::ImageConstPtr &msg){
     try{
         cv_rgb_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+        Mat image_hsv;
+        Mat frame_threshold;
+        cvtColor(cv_rgb_ptr->image, image_hsv, CV_BGR2HSV);
+        inRange(image_hsv, Scalar(0, 90, 0), Scalar(180, 255, 255), frame_threshold);
+        // Show the frames
+        imshow("window_detection_name", frame_threshold);
+        bitwise_and(image_hsv,frame_threshold,image_hsv);
+        cvtColor(image_hsv, cv_rgb_ptr->image, CV_HSV2BGR);
+        cv::waitKey(3);
         origin_frame = (cv_rgb_ptr->image).clone();
         detectAndDisplay(cv_rgb_ptr);
     }
@@ -232,8 +241,7 @@ void ObjectDetection::listen_obj_map(double x, double y, int type){
 }
 
 void ObjectDetection::removeBackground(Mat frame){
-    Mat img_hsv;
-    cvtColor(frame,img_hsv,CV_RGB2HSV);
+    
     // OBJECTS_MIN = cv.Scalar(0, 40, 90)
     // OBJECTS_MAX = cv.Scalar(255, 255, 255)
 }
@@ -277,7 +285,7 @@ int ObjectDetection::colorFilter_is_object(Mat frame, int x, int y){
      
     try{
         Mat img_hsv;
-        cvtColor(frame, img_hsv, CV_RGB2HSV);
+        cvtColor(frame, img_hsv, CV_BGR2HSV);
         uchar* d_ = frame.ptr<uchar>(y); 
         uchar* d = img_hsv.ptr<uchar>(y); 
         int h = d[3 * x];            
