@@ -1,9 +1,9 @@
 #include "ros/ros.h"
-#include "geometry_msgs/Twist.h"
 #include "sensor_msgs/LaserScan.h"
 #include "geometry_msgs/Pose2D.h"
 #include <math.h>
 #include <vector>
+#include <deque>
 
 
 class ParticleFilter{
@@ -11,8 +11,9 @@ public: /* ros */
 	ros::NodeHandle nh;
 	/* Subscribers and publishers */
         ros::Subscriber sub_lidar;
-        ros::Subscriber sub_vel;
+        ros::Subscriber sub_pose;
         ros::Publisher pub_weight_pose;
+        ros::Publisher pub_corrected_pose;
 
         ros::Time current_time;
         ros::Time last_time;
@@ -26,32 +27,38 @@ public: /* Functions */
         void MCL();
         void predict();
         void associate();
+        void associate2();
+        double calcInnovation();
         void systematicResample();
-        void velocityCallBack(const geometry_msgs::Twist::ConstPtr &msg);
+        void odometryCallBack(const geometry_msgs::Pose2D::ConstPtr &msg);
         void lidarCallBack(const sensor_msgs::LaserScan::ConstPtr &msg);
         void weightedAveragePosePublisher();
+        void showPose(geometry_msgs::Pose2D &corrected_pose);
 
 private:
+        double frequency;
         double dt;
 
         int n_particles;
         int n_measurements;
         double measurements[30];
-        double particles[4][500]; // particles with [x, y, theta, w]
-        double particles_res[4][500]; // resampled particles
+        std::vector<std::vector<double> > particles; // particles with [x, y, theta, w]
+        std::vector<std::vector<double> > particles_res; // resampled particles
         double std_x;
         double std_y;
         double std_theta;
         double std_meas;
         double lambda;
 
-
-        double v;
-        double w;
+        double x_old;
+        double y_old;
+        double theta_old;
+        double dx;
+        double dy;
+        double dtheta;
 
         double start_pose[3];
         bool global_flag;
 
-        double weight_sum;
-
+        std::deque<double> z_hat;
 };

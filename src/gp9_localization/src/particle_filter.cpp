@@ -1,10 +1,12 @@
 #include "gp9_localization/particle_filter.h"
 #include <random_numbers/random_numbers.h>
+#include <visualization_msgs/Marker.h>
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <math.h>
 #include <deque>
+#include <tf/transform_broadcaster.h>
 #include <boost/foreach.hpp>
 #include <boost/tokenizer.hpp>
 #include <std_msgs/Bool.h>
@@ -285,31 +287,37 @@ int main(int argc, char** argv) {
 
 ParticleFilter::ParticleFilter() {
     dt = (current_time - last_time).toSec();
+    frequency = 5;
+    dt = 1.0/frequency;
     n_measurements = 30;
-    n_particles = 500;
-    std_x = 0.5;
-    std_y = 0.5;
-    std_theta = 0.8;
+    n_particles = 800;
+    particles = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
+    std_x = 0.05;
+    std_y = 0.05;
+    std_theta = 0.1;
     std_meas = 0.1;
-    lambda = 0.0001;
-
-    weight_sum = 1;
-
+    lambda = 0.001;
 
     current_time = ros::Time::now();
     last_time = ros::Time::now();
-    v = 0;
-    w = 0;
 
     start_pose[0] = 0.225;
     start_pose[1] = 0.225;
     start_pose[2] = 0.5*M_PI;
 
+    x_old = start_pose[0];
+    y_old = start_pose[1];
+    theta_old = start_pose[2];
+    dx = 0;
+    dy = 0;
+    dtheta = 0;
+
     global_flag =  false;
 
-    sub_vel = nh.subscribe<geometry_msgs::Twist>("/velocity_estimate", 1, &ParticleFilter::velocityCallBack, this);
+    sub_pose = nh.subscribe<geometry_msgs::Pose2D>("/pose", 1, &ParticleFilter::odometryCallBack, this);
     sub_lidar = nh.subscribe<sensor_msgs::LaserScan>("/scan", 1, &ParticleFilter::lidarCallBack, this);
     pub_weight_pose = nh.advertise<geometry_msgs::Pose2D>("/corrected_pose", 1);
+    pub_corrected_pose = nh.advertise<visualization_msgs::Marker>("/visualization_filter", 1);
     initParticles();
 }
 
@@ -319,7 +327,7 @@ void ParticleFilter::initParticles() {
             particles[0][i] = start_pose[0];
             particles[1][i] = start_pose[1];
             particles[2][i] = start_pose[2];
-            particles[3][i] = 1/n_particles;
+            particles[3][i] = 1.0/n_particles;
         }
     }
     //TODO global localization over whole map (need bounds)
@@ -327,21 +335,18 @@ void ParticleFilter::initParticles() {
 
 
 void ParticleFilter::predict() {
-    current_time = ros::Time::now();
-    dt = (current_time - last_time).toSec();
     random_numbers::RandomNumberGenerator gen;
     for(int i = 0; i < n_particles; i++) {
-        double theta = particles[2][i];
-        particles[0][i] += gen.gaussian(dt*v*cos(theta), std_x);
-        particles[1][i] += gen.gaussian(dt*v*sin(theta), std_y);
-        particles[2][i] += gen.gaussian(dt*w, std_theta);
+        particles[0][i] += gen.gaussian(dx, std_x);
+        particles[1][i] += gen.gaussian(dy, std_y);
+        particles[2][i] += gen.gaussian(dtheta, std_theta);
+
         if(particles[2][i] < 0) {
             particles[2][i] += 2*M_PI;
         } else if(particles[2][i] > 2*M_PI) {
             particles[2][i] -= 2*M_PI;
         }
     }
-    last_time = current_time;
 }
 
 void ParticleFilter::associate() {
@@ -358,7 +363,7 @@ void ParticleFilter::associate() {
                 psi[i][j] = 0;
             } else {
                 double nu = measurements[j] - z_hat[j];
-                //ROS_INFO("DIFFERENCE INNOVATION \n MODEL: %f \n MEASUREMENT: %f \n", z_hat[j],measurements[j]);
+                ROS_INFO("DIFFERENCE INNOVATION \n MODEL: %f \n MEASUREMENT: %f \n", z_hat[j],measurements[j]);
                 psi[i][j] = exp(-(0.5*pow(nu, 2))/std_meas)/(std_meas*sqrt(2*M_PI));
             }
             psi_means[j] += psi[i][j]/n_particles;
@@ -367,13 +372,13 @@ void ParticleFilter::associate() {
     for(int i = 0; i < n_measurements; i++){
         if(psi_means[i] < lambda) {
             outliers[i] = true;
-            ROS_INFO("OUTLIER");
+            //ROS_INFO("OUTLIER");
         } else {
             outliers[i] = false;
         }
     }
 
-    weight_sum = 0;
+    double prod_sum = 0;
     for(int i = 0; i < n_particles; i++) {
         double prod_psi = 1;
         for(int j = 0; j < n_measurements; j++) {
@@ -381,25 +386,72 @@ void ParticleFilter::associate() {
                 prod_psi *= psi[i][j];
             }
         }
-        weight_sum += prod_psi;
+        prod_sum += prod_psi;
         particles[3][i] = prod_psi;
     }
-    ROS_INFO("WEIGHT SUM: %f", weight_sum);
+
+    //ROS_INFO("WEIGHT SUM: %f", prod_sum);
+    
     for(int i = 0; i < n_particles; i++) {
-        particles[3][i] /= weight_sum;
+        particles[3][i] /= prod_sum;
     }
 
 }
 
+void ParticleFilter::associate2() {
+    Intersections intersections = Intersections();
+    double psi[n_particles];
+    for(int i = 0; i < n_particles; i++) {
+        Pose pose = Pose(particles[0][i], particles[1][i], particles[2][i]);
+        z_hat = intersections.findIntersections(pose, n_measurements);
+        double nu = calcInnovation();
+        if (nu == 0) {
+            psi[i] = 0;
+        } else {
+            psi[i] = exp(-0.5*pow(nu, 2)/std_meas);
+            //ROS_INFO("PSI %f",  psi[i]);
+        }
+        
+        
+    }
+    // TODO WHAT HAPPENS IF PSI IS ALL ZEROS?
+    double norm_sum = 0;
+    for(int i = 0; i < n_particles; i++) {
+        norm_sum += psi[i];
+        particles[3][i] = psi[i];
+        ROS_INFO("WEIGHT: %f", particles[3][i]);
+    }
+    
+    //ROS_INFO("NORM %f", norm_sum);
+    for(int i = 0; i < n_particles; i++) {
+        particles[3][i] /= norm_sum;
+        ROS_INFO("x: %f, y: %f, theta: %f, w: %lf", particles[0][i], particles[1][i], particles[2][i], particles[3][i]);
+    }
+
+}
+
+double ParticleFilter::calcInnovation() {
+    double nu = 0;
+    for(int j = 0; j < n_measurements; j++) {
+        if(!isinf(measurements[j])) {
+            nu += pow(measurements[j]-z_hat[j], 2);
+            //ROS_INFO("DIFFERENCE INNOVATION MODEL AND MEASUREMENT: %f \n", measurements[j]-z_hat[j]);
+        }
+    }
+    nu = sqrt(nu);
+    return nu;
+}
 
 void ParticleFilter::systematicResample() {
     random_numbers::RandomNumberGenerator gen;
+    particles_res = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
 
     double cumsum[n_particles];
     cumsum[0] = particles[3][0];
     for(int i = 1; i < n_particles ; i++) {
         cumsum[i] = cumsum[i-1] + particles[3][i];
     }
+
     double r_0 = gen.uniform01()/n_particles;
     int ind = 0;
     for(int i = 0; i < n_particles ; i++) {
@@ -416,21 +468,29 @@ void ParticleFilter::systematicResample() {
         r_0 += 1.0/n_particles;
     }
     
-    //FIX THIS TO BE WITHOUT LOOP
-    memcpy(particles, particles_res, sizeof(particles));
+    particles = particles_res;
 }
 
 void ParticleFilter::MCL() {
     predict();
-    associate();
+    associate2();
     systematicResample();
     weightedAveragePosePublisher();
 }
 
 
-void ParticleFilter::velocityCallBack(const geometry_msgs::Twist::ConstPtr &msg) {
-    v = msg->linear.x;
-    w = msg->angular.z;
+void ParticleFilter::odometryCallBack(const geometry_msgs::Pose2D::ConstPtr &msg) {
+    double x_new = msg->x;
+    double y_new = msg->y;
+    double theta_new = msg->theta;
+
+    dx = x_new - x_old;
+    dy = y_new - y_old;
+    dtheta = theta_new - theta_old;
+
+    x_old = x_new;
+    y_old = y_new;
+    theta_old = theta_new;
 }
 
 void ParticleFilter::lidarCallBack(const sensor_msgs::LaserScan::ConstPtr &msg) {
@@ -446,21 +506,53 @@ void ParticleFilter::lidarCallBack(const sensor_msgs::LaserScan::ConstPtr &msg) 
 
 void ParticleFilter::weightedAveragePosePublisher() {
     geometry_msgs::Pose2D pose;
-    double w_sum = 0;
-    for(int i = 0; i < n_particles; i++) {
-        w_sum += particles[3][i];
-    }
+    pose.x = 0;
+    pose.y = 0;
+    pose.theta = 0;
 
-    double weight_pose[3];
+    double sum_sin = 0;
+    double sum_cos = 0;
+
     for(int i = 0 ; i < n_particles ; i++) {
-        weight_pose[0] += particles[0][i]*particles[3][i]/w_sum;
-        weight_pose[1] += particles[1][i]*particles[3][i]/w_sum;
-        weight_pose[2] += particles[2][i]*particles[3][i]/w_sum;
+        pose.x += particles[0][i];
+        pose.y += particles[1][i];
+
+        sum_sin += sin(particles[2][i]);
+        sum_cos += cos(particles[2][i]);
+    }
+    pose.theta = atan2(sum_sin, sum_cos);
+    if(pose.theta < 0) {
+        pose.theta += 2*M_PI;
     }
 
-    pose.x = weight_pose[0];
-    pose.y = weight_pose[1];
-    pose.theta = weight_pose[2];
+    pose.x /= n_particles;
+    pose.y /= n_particles;
 
     pub_weight_pose.publish(pose);
+    showPose(pose);
 }
+
+	void ParticleFilter::showPose(geometry_msgs::Pose2D &corrected_pose) {
+
+		visualization_msgs::Marker marker;
+		geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(corrected_pose.theta);
+		
+		marker.header.frame_id = "map";
+		marker.header.stamp = ros::Time();
+		marker.ns = "my_namespace";
+		marker.id = 0;
+		marker.type = visualization_msgs::Marker::ARROW;
+		marker.action = visualization_msgs::Marker::ADD;
+		marker.pose.position.x = corrected_pose.x;
+		marker.pose.position.y = corrected_pose.y;
+		marker.pose.position.z = 0;
+		marker.pose.orientation = odom_quat;
+		marker.scale.x = 0.2;
+		marker.scale.y = 0.05;
+		marker.scale.z = 0.05;
+		marker.color.a = 0.5; // Don't forget to set the alpha!
+		marker.color.r = 0.0;
+		marker.color.g = 1.0;
+		marker.color.b = 0.2;
+		pub_corrected_pose.publish(marker);
+	}
