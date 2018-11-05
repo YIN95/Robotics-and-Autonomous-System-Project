@@ -50,5 +50,6 @@
         "typeindex": "cpp",
         "typeinfo": "cpp",
         "utility": "cpp"
-    }
+    },
+    "window.zoomLevel": -3
 }

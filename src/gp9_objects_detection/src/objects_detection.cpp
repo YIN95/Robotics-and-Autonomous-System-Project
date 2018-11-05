@@ -9,7 +9,7 @@ int main(int argc, char** argv)
 	ros::init(argc, argv, "object_detection");
 	ObjectDetection objectDetection;
 
-	ros::Rate rate(10);
+	ros::Rate rate(2);
 	
 	while (objectDetection.nh.ok()) {
         
@@ -87,12 +87,13 @@ void ObjectDetection::imageRGBCallback(const sensor_msgs::ImageConstPtr &msg){
         Mat frame_threshold;
         cvtColor(cv_rgb_ptr->image, image_hsv, CV_BGR2HSV);
         inRange(image_hsv, Scalar(0, 90, 0), Scalar(180, 255, 255), frame_threshold);
-        // Show the frames
-        imshow("window_detection_name", frame_threshold);
-        bitwise_and(image_hsv,frame_threshold,image_hsv);
-        cvtColor(image_hsv, cv_rgb_ptr->image, CV_HSV2BGR);
-        cv::waitKey(3);
+        cvtColor(frame_threshold, frame_threshold, COLOR_GRAY2BGR);
         origin_frame = (cv_rgb_ptr->image).clone();
+        bitwise_and((cv_rgb_ptr->image), frame_threshold, origin_frame_masked);
+                
+        imshow("image_hsv", origin_frame_masked);
+        //cv::waitKey(3);
+        
         detectAndDisplay(cv_rgb_ptr);
     }
     catch (...){
@@ -125,7 +126,7 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
         cvtColor(frame, frame_gray, COLOR_BGR2GRAY);
         equalizeHist(frame_gray, frame_gray);
         //-- Detect objects
-        cascade.detectMultiScale(frame_gray, objects, 1.1, 5, 0|CASCADE_SCALE_IMAGE, Size(80, 80), Size(140, 140));
+        cascade.detectMultiScale(frame_gray, objects, 1.1, 3, 0|CASCADE_SCALE_IMAGE, Size(90, 90), Size(170, 170));
         detect_size = std::min(int(objects.size()), detect_size);
 
 
@@ -136,7 +137,7 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                 int center_y = objects[i].y + objects[i].height/2;
                 Point center(center_x, center_y);
                 // ellipse(frame, center, Size(objects[0].width/2, objects[0].height/2 ), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
-                int color_result = colorFilter_is_object(frame, center_x, center_y);
+                int color_result = colorFilter_is_object(origin_frame_masked, center_x, center_y);
                 object_depth = getDepth(center_x, center_y);
                 object_depth = getTrueDepth(object_depth);
                 ROS_INFO("DEPTH: %d", object_depth);
@@ -286,14 +287,21 @@ int ObjectDetection::colorFilter_is_object(Mat frame, int x, int y){
     try{
         Mat img_hsv;
         cvtColor(frame, img_hsv, CV_BGR2HSV);
+        //!!!!!!!!!!!!!!!!!  BGR
         uchar* d_ = frame.ptr<uchar>(y); 
         uchar* d = img_hsv.ptr<uchar>(y); 
+
         int h = d[3 * x];            
         int s = d[x * 3 + 1];            
         int v = d[x * 3 + 2];
         int b = d_[3 * x];    
         int g = d_[x * 3 + 1];            
         int r = d_[x * 3 + 2];  
+
+        if ((b==0)&&(g==0)&&(r==0)){
+            return -1;
+        }
+
         if (s < 40){
             ROS_INFO("-----------");
             ROS_INFO("center: (%d, %d)", x, y);
@@ -321,6 +329,54 @@ int ObjectDetection::colorFilter_is_object(Mat frame, int x, int y){
 
 int ObjectDetection::colorClassifier(int h, int s, int v, int b, int g, int r){
     bool use_rgb = false;
+    bool use_bgr_hsv = true;
+
+    if (use_bgr_hsv){
+        if (s <40){
+            return -1;
+        }
+
+        if (0 <= h && h <= 7 && 0 <= s && s <= 255 && 0 <= v && v <= 255){   
+            ROS_INFO("COLOR_RED");
+            return obj.COLOR_RED;
+        }
+        else if ((156 <= h && h <= 180) && (0 <= s && s <= 255) && (0 <= v && v <= 255)){
+            ROS_INFO("COLOR_RED");
+            return obj.COLOR_RED;
+        }
+        else if ((8 <= h && h <= 16) && (0 <= s && s <= 255) && (0 <= v && v <= 255)){
+            ROS_INFO("COLOR_ORANGE");
+            return obj.COLOR_ORANGE;
+        }
+        else if (17 <= h && h <= 34 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
+            ROS_INFO("COLOR_YELLOW");
+            return obj.COLOR_YELLOW;
+        }
+        else if ((35 <= h && h <= 66) && 0 <= s && s <= 255 && 0 <= v && v <= 255){
+            ROS_INFO("COLOR_LIGHT_GREEN");
+            return obj.COLOR_LIGHT_GREEN;
+        }
+        
+        else if (67 <= h && h < 86 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
+            ROS_INFO("COLOR_GREEN");
+            return obj.COLOR_GREEN;
+        }
+        else if (87 <= h && h <= 96 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
+            ROS_INFO("COLOR_LIGHT_BLUE");
+            return obj.COLOR_LIGHT_BLUE;
+        }
+        else if (97 <= h && h <= 128 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
+            ROS_INFO("COLOR_BLUE");
+            return obj.COLOR_BLUE;
+        }
+        else if (129 <= h && h < 155 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
+            ROS_INFO("COLOR_PURPLE");
+            return obj.COLOR_PURPLE;
+        }
+
+        return -1;   
+    }
+
     if (use_rgb){
         if (10 < b && b < 70 && 50 < g && g < 120 && 0 < r && r < 40){
             ROS_INFO("COLOR_GREEN");
@@ -668,8 +724,114 @@ int ObjectDetection::check_now_object_color_shape(){
 }
 
 int ObjectDetection::check_now_object(){
-    
-    switch(now_shape) {
+    bool color_first = true;
+    if (color_first){
+        switch(now_color) {
+        
+            // yellow
+            case 1 :
+                if (now_shape == obj.SHAPE_BALL){
+                    now_object = obj.Yellow_Ball;
+                    ROS_INFO("I SEE YELLOW BALL");
+                }
+                else{
+                    now_object = obj.Yellow_Cube;
+                    ROS_INFO("I SEE YELLOW CUBE");
+                }
+                break;
+            
+            // green
+            case 2 :
+                now_object = obj.Green_Cube;
+                ROS_INFO("I SEE GREEN CUBE");
+         
+                break;
+
+            // light green
+            case 3 :
+                if (now_shape == obj.SHAPE_CYLINDER){
+                    now_object = obj.Green_Cylinder;
+                    ROS_INFO("I SEE GREEN CYLINDER");
+                }
+                else if (now_shape == obj.SHAPE_HOLLOW_CUBE){
+                    now_object = obj.Green_Hollow_Cube;
+                    ROS_INFO("I SEE GREEN HOLLOW CUBE");
+                }
+                else if (now_shape == obj.SHAPE_CUBE){
+                    now_object = obj.Green_Hollow_Cube;
+                    ROS_INFO("I SEE GREEN HOLLOW CUBE");
+                }
+                break;
+
+            // orange
+            case 4 :
+                if (now_shape == obj.SHAPE_STAR){
+                    now_object = obj.Patric;
+                    ROS_INFO("I SEE PATRIC");
+                }
+                else if (now_shape == obj.SHAPE_CROSS){
+                    now_object = obj.Orange_Cross;
+                    ROS_INFO("I SEE ORANGE CROSS");
+                }
+               
+                break;
+
+            // red
+            case 5 :
+                if (now_shape == obj.SHAPE_BALL){
+                    now_object = obj.Red_Ball;
+                    ROS_INFO("I SEE RED BALL");
+                }
+                else if (now_shape == obj.SHAPE_CYLINDER){
+                    now_object = obj.Red_Cylinder;
+                    ROS_INFO("I SEE RED CYLINDER");
+                }
+                else if (now_shape == obj.SHAPE_HOLLOW_CUBE){
+                    now_object = obj.Red_Hollow_Cube;
+                    ROS_INFO("I SEE RED HOLLOW CUBE");
+                }
+                else if (now_shape == obj.SHAPE_CUBE){
+                    now_object = obj.Red_Hollow_Cube;
+                    ROS_INFO("I SEE RED HOLLOW CUBE");
+                }
+                
+                break;
+
+            // light blue
+            case 6 :
+                now_object = obj.Blue_Triangle;
+                ROS_INFO("I SEE BLUE TRIANGLE");
+         
+                break;
+
+            // blue
+            case 7 :
+                now_object = obj.Blue_Cube;
+                ROS_INFO("I SEE BLUE CUBE");
+         
+                break;
+
+            // purple
+            case 8 :
+                if (now_shape == obj.SHAPE_CROSS){
+                    now_object = obj.Purple_Cross;
+                    ROS_INFO("I SEE PURPLE CROSS");
+                }
+                else if (now_shape == obj.SHAPE_STAR){
+                    now_object = obj.Purple_Star;
+                    ROS_INFO("I SEE PURPLE STAR");
+                }
+                break;
+
+            default :
+                now_object = 99;
+                ROS_INFO("classification error");
+            
+        }
+
+    }
+    else{
+        switch(now_shape) {
         // BALL
         case 0 :
             if (now_color == obj.COLOR_YELLOW){
@@ -805,7 +967,9 @@ int ObjectDetection::check_now_object(){
         default :
             now_object = 99;
             ROS_INFO("classification error");
+        }
     }
+    
  
     return now_object;
 }

@@ -98,6 +98,7 @@ public:
     geometry_msgs::Pose2D pose;
     Mat origin_frame;
     Mat evidence_frame;
+    Mat origin_frame_masked;
     double evidence_x;
     double evidence_y;
     String evidence_id;
