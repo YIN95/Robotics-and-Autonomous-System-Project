@@ -50,7 +50,7 @@ public:
 		dt = 1.0 / control_frequency;
 
 		every_lidar_value = every_lidar_value_;
-		laser_distances = std::vector<double>(360, 0);
+		laser_distances = std::vector<double>(360, 10000);
 		min_distance_to_obstacle = min_distance_to_obstacle_;
 
 		pose = std::vector<double>(3, 0);
@@ -159,8 +159,8 @@ public:
 		}
 
 		// ROS_INFO("last checkpoint: %f, %f, %f", last_checkpoint[0], last_checkpoint[1], last_checkpoint[2]);
-		// ROS_INFO("v : %f", velocity_msg.linear.x);
-		// ROS_INFO("w : %f", velocity_msg.angular.z);
+		ROS_INFO("v : %f", velocity_msg.linear.x);
+		ROS_INFO("w : %f", velocity_msg.angular.z);
 		// ROS_INFO("publishing");
 
 		pub_velocity.publish(velocity_msg);
@@ -193,7 +193,7 @@ public:
 
 	void rotate() {
 
-		ROS_INFO("IN ROTATE!!!!!!!!!!!!!!!");
+		//ROS_INFO("IN ROTATE!!!!!!!!!!!!!!!");
 		
 		double sign = error_angle / fabs(error_angle);
 
@@ -212,32 +212,32 @@ public:
 
 
 
-		ROS_INFO("angle travelled: %f", angle_travelled);
+		//ROS_INFO("angle travelled: %f", angle_travelled);
 
 		bool just_started = fabs(error_angle) > slow_rads;
 		bool short_drive = (fabs(error_angle) < slow_rads && angle_travelled < (slow_rads + angle_threshold));
 
 		// To start slowly. w: w_min --> w_max, angle_travelled: 0 --> slow_rads.
 		if (just_started) {
-			ROS_INFO("Slow start");
+			//ROS_INFO("Slow start");
 			w = sign * (w_min + (w_max - w_min) * (angle_travelled / slow_rads));
 		}
 
 			// When just driving a short distance, drive slowly
 		else if (short_drive) {
-			ROS_INFO("Short drive");
+			//ROS_INFO("Short drive");
 			w = sign * w_min;
 		}
 
 			// To slow down in the end. w: w_max --> w_min, error_angle: slow_rads --> 0.
 		else {
-			ROS_INFO("Slowing down");
+			//ROS_INFO("Slowing down");
 			w = sign * (w_max - (w_max - w_min) * (((slow_rads + angle_threshold) - fabs(error_angle)) / (slow_rads + angle_threshold)));
 		}
 
-		ROS_INFO("error angle : %f", error_angle);
+		//ROS_INFO("error angle : %f", error_angle);
 
-		ROS_INFO("w : %f", w);
+		//ROS_INFO("w : %f", w);
 		velocity_msg.linear.x = 0;
 		velocity_msg.angular.z = w; // 1.2 is a okay value
 	}
@@ -296,7 +296,7 @@ public:
 		for (int i = 0; i < 360; i += every_lidar_value) {
 			lidar_dist = laser_distances[i];
 			if (lidar_dist < min_distance_to_obstacle) {
-				return false;
+				return true;
 			}
 		}
 		return false;
@@ -424,8 +424,8 @@ private:
 int main(int argc, char** argv) {
 
 	int control_frequency = 125;
-	int check_every_laser = 4;
-	double min_distance_to_obstacles = 0.30;
+	int check_every_laser = 30;
+	double min_distance_to_obstacles = 0.20;
 
 	ros::init(argc, argv, "path_follower");
 	StraightLines sl(control_frequency, min_distance_to_obstacles, check_every_laser);
