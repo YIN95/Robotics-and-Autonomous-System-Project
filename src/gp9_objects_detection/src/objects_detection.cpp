@@ -192,6 +192,7 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                             //preDetectColor = now_object;
                         }
                     }
+                    now_shape = -1;
                                         
                 }
             }
@@ -361,13 +362,18 @@ int ObjectDetection::colorClassifier(int h, int s, int v, int b, int g, int r){
             ROS_INFO("COLOR_GREEN");
             return obj.COLOR_GREEN;
         }
-        else if (87 <= h && h <= 96 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
-            ROS_INFO("COLOR_LIGHT_BLUE");
-            return obj.COLOR_LIGHT_BLUE;
+        else if (87 <= h && h <= 128 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
+            if (v>150){
+                ROS_INFO("COLOR_LIGHT_BLUE");
+                return obj.COLOR_LIGHT_BLUE;
+            }
+            
         }
-        else if (97 <= h && h <= 128 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
-            ROS_INFO("COLOR_BLUE");
-            return obj.COLOR_BLUE;
+        else if (87 <= h && h <= 128 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
+            if (v<150){
+                ROS_INFO("COLOR_BLUE");
+                return obj.COLOR_BLUE;
+            }
         }
         else if (129 <= h && h < 155 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
             ROS_INFO("COLOR_PURPLE");
@@ -734,7 +740,7 @@ int ObjectDetection::check_now_object(){
                     now_object = obj.Yellow_Ball;
                     ROS_INFO("I SEE YELLOW BALL");
                 }
-                else{
+                else if (now_shape == obj.SHAPE_CUBE){
                     now_object = obj.Yellow_Cube;
                     ROS_INFO("I SEE YELLOW CUBE");
                 }
@@ -742,8 +748,11 @@ int ObjectDetection::check_now_object(){
             
             // green
             case 2 :
-                now_object = obj.Green_Cube;
-                ROS_INFO("I SEE GREEN CUBE");
+                if ((now_shape >= 0) &&(now_shape <999)){
+                    now_object = obj.Green_Cube;
+                    ROS_INFO("I SEE GREEN CUBE");
+                }
+                
          
                 break;
 
@@ -757,10 +766,10 @@ int ObjectDetection::check_now_object(){
                     now_object = obj.Green_Hollow_Cube;
                     ROS_INFO("I SEE GREEN HOLLOW CUBE");
                 }
-                else if (now_shape == obj.SHAPE_CUBE){
-                    now_object = obj.Green_Hollow_Cube;
-                    ROS_INFO("I SEE GREEN HOLLOW CUBE");
-                }
+                // else if (now_shape == obj.SHAPE_CUBE){
+                //     now_object = obj.Green_Hollow_Cube;
+                //     ROS_INFO("I SEE GREEN HOLLOW CUBE");
+                // }
                 break;
 
             // orange
@@ -799,15 +808,21 @@ int ObjectDetection::check_now_object(){
 
             // light blue
             case 6 :
-                now_object = obj.Blue_Triangle;
-                ROS_INFO("I SEE BLUE TRIANGLE");
+                if ((now_shape >= 0) &&(now_shape <999)){
+                    now_object = obj.Blue_Triangle;
+                    ROS_INFO("I SEE BLUE TRIANGLE");
+                }
+                
          
                 break;
 
             // blue
             case 7 :
-                now_object = obj.Blue_Cube;
-                ROS_INFO("I SEE BLUE CUBE");
+                if ((now_shape >= 0) &&(now_shape <999)){
+                    now_object = obj.Blue_Cube;
+                    ROS_INFO("I SEE BLUE CUBE");
+                }
+                
          
                 break;
 
