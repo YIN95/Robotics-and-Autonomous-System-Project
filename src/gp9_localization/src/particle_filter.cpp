@@ -282,7 +282,7 @@ public:
 ////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////
 int main(int argc, char** argv) {
-    int control_frequency = 10;
+    int control_frequency = 5;
 
     ros::init(argc, argv, "particle_filter");
     ParticleFilter pf;

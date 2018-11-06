@@ -91,7 +91,7 @@ void ObjectDetection::imageRGBCallback(const sensor_msgs::ImageConstPtr &msg){
         origin_frame = (cv_rgb_ptr->image).clone();
         bitwise_and((cv_rgb_ptr->image), frame_threshold, origin_frame_masked);
                 
-        imshow("image_hsv", origin_frame_masked);
+        //imshow("image_hsv", origin_frame_masked);
         //cv::waitKey(3);
         
         detectAndDisplay(cv_rgb_ptr);
@@ -164,7 +164,7 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                         if (movingState == 0){
                             now_color = color_result;
                             publishClassificationTarget(frame_target);
-                            imshow("target", frame_target);
+                            //imshow("target", frame_target);
                             char keyt = (char)waitKey(1);
                         }
                         
@@ -188,7 +188,7 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                             listen_obj_map(pose.x, pose.y, now_object);
                             evidence_id = getEvidenceID(now_object);
                             publishEvidence(evidence_id, evidence_frame, evidence_x, evidence_y);
-                            ROS_INFO("now::: %d", now_object);
+                            //ROS_INFO("now::: %d", now_object);
                             //preDetectColor = now_object;
                         }
                     }

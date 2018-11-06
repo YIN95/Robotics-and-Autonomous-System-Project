@@ -150,7 +150,7 @@ public:
 
 		bool obstacle_in_the_way = obstacleCheck();
 		if (obstacle_in_the_way) {
-			ROS_INFO("obstacle in the way");
+			//ROS_INFO("obstacle in the way");
 			stop();
 		}
 
@@ -159,8 +159,8 @@ public:
 		}
 
 		// ROS_INFO("last checkpoint: %f, %f, %f", last_checkpoint[0], last_checkpoint[1], last_checkpoint[2]);
-		ROS_INFO("v : %f", velocity_msg.linear.x);
-		ROS_INFO("w : %f", velocity_msg.angular.z);
+		//ROS_INFO("v : %f", velocity_msg.linear.x);
+		//ROS_INFO("w : %f", velocity_msg.angular.z);
 		// ROS_INFO("publishing");
 
 		pub_velocity.publish(velocity_msg);
@@ -176,7 +176,7 @@ public:
 			// ROS_INFO("distance error: %f", distance);
 
 			if ((fabs(error_angle) > angle_threshold) && (distance > distance_threshold) ) {
-				ROS_INFO("first turn");
+				//ROS_INFO("first turn");
 				rotate();
 			}
 
@@ -239,7 +239,7 @@ public:
 
 		//ROS_INFO("w : %f", w);
 		velocity_msg.linear.x = 0;
-		velocity_msg.angular.z = w; // 1.2 is a okay value
+		velocity_msg.angular.z = sign * 1.2; // 1.2 is a okay value
 	}
 
 	void translate(double distance) {
@@ -255,7 +255,7 @@ public:
 		double w = PW + IW + DW;
 
 		double v;
-		double v_max = 0.50;
+		double v_max = 0.35;
 		double v_min = 0.2;
 		double slow_dist = 0.15;
 
@@ -331,7 +331,7 @@ public:
 		velocity_msg.angular.z = 0;
 		resetErrors();
         close_enough_msg.data = true;
-		ROS_INFO("Close Enough");
+		//ROS_INFO("Close Enough");
 
 	}
 
@@ -425,7 +425,7 @@ int main(int argc, char** argv) {
 
 	int control_frequency = 125;
 	int check_every_laser = 30;
-	double min_distance_to_obstacles = 0.18;
+	double min_distance_to_obstacles = 0.17;
 
 	ros::init(argc, argv, "path_follower");
 	StraightLines sl(control_frequency, min_distance_to_obstacles, check_every_laser);
