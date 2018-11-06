@@ -425,7 +425,7 @@ int main(int argc, char** argv) {
 
 	int control_frequency = 125;
 	int check_every_laser = 30;
-	double min_distance_to_obstacles = 0.20;
+	double min_distance_to_obstacles = 0.18;
 
 	ros::init(argc, argv, "path_follower");
 	StraightLines sl(control_frequency, min_distance_to_obstacles, check_every_laser);
