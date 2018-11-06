@@ -249,31 +249,3 @@ class Graph:
 
         plt.legend()
         self.plot_graph(axis_size=axis_size)
-
-
-if __name__ == "__main__":
-
-    r = 0.161
-    axis = [-0.5, 3, -0.5, 5.5]
-
-    obst_map = ObstacleMap(r)
-    obst_map.construct_obstacle_map("/home/ras19/catkin_ws/src/gp9_path_planning/maps/maze.txt")
-    
-    # obstacles = obst_map.obstacles
-    # dims = obst_map.map_dimensions
-
-    graph = Graph(obst_map.obstacles, obst_map.map_dimensions)
-    graph.build_visibility_graph()
-    # graph.plot_graph(axis)
-
-    # start = graph.vertices[35]
-    start = Vertex(0.225, 0.225)
-    print(start)
-    goal = Vertex(2.225, 0.225)
-    print(goal)
-
-    path = graph.shortest_path(start, goal)
-    graph.plot_path(path, axis)
-
-    a = 0
-
