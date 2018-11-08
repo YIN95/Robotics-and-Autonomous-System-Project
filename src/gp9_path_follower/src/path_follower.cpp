@@ -4,6 +4,7 @@
 #include <math.h>
 #include <visualization_msgs/Marker.h>
 #include <std_msgs/Bool.h>
+#include <std_msgs/Int32.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Pose2D.h>
 #include <geometry_msgs/Quaternion.h>
@@ -24,6 +25,7 @@ public:
 	ros::Subscriber sub_desired_pose;
 	ros::Subscriber sub_odom;
 	ros::Subscriber sub_lidar;
+	ros::Subscriber sub_brain;
 
     ros::Publisher pub_close_enough;
 	ros::Publisher pub_desired_pose;
@@ -35,10 +37,13 @@ public:
 		sub_odom = nh.subscribe<geometry_msgs::Pose2D>("/pose", 1, &StraightLines::poseCallBack, this);
 		sub_lidar = nh.subscribe<sensor_msgs::LaserScan>("/scan", 1, &StraightLines::lidarCallBack, this);
 		sub_desired_pose = nh.subscribe<geometry_msgs::Pose2D>("/desired_pose", 1, &StraightLines::desiredPoseCallBack, this);
+		sub_brain = nh.subscribe<std_msgs::Int32>("/brain_state", 1, &StraightLines::brainStateCallBack, this);
 
 		pub_close_enough = nh.advertise<std_msgs::Bool>("/close_enough", 1);
 		pub_velocity = nh.advertise<geometry_msgs::Twist>("/motor_controller/velocity", 1);
 		pub_desired_pose = nh.advertise<visualization_msgs::Marker>("/visualization_marker", 1);
+
+		brain_state = 1;
 
 		stopped = false;
 		turn_flag = false;
@@ -90,7 +95,13 @@ public:
 		gains_translation[0] = 20.0;
 		gains_translation[1] = 0.01;
 		gains_translation[2] = 0;
+
+		close_enough_msg.data = false;
 		
+	}
+
+	void brainStateCallBack(const std_msgs::Int32::ConstPtr& brain_msg) {
+		brain_state = brain_msg->data;
 	}
 
 	void lidarCallBack(const sensor_msgs::LaserScan::ConstPtr& lidar_msg) {
@@ -159,9 +170,9 @@ public:
 		}
 
 		// ROS_INFO("last checkpoint: %f, %f, %f", last_checkpoint[0], last_checkpoint[1], last_checkpoint[2]);
-		//ROS_INFO("v : %f", velocity_msg.linear.x);
-		//ROS_INFO("w : %f", velocity_msg.angular.z);
-		// ROS_INFO("publishing");
+		ROS_INFO("v : %f", velocity_msg.linear.x);
+		ROS_INFO("w : %f", velocity_msg.angular.z);
+		ROS_INFO("close Enough: %d", close_enough_msg.data);
 
 		pub_velocity.publish(velocity_msg);
 		pub_close_enough.publish(close_enough_msg);
@@ -173,15 +184,15 @@ public:
 		if (!turn_flag) {
 
 			updateErrors();
-			// ROS_INFO("distance error: %f", distance);
+			ROS_INFO("distance error: %f", distance);
 
 			if ((fabs(error_angle) > angle_threshold) && (distance > distance_threshold) ) {
-				//ROS_INFO("first turn");
+				ROS_INFO("first turn");
 				rotate();
 			}
 
 			else if (distance > distance_threshold) {
-				// ROS_INFO("translation");
+				ROS_INFO("translation");
 				translate(distance);
 			}
 
@@ -293,7 +304,7 @@ public:
 	////////////////////// CHANGE TO RETURN TRUE INSIDE LOOP ////////////////////
 	bool obstacleCheck() {
 		double lidar_dist;
-		for (int i = 0; i < 360; i += every_lidar_value) {
+		for (int i = 90; i < 270; i += every_lidar_value) {
 			lidar_dist = laser_distances[i];
 			if (lidar_dist < min_distance_to_obstacle) {
 				return true;
@@ -384,6 +395,9 @@ public:
         return error_angle;
 	}
 
+	int getBrainState(){
+		return brain_state;
+	}
 
 private:
 
@@ -394,6 +408,7 @@ private:
 	bool same_point;
 	bool other_angle;
 	int control_frequency;
+	int brain_state;
 
 	double degrees;
 	double distance;
@@ -434,11 +449,13 @@ int main(int argc, char** argv) {
 	while (sl.nh.ok()) {
 		ros::spinOnce();
 		if (!sl.has_stopped()) {
-			sl.turnOnSpot();
-			sl.move();
-		}
+			if(sl.getBrainState() == 1) {
+				sl.turnOnSpot();
+				sl.move();
+			}
 
-		rate.sleep();
+			rate.sleep();
+		}
 	}
 
 	return 0;
