@@ -91,8 +91,8 @@ void ObjectDetection::imageRGBCallback(const sensor_msgs::ImageConstPtr &msg){
         origin_frame = (cv_rgb_ptr->image).clone();
         bitwise_and((cv_rgb_ptr->image), frame_threshold, origin_frame_masked);
                 
-        //imshow("image_hsv", origin_frame_masked);
-        //cv::waitKey(3);
+        imshow("image_hsv", origin_frame_masked);
+        cv::waitKey(3);
         
         detectAndDisplay(cv_rgb_ptr);
     }
@@ -103,16 +103,37 @@ void ObjectDetection::imageRGBCallback(const sensor_msgs::ImageConstPtr &msg){
     // cv::waitKey(3);    
 }
 
+void ObjectDetection::detectBarrier(){
+    int i, j, temp;
+    int height = 999;
+    for (i=0; i<640; i++){
+        for (j=0; j<480; j++){
+            temp = getDepth_onePoint(i, j);
+            if ((temp > 1) && (temp < height)){
+                height = temp;
+            }
+        }
+    }
+    ROS_INFO("|||||MinHeight: %d", height);
+    if (height < 92){
+        ROS_INFO("[WARNING] Obstacle or Wall !!!!!");
+        std_msgs::String msg;
+        msg.data = "Obstacle or Wall";
+        pub_speak.publish(msg);
+    }
+}
+
 void ObjectDetection::imageDepthCallback(const sensor_msgs::ImageConstPtr &msg){
     try{
         cv_depth_ptr = cv_bridge::toCvCopy(msg);
+        detectBarrier();
         // , sensor_msgs::image_encodings::mono8
     }
     catch (...){
         return;
     }
-    // cv::imshow("DEPTH_WINDOW", cv_depth_ptr->image);
-    // cv::waitKey(3);  
+    cv::imshow("DEPTH_WINDOW", cv_depth_ptr->image);
+    cv::waitKey(3);  
 }
 
 void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
@@ -126,7 +147,7 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
         cvtColor(frame, frame_gray, COLOR_BGR2GRAY);
         equalizeHist(frame_gray, frame_gray);
         //-- Detect objects
-        cascade.detectMultiScale(frame_gray, objects, 1.1, 3, 0|CASCADE_SCALE_IMAGE, Size(90, 90), Size(170, 170));
+        cascade.detectMultiScale(frame_gray, objects, 1.1, 3, 0|CASCADE_SCALE_IMAGE, Size(70, 70), Size(190, 190));
         detect_size = std::min(int(objects.size()), detect_size);
 
 
@@ -165,7 +186,7 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                             now_color = color_result;
                             publishClassificationTarget(frame_target);
                             //imshow("target", frame_target);
-                            char keyt = (char)waitKey(1);
+                            //char keyt = (char)waitKey(1);
                         }
                         
 
@@ -272,6 +293,111 @@ void ObjectDetection::pubPose(double x, double y, int type){
     marker.color.r = 0.0;
     marker.color.g = 1.0;
     marker.color.b = 0.0;
+
+//////////////////////////////////////////////////////////
+
+        if (type == obj.Blue_Cube){
+            marker.type = visualization_msgs::Marker::CUBE;
+            marker.color.r = 0.0;
+            marker.color.g = 0.0;
+            marker.color.b = 1.0;
+        }
+            
+        
+        else if (type == obj.Blue_Triangle){
+            marker.type = visualization_msgs::Marker::ARROW;
+            marker.color.r = 0.0;
+            marker.color.g = 0.0;
+            marker.color.b = 1.0;
+        }
+          
+        
+        else if (type == obj.Green_Cube){
+            marker.type = visualization_msgs::Marker::CUBE;
+            marker.color.r = 0.0;
+            marker.color.g = 1.0;
+            marker.color.b = 0.0;
+        }
+        
+        else if (type == obj.Green_Cylinder){
+            marker.type = visualization_msgs::Marker::CYLINDER;
+            marker.color.r = 0.0;
+            marker.color.g = 1.0;
+            marker.color.b = 0.0;
+        }
+
+        else if (type == obj.Green_Hollow_Cube){
+            marker.type = visualization_msgs::Marker::CUBE;
+            marker.color.r = 0.0;
+            marker.color.g = 1.0;
+            marker.color.b = 0.0;
+        }
+
+        else if (type == obj.Orange_Cross){
+            marker.type = visualization_msgs::Marker::CUBE;
+            marker.color.r = 1;
+            marker.color.g = 0.5;
+            marker.color.b = 0.05;
+        }
+        
+        else if (type == obj.Patric){
+            marker.type = visualization_msgs::Marker::SPHERE;
+            marker.color.r = 1;
+            marker.color.g = 0.5;
+            marker.color.b = 0.05;
+        }
+        
+        else if (type == obj.Purple_Cross){
+            marker.type = visualization_msgs::Marker::CUBE;
+            marker.color.r = 0.6;
+            marker.color.g = 0.13;
+            marker.color.b = 0.9;
+        }
+
+        else if (type == obj.Purple_Star){
+            marker.type = visualization_msgs::Marker::SPHERE;
+            marker.color.r = 0.6;
+            marker.color.g = 0.13;
+            marker.color.b = 0.9;
+        }
+
+        else if (type == obj.Red_Ball){
+            marker.type = visualization_msgs::Marker::SPHERE;
+            marker.color.r = 1;
+            marker.color.g = 0;
+            marker.color.b = 0;
+        }
+ 
+        else if (type == obj.Red_Cylinder){
+            marker.type = visualization_msgs::Marker::CYLINDER;
+            marker.color.r = 1;
+            marker.color.g = 0;
+            marker.color.b = 0;
+        }
+
+        else if (type == obj.Red_Hollow_Cube){
+            marker.type = visualization_msgs::Marker::CUBE;
+            marker.color.r = 1;
+            marker.color.g = 0;
+            marker.color.b = 0;
+        }
+        
+        else if (type == obj.Yellow_Ball){
+            marker.type = visualization_msgs::Marker::SPHERE;
+            marker.color.r = 1;
+            marker.color.g = 1;
+            marker.color.b = 0;
+        }
+
+        else if (type == obj.Yellow_Cube){
+            marker.type = visualization_msgs::Marker::CUBE;
+            marker.color.r = 1;
+            marker.color.g = 1;
+            marker.color.b = 0;
+        }
+        
+/////////////////////////////////////////////////////////
+
     // //only if using a MESH_RESOURCE marker type:
     // marker.mesh_resource = "package://pr2_description/meshes/base_v0/base.dae";
     // pub_object_marker.publish(marker);
@@ -530,6 +656,18 @@ int ObjectDetection::getDepth(int x, int y){
     return depth;
 }
 
+int ObjectDetection::getDepth_onePoint(int x, int y){
+
+    Mat frame_depth = cv_depth_ptr->image;
+    uchar* d = frame_depth.ptr<uchar>(y); 
+    int depth = d[2*x] + 255*d[2*x+1];            
+    
+    // ROS_INFO("||||| Depth: %d", depth);
+
+    return depth;
+
+}
+
 bool ObjectDetection::check_pre_object(int temp){
     int size = marker_array.markers.size();
     int index = 1;
@@ -749,6 +887,10 @@ int ObjectDetection::check_now_object(){
                     ROS_INFO("I SEE YELLOW CUBE");
                 }
                 else if (now_shape == obj.SHAPE_CROSS){
+                    now_object = obj.Yellow_Cube;
+                    ROS_INFO("I SEE YELLOW CUBE");
+                }
+                else if (now_shape == obj.SHAPE_TRIANGLE){
                     now_object = obj.Yellow_Cube;
                     ROS_INFO("I SEE YELLOW CUBE");
                 }

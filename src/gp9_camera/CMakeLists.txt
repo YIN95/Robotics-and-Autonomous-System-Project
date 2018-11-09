@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_ros
   cv_bridge
   tf
+  image_transport
 )
 
 ## System dependencies are found with CMake's conventions
@@ -142,6 +143,7 @@ target_link_libraries(object_detection ${catkin_LIBRARIES})
 
 add_executable(barrier_detection src/barrier_detection.cpp)
 target_link_libraries(barrier_detection ${catkin_LIBRARIES})
+add_dependencies(barrier_detection robot_vision_generate_messages_cpp)
 
 #add_executable(object_detection_haar src/object_detection_haar.cpp)
 #target_link_libraries(object_detection_haar ${catkin_LIBRARIES})

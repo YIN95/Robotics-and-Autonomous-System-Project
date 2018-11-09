@@ -80,6 +80,9 @@ public:
     void robotCallback(const geometry_msgs::Pose2D::ConstPtr &msg);
     double calculateDiatance(double x1, double y1, double x2, double y2);
     void stateMovingCallback(const std_msgs::Int32ConstPtr &msg);
+    int getDepth_onePoint(int x, int y);
+    void detectBarrier();
+
 public:
     static const int img_rgb_height = 480;
     static const int img_rgb_width = 640;
@@ -110,3 +113,4 @@ public:
 
 };
 
+ 

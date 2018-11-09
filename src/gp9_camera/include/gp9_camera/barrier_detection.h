@@ -3,38 +3,33 @@
 #include <pcl/point_types.h>
 #include <boost/foreach.hpp>
 #include <vector>
-
+#include <sensor_msgs/Image.h>
+#include <cv_bridge/cv_bridge.h>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/objdetect.hpp>
+#include <opencv2/videoio.hpp>
+#include <sensor_msgs/image_encodings.h>
+#include <iostream>
+#include <stdio.h>
+#include <math.h>
 
 class ObjectDetection{
 public: /* ros */
 	ros::NodeHandle nh;
+
 	/* Subscribers and publishers */
 	ros::Subscriber sub_pointcloud;
-	ros::Publisher pub_pointcloud;
+	ros::Subscriber sub_image_depth;
 
+public:
 	pcl::PointCloud<pcl::PointXYZRGB>::Ptr rgb_cloud;
-	pcl::PointCloud<pcl::PointXYZRGB>::Ptr res_cloud;
-    pcl::PointCloud<pcl::PointXYZHSV>::Ptr hsv_cloud;
-
-
+	cv_bridge::CvImagePtr cv_depth_ptr;
 public: /* Functions */
 	/* Constructor Functions */
 	ObjectDetection();
-
+	// int getDepth(int x, int y);
 	void pointCloudCallback(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &msg);
-	void pubCloud();
-	void detectObject();
-	void cleanData();
-	void clusterObject();
-	void checkColor(int h);
-    void dimFilter(std::string dim, double lower_bound, double upper_bound, bool inv_cond);
-	void colorFilter(std::string dim, double lower_bound, double upper_bound, bool inv_cond);
-	void makeVoxelGrid();
-	void removeOutliers();
-	void checkSize();
-	bool objectInImage();
-	void PointCloudXYZHSVtoXYZRGB(pcl::PointCloud<pcl::PointXYZHSV>& in, pcl::PointCloud<pcl::PointXYZRGB>& out);
-	void PointCloudXYZRGBtoXYZHSV(pcl::PointCloud<pcl::PointXYZRGB>& in, pcl::PointCloud<pcl::PointXYZHSV>& out);
-private:
-        double color_lim_s;
+	void imageDepthCallback(const sensor_msgs::ImageConstPtr &msg);
+	void detectBarrier();
 };
