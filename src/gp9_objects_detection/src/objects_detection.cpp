@@ -9,7 +9,7 @@ int main(int argc, char** argv)
 	ros::init(argc, argv, "object_detection");
 	ObjectDetection objectDetection;
 
-	ros::Rate rate(2);
+	ros::Rate rate(1);
 	
 	while (objectDetection.nh.ok()) {
         
@@ -341,7 +341,7 @@ int ObjectDetection::colorClassifier(int h, int s, int v, int b, int g, int r){
             ROS_INFO("COLOR_RED");
             return obj.COLOR_RED;
         }
-        else if ((156 <= h && h <= 180) && (0 <= s && s <= 255) && (0 <= v && v <= 255)){
+        else if ((176 <= h && h <= 180) && (0 <= s && s <= 255) && (0 <= v && v <= 255)){
             ROS_INFO("COLOR_RED");
             return obj.COLOR_RED;
         }
@@ -375,7 +375,7 @@ int ObjectDetection::colorClassifier(int h, int s, int v, int b, int g, int r){
                 return obj.COLOR_BLUE;
             }
         }
-        else if (129 <= h && h < 155 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
+        else if (129 <= h && h <= 175 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
             ROS_INFO("COLOR_PURPLE");
             return obj.COLOR_PURPLE;
         }
@@ -740,7 +740,15 @@ int ObjectDetection::check_now_object(){
                     now_object = obj.Yellow_Ball;
                     ROS_INFO("I SEE YELLOW BALL");
                 }
+                else if (now_shape == obj.SHAPE_CYLINDER){
+                    now_object = obj.Yellow_Ball;
+                    ROS_INFO("I SEE YELLOW CUBE");
+                }
                 else if (now_shape == obj.SHAPE_CUBE){
+                    now_object = obj.Yellow_Cube;
+                    ROS_INFO("I SEE YELLOW CUBE");
+                }
+                else if (now_shape == obj.SHAPE_CROSS){
                     now_object = obj.Yellow_Cube;
                     ROS_INFO("I SEE YELLOW CUBE");
                 }
