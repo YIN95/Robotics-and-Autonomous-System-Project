@@ -26,10 +26,12 @@ public:
 	ros::Subscriber sub_odom;
 	ros::Subscriber sub_lidar;
 	ros::Subscriber sub_brain;
+	ros::Subscriber sub_goal;
 
     ros::Publisher pub_close_enough;
 	ros::Publisher pub_desired_pose;
 	ros::Publisher pub_velocity;
+	ros::Publisher pub_has_reached_goal;
 
 	StraightLines(int control_frequency_, double min_distance_to_obstacle_, int every_lidar_value_) {
 		nh = ros::NodeHandle("~");
@@ -38,12 +40,15 @@ public:
 		sub_lidar = nh.subscribe<sensor_msgs::LaserScan>("/scan", 1, &StraightLines::lidarCallBack, this);
 		sub_desired_pose = nh.subscribe<geometry_msgs::Pose2D>("/desired_pose", 1, &StraightLines::desiredPoseCallBack, this);
 		sub_brain = nh.subscribe<std_msgs::Int32>("/brain_state", 1, &StraightLines::brainStateCallBack, this);
+		sub_goal = nh.subscribe<geometry_msgs::Pose2D>("/global_desired_pose", 1, &StraightLines::globalDesiredPoseCallBack, this);
+
 
 		pub_close_enough = nh.advertise<std_msgs::Bool>("/close_enough", 1);
 		pub_velocity = nh.advertise<geometry_msgs::Twist>("/motor_controller/velocity", 1);
 		pub_desired_pose = nh.advertise<visualization_msgs::Marker>("/visualization_marker", 1);
+		pub_has_reached_goal = nh.advertise<std_msgs::Bool>("/has_reached_goal", 1);
 
-		brain_state = 1;
+		brain_state = -10;
 
 		stopped = false;
 		turn_flag = false;
@@ -60,6 +65,7 @@ public:
 
 		pose = std::vector<double>(3, 0);
         pose_desired = std::vector<double>(3, 0);
+		pose_goal = std::vector<double>(3, 0);
         pose_previous = std::vector<double>(3, 0);
         last_checkpoint = std::vector<double>(3, 0);
 
@@ -75,6 +81,10 @@ public:
         last_checkpoint[0] = 0.225;
         last_checkpoint[1] = 0.225;
         last_checkpoint[2] = M_PI / 2;
+
+		pose_goal[0] = 20;
+		pose_goal[1] = 20;
+		pose_goal[2] = M_PI;
 
 		degrees = 3;
 		angle_threshold = degToRad(degrees);
@@ -97,6 +107,7 @@ public:
 		gains_translation[2] = 0;
 
 		close_enough_msg.data = false;
+		has_reached_goal_msg.data = false;
 		
 	}
 
@@ -130,12 +141,29 @@ public:
 		pose_previous[1] = pose_desired[1];
 		pose_previous[2] = pose_desired[2];
 
+		// ROS_INFO("Local Pose Callback");
+
 		show_desired_pose();
+	}
+
+	void globalDesiredPoseCallBack(const geometry_msgs::Pose2D::ConstPtr& global_desired_pose_msg) {
+		pose_goal[0] = global_desired_pose_msg->x;
+		pose_goal[1] = global_desired_pose_msg->y;
+		pose_goal[2] = global_desired_pose_msg->theta;
+
+		// ROS_INFO("Global Pose Callback");
+
+		// bool x_close = fabs(pose_previous[0] - pose_desired[0]) < 1e-6;
+		// bool y_close = fabs(pose_previous[1] - pose_desired[1]) < 1e-6;
+		// same_point = (x_close && y_close);
+		// bool angle_close = fabs(pose_desired[2] - pose_previous[2]) < 1e-6;
+		// other_angle = !angle_close;
+
 	}
 
 	void turnOnSpot() {
 		close_enough_msg.data = false;
-
+		has_reached_goal_msg.data = false;
 		if (same_point && other_angle) {
 			turn_flag = true;
 			resetErrors();
@@ -170,12 +198,13 @@ public:
 		}
 
 		// ROS_INFO("last checkpoint: %f, %f, %f", last_checkpoint[0], last_checkpoint[1], last_checkpoint[2]);
-		ROS_INFO("v : %f", velocity_msg.linear.x);
-		ROS_INFO("w : %f", velocity_msg.angular.z);
-		ROS_INFO("close Enough: %d", close_enough_msg.data);
+		// ROS_INFO("v : %f", velocity_msg.linear.x);
+		// ROS_INFO("w : %f", velocity_msg.angular.z);
+		// ROS_INFO("close Enough: %d", close_enough_msg.data);
 
 		pub_velocity.publish(velocity_msg);
 		pub_close_enough.publish(close_enough_msg);
+		pub_has_reached_goal.publish(has_reached_goal_msg);
 		// ROS_INFO("=============================================");
 	}
 
@@ -184,20 +213,21 @@ public:
 		if (!turn_flag) {
 
 			updateErrors();
-			ROS_INFO("distance error: %f", distance);
+			// ROS_INFO("distance error: %f", distance);
 
 			if ((fabs(error_angle) > angle_threshold) && (distance > distance_threshold) ) {
-				ROS_INFO("first turn");
+				// ROS_INFO("first turn");
 				rotate();
 			}
 
 			else if (distance > distance_threshold) {
-				ROS_INFO("translation");
+				// ROS_INFO("translation");
 				translate(distance);
 			}
 
 			else {
 				closeEnough();
+				hasReachedGoal();
 			}
 		}
 	}
@@ -301,7 +331,6 @@ public:
 		velocity_msg.angular.z = w;
 	}
 
-	////////////////////// CHANGE TO RETURN TRUE INSIDE LOOP ////////////////////
 	bool obstacleCheck() {
 		double lidar_dist;
 		for (int i = 90; i < 270; i += every_lidar_value) {
@@ -343,6 +372,27 @@ public:
 		resetErrors();
         close_enough_msg.data = true;
 		//ROS_INFO("Close Enough");
+
+	}
+
+	void hasReachedGoal() {
+		ROS_INFO("Pose Goal x: %f", pose_goal[0]);
+		ROS_INFO("Pose Desired x: %f", pose_desired[0]);
+		ROS_INFO("Pose Goal y: %f", pose_goal[1]);
+		ROS_INFO("Pose Desired y: %f", pose_desired[1]);
+		ROS_INFO("Pose Goal theta: %f", pose_goal[2]);
+		ROS_INFO("Pose Desired theta: %f", pose_desired[2]);
+		if(pose_goal == pose_desired)
+		{
+			has_reached_goal_msg.data = true;
+			ROS_INFO("hasReachedGoal");
+		}
+		else
+		{
+			has_reached_goal_msg.data = false;
+			ROS_INFO("NO");
+		}
+        ROS_INFO("--------------------------------------------------------");
 
 	}
 
@@ -417,6 +467,7 @@ private:
 	double distance_threshold;
 
 	std_msgs::Bool close_enough_msg;
+	std_msgs::Bool has_reached_goal_msg;
 	geometry_msgs::Twist velocity_msg;
 
 	int every_lidar_value;
@@ -426,6 +477,7 @@ private:
 	std::vector<double> pose;
 	std::vector<double> pose_desired;
 	std::vector<double> pose_previous;
+	std::vector<double> pose_goal;
 	std::vector<double> last_checkpoint;
 
     double error_angle;

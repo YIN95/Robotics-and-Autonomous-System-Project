@@ -30,6 +30,7 @@ class PathPublisher:
         self.pub_path = rospy.Publisher('/path', PathList, queue_size=1)
         self.position = Vertex(0.225, 0.225)
         self.desired_position = Vertex(0.225, 0.225)
+        self.previous_desired_position = Vertex(0.225, 0.225)
         self.graph = visibility_graph
 
         self.new_position = False
@@ -42,6 +43,12 @@ class PathPublisher:
         rospy.loginfo("===================================")
         self.desired_position = Vertex(desired_pose.x, desired_pose.y)
         self.new_position = True
+        
+        
+        # if Vertex(desired_pose.x, desired_pose.y) != self.previous_desired_position:
+        #     self.desired_position = Vertex(desired_pose.x, desired_pose.y)
+        #     self.new_position = True
+        #     self.previous_desired_position = self.desired_position
     
     def _find_path(self):
 
