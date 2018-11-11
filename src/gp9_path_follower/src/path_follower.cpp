@@ -155,7 +155,7 @@ public:
 		pose_goal[1] = global_desired_pose_msg->y;
 		pose_goal[2] = global_desired_pose_msg->theta;
 
-		ROS_INFO("Global Pose Callback");
+		// ROS_INFO("Global Pose Callback");
 
 		// bool x_close = fabs(pose_previous[0] - pose_desired[0]) < 1e-6;
 		// bool y_close = fabs(pose_previous[1] - pose_desired[1]) < 1e-6;
@@ -383,12 +383,6 @@ public:
 	}
 
 	void hasReachedGoal() {
-		ROS_INFO("Pose Goal x: %f", pose_goal[0]);
-		ROS_INFO("Pose Desired x: %f", pose_desired[0]);
-		ROS_INFO("Pose Goal y: %f", pose_goal[1]);
-		ROS_INFO("Pose Desired y: %f", pose_desired[1]);
-		ROS_INFO("Pose Goal theta: %f", pose_goal[2]);
-		ROS_INFO("Pose Desired theta: %f", pose_desired[2]);
 		if(pose_goal == pose_desired)
 		{
 			has_reached_goal_msg.data = true;
@@ -397,7 +391,7 @@ public:
 		else
 		{
 			has_reached_goal_msg.data = false;
-			ROS_INFO("NO");
+			// ROS_INFO("NO");
 		}
 		if(has_reached_goal_msg.data != previous_hasReachedGoal){
 			newInfoAboutGoal = true;
@@ -406,7 +400,6 @@ public:
 			newInfoAboutGoal = false;
 		}
 		previous_hasReachedGoal = has_reached_goal_msg.data;
-        ROS_INFO("--------------------------------------------------------");
 
 	}
 

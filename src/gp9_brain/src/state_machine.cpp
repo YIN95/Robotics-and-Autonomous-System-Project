@@ -5,6 +5,7 @@
 #include <std_msgs/Bool.h>
 #include <geometry_msgs/Pose2D.h>
 
+
 class StateMachine{
 
 public: /* ros */
@@ -25,7 +26,11 @@ public: /* ros */
 
 		global_pose = std::vector<double>(3, 0);
 		previous_pose = std::vector<double>(3, 0);
-		pose_sequence = std::vector<std::vector<double> >(numberOfPoses, std::vector<double>(3, 0)); //The fourth value of the row could be 0 if there is nothing to grab, 1 if it is an object pose, 2 if there is an obstacle to avoid
+		pose_sequence = std::vector<std::vector<double> >(numberOfPoses, std::vector<double>(3, 0)); 
+		//The fourth value of the row could be:
+		//- 0 if there is nothing to grab;
+		//- 1 if it is an object pose;
+		//- 2 if there is an obstacle to avoid.
 
 		global_pose[0] = 0.225;
 		global_pose[1] = 0.225;
@@ -81,7 +86,7 @@ public: /* ros */
 			case 1:
 				ROS_INFO("MOVING");
 				if(hasReachedGoal){
-					currentState = -1;
+					currentState = 0;
 					hasReachedGoal = false;
 				}
 				break;
@@ -90,14 +95,6 @@ public: /* ros */
 				ROS_INFO("GO HOME");
 				global_pose[0] = 0.225;
 				global_pose[1] = 0.225;
-				global_pose[2] = 0.0;
-				currentState = 1;
-				break;
-
-
-			case 10: //Initial Pose
-				global_pose[0] = 1.0;
-				global_pose[1] = 2.15;
 				global_pose[2] = 0.0;
 				currentState = 1;
 				break;
