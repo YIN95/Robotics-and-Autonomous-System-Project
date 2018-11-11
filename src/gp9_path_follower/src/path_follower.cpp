@@ -40,7 +40,7 @@ public:
 		sub_lidar = nh.subscribe<sensor_msgs::LaserScan>("/scan", 1, &StraightLines::lidarCallBack, this);
 		sub_desired_pose = nh.subscribe<geometry_msgs::Pose2D>("/desired_pose", 1, &StraightLines::desiredPoseCallBack, this);
 		sub_brain = nh.subscribe<std_msgs::Int32>("/brain_state", 1, &StraightLines::brainStateCallBack, this);
-		sub_goal = nh.subscribe<geometry_msgs::Pose2D>("/global_desired_pose", 1, &StraightLines::globalDesiredPoseCallBack, this);
+		sub_goal = nh.subscribe<geometry_msgs::Pose2D>("/global_desired_pose", 10, &StraightLines::globalDesiredPoseCallBack, this);
 
 
 		pub_close_enough = nh.advertise<std_msgs::Bool>("/close_enough", 1);
@@ -55,6 +55,8 @@ public:
 		point_flag = false;
 		same_point = false;
 		other_angle = false;
+		newInfoAboutGoal = false;
+		previous_hasReachedGoal = true;
 
 		control_frequency = control_frequency_;
 		dt = 1.0 / control_frequency;
@@ -109,6 +111,8 @@ public:
 		close_enough_msg.data = false;
 		has_reached_goal_msg.data = false;
 		
+
+		
 	}
 
 	void brainStateCallBack(const std_msgs::Int32::ConstPtr& brain_msg) {
@@ -151,7 +155,7 @@ public:
 		pose_goal[1] = global_desired_pose_msg->y;
 		pose_goal[2] = global_desired_pose_msg->theta;
 
-		// ROS_INFO("Global Pose Callback");
+		ROS_INFO("Global Pose Callback");
 
 		// bool x_close = fabs(pose_previous[0] - pose_desired[0]) < 1e-6;
 		// bool y_close = fabs(pose_previous[1] - pose_desired[1]) < 1e-6;
@@ -204,7 +208,10 @@ public:
 
 		pub_velocity.publish(velocity_msg);
 		pub_close_enough.publish(close_enough_msg);
-		pub_has_reached_goal.publish(has_reached_goal_msg);
+		if(newInfoAboutGoal){
+			pub_has_reached_goal.publish(has_reached_goal_msg);
+		}
+		
 		// ROS_INFO("=============================================");
 	}
 
@@ -392,6 +399,13 @@ public:
 			has_reached_goal_msg.data = false;
 			ROS_INFO("NO");
 		}
+		if(has_reached_goal_msg.data != previous_hasReachedGoal){
+			newInfoAboutGoal = true;
+		}
+		else{
+			newInfoAboutGoal = false;
+		}
+		previous_hasReachedGoal = has_reached_goal_msg.data;
         ROS_INFO("--------------------------------------------------------");
 
 	}
@@ -459,6 +473,8 @@ private:
 	bool other_angle;
 	int control_frequency;
 	int brain_state;
+	bool newInfoAboutGoal;
+	bool previous_hasReachedGoal;
 
 	double degrees;
 	double distance;
