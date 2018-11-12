@@ -16,14 +16,11 @@ public: /* ros */
         ros::Subscriber sub_pose;
         ros::Publisher pub_weight_pose;
         ros::Publisher pub_corrected_pose;
-
-        ros::Time current_time;
-        ros::Time last_time;
+        ros::Publisher pub_object_marker_array;
 
         visualization_msgs::Marker marker;
         visualization_msgs::MarkerArray marker_array;
         
-        ros::Publisher pub_object_marker_array;
 public: /* Functions */
 	/* Constructor Functions */
         ParticleFilter();
@@ -41,9 +38,6 @@ public: /* Functions */
         void pubParticles(int before);
 
 private:
-        double frequency;
-        double dt;
-
         int n_particles;
         int n_measurements;
         double measurements[30];

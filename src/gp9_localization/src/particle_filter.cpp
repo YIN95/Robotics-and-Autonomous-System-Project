@@ -297,9 +297,6 @@ int main(int argc, char** argv) {
 }
 
 ParticleFilter::ParticleFilter() {
-    dt = (current_time - last_time).toSec();
-    frequency = 5;
-    dt = 1.0/frequency;
     n_measurements = 30;
     n_particles = 500;
     particles = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
@@ -308,10 +305,7 @@ ParticleFilter::ParticleFilter() {
     std_y = 0.02;
     std_theta = 0.1;
     std_meas = 0.000001;
-    lambda = 0.0001;
-
-    current_time = ros::Time::now();
-    last_time = ros::Time::now();
+    lambda = -1; //0.0001;
 
     start_pose[0] = 0.225;
     start_pose[1] = 0.225;
@@ -351,32 +345,26 @@ void ParticleFilter::predict() {
     random_numbers::RandomNumberGenerator gen;
     for(int i = 0; i < n_particles; i++) {
         particles[0][i] += gen.gaussian(dx, std_x);
-
-        // TODO: for whole bounding box
         if (particles[0][i] < 0) {
             particles[0][i] = 0.0001;
         }
-	
-	else if (particles[0][i] > 2.4) {
-	    particles[0][i] = 2.3999;
-	}
-
+	    else if (particles[0][i] > 2.4) {
+	        particles[0][i] = 2.3999;
+	    }
 
         particles[1][i] += gen.gaussian(dy, std_y);
-
         if (particles[1][i] < 0) {
             particles[1][i] = 0.0001;
         }
-
-	else if (particles[1][i] > 2.4) {
-	    particles[1][i] = 2.3999;
-	}
+	    else if (particles[1][i] > 2.4) {
+	        particles[1][i] = 2.3999;
+	    }
 
         particles[2][i] += gen.gaussian(dtheta, std_theta);
-
         if(particles[2][i] < 0) {
             particles[2][i] += 2*M_PI;
-        } else if(particles[2][i] > 2*M_PI) {
+        } 
+        else if(particles[2][i] > 2*M_PI) {
             particles[2][i] -= 2*M_PI;
         }
     }
@@ -385,7 +373,7 @@ void ParticleFilter::predict() {
 void ParticleFilter::associate() {
     Intersections intersections = Intersections();
     double psi[n_particles][n_measurements];
-    double psi_means[n_measurements];
+    std::vector<double> psi_means = std::vector<double>(n_measurements, 0);
     bool outliers[n_measurements];
     for(int i = 0; i < n_particles; i++) {
         Pose pose = Pose(particles[0][i], particles[1][i], particles[2][i]);
@@ -405,7 +393,7 @@ void ParticleFilter::associate() {
     for(int i = 0; i < n_measurements; i++){
         if(psi_means[i] < lambda) {
             outliers[i] = true;
-            //ROS_INFO("OUTLIER");
+            ROS_INFO("OUTLIER");
         } else {
             outliers[i] = false;
         }
@@ -428,9 +416,7 @@ void ParticleFilter::associate() {
     
     for(int i = 0; i < n_particles; i++) {
         particles[3][i] /= weight_sum;
-        
     }
-
 }
 
 void ParticleFilter::associate2() {
@@ -445,11 +431,9 @@ void ParticleFilter::associate2() {
         } else {
             psi[i] = pow(10, 20)*exp(-0.5*pow(nu, 2)/std_meas);
             //ROS_INFO("PSI %f",  psi[i]);
-        }
-        
+        }   
         
     }
-    // TODO WHAT HAPPENS IF PSI IS ALL ZEROS?
     double norm_sum = 0;
     for(int i = 0; i < n_particles; i++) {
         norm_sum += psi[i];
@@ -462,7 +446,6 @@ void ParticleFilter::associate2() {
         particles[3][i] /= norm_sum;
         //ROS_INFO("x: %f, y: %f, theta: %f, w: %lf", particles[0][i], particles[1][i], particles[2][i], particles[3][i]);
     }
-
 }
 
 double ParticleFilter::calcInnovation() {
@@ -478,26 +461,19 @@ double ParticleFilter::calcInnovation() {
 }
 
 void ParticleFilter::systematicResample() {
-        
-
-    // random_numbers::RandomNumberGenerator gen;
-        
-    
     double cumsum[n_particles];
     cumsum[0] = particles[3][0];
     for(int i = 1; i < n_particles ; i++) {
         cumsum[i] = cumsum[i-1] + particles[3][i];
     }
-    
-    // double r_0 = gen.uniform01()/n_particles;
 
     srand(time(0));
     double r_0 = (rand()%100 / (double)101) /n_particles;
-    ROS_INFO("R0: %f", r_0);
+    //ROS_INFO("R0: %f", r_0);
     int ind = 0;
     for(int i = 0; i < n_particles ; i++) {
         for(int j = 0; j < n_particles ; j++) {
-            if(r_0 <= cumsum[j]) {
+            if(cumsum[j] >= r_0) {
                 ind = j;
                 break;
             }
@@ -515,13 +491,10 @@ void ParticleFilter::systematicResample() {
 
 void ParticleFilter::MCL() {
     predict();
-    // pubParticles();
     associate();
     pubParticles(0);
     systematicResample();
-            
     pubParticles(1);
-
     weightedAveragePosePublisher();
 }
 
