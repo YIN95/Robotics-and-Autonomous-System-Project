@@ -305,7 +305,7 @@ ParticleFilter::ParticleFilter() {
     std_y = 0.05;
     std_theta = 0.2;
     std_meas = 0.000001;
-    lambda = -1;// 0.0001;
+    lambda = -1;//0.0001;
 
     start_pose[0] = 0.225;
     start_pose[1] = 0.225;
@@ -417,7 +417,7 @@ void ParticleFilter::associate() {
             } else {
                 double nu = measurements[j] - z_hat[j];
                 //ROS_INFO("DIFFERENCE INNOVATION \n MODEL: %f \n MEASUREMENT: %f \n", z_hat[j],measurements[j]);
-                psi[i][j] = exp(-(0.5*pow(nu, 2))/std_meas);
+                psi[i][j] = exp(-(0.5*pow(nu, 2))/std_meas);///(std_meas*sqrt(2*M_PI));
             }
             psi_means[j] += psi[i][j]/n_particles;
         }
