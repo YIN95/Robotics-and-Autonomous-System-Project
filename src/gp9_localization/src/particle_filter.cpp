@@ -301,15 +301,19 @@ ParticleFilter::ParticleFilter() {
     n_particles = 500;
     particles = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
     particles_res = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
-    std_x = 0.02;
-    std_y = 0.02;
-    std_theta = 0.1;
+    std_x = 0.05;
+    std_y = 0.05;
+    std_theta = 0.2;
     std_meas = 0.000001;
-    lambda = -1; //0.0001;
+    lambda = -1;// 0.0001;
 
     start_pose[0] = 0.225;
     start_pose[1] = 0.225;
     start_pose[2] = 0.5*M_PI;
+
+    last_pose[0] = 0.225;
+    last_pose[1] = 0.225;
+    last_pose[2] = 0.5*M_PI;
 
     x_old = start_pose[0];
     y_old = start_pose[1];
@@ -318,10 +322,12 @@ ParticleFilter::ParticleFilter() {
     dy = 0;
     dtheta = 0;
 
-    global_flag =  false;
+    emergency = false;
+    init_flag =  0;
 
     sub_pose = nh.subscribe<geometry_msgs::Pose2D>("/pose", 1, &ParticleFilter::odometryCallBack, this);
     sub_lidar = nh.subscribe<sensor_msgs::LaserScan>("/scan", 1, &ParticleFilter::lidarCallBack, this);
+    sub_emergency = nh.subscribe<std_msgs::Bool>("/emergency_break", 1, &ParticleFilter::emergencyCallBack, this);
     pub_weight_pose = nh.advertise<geometry_msgs::Pose2D>("/corrected_pose", 1);
     pub_corrected_pose = nh.advertise<visualization_msgs::Marker>("/visualization_filter", 1);
     pub_object_marker_array = nh.advertise<visualization_msgs::Marker>("/particle/points", 100);
@@ -329,7 +335,12 @@ ParticleFilter::ParticleFilter() {
 }
 
 void ParticleFilter::initParticles() {
-    if(!global_flag) {
+    random_numbers::RandomNumberGenerator gen;
+
+    if(init_flag == 0) {
+        n_particles = 500;
+        particles = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
+        particles_res = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
         for(int i = 0; i < n_particles; i++) {
             particles[0][i] = start_pose[0];
             particles[1][i] = start_pose[1];
@@ -337,7 +348,28 @@ void ParticleFilter::initParticles() {
             particles[3][i] = 1.0/n_particles;
         }
     }
-    //TODO global localization over whole map (need bounds)
+    else if(init_flag == 1) {
+        n_particles = 1000;
+        particles = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
+        particles_res = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
+        for(int i = 0; i < n_particles; i++) {
+            particles[0][i] = gen.uniform01()-0.5+last_pose[0];
+            particles[1][i] = gen.uniform01()-0.5+last_pose[1];
+            particles[2][i] = gen.uniform01()-0.5+last_pose[2];
+            particles[3][i] = 1.0/n_particles;
+        }
+    }
+    else {
+        n_particles = 2000;
+        particles = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
+        particles_res = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
+        for(int i = 0; i < n_particles; i++) {
+            particles[0][i] = gen.uniform01()*2.4;
+            particles[1][i] = gen.uniform01()*2.4;
+            particles[2][i] = gen.uniform01()*2*M_PI;
+            particles[3][i] = 1.0/n_particles;
+        }
+    }
 }
 
 
@@ -490,12 +522,19 @@ void ParticleFilter::systematicResample() {
 }
 
 void ParticleFilter::MCL() {
-    predict();
-    associate();
-    pubParticles(0);
-    systematicResample();
-    pubParticles(1);
-    weightedAveragePosePublisher();
+    if(!emergency) {
+        predict();
+        associate();
+        pubParticles(0);
+        systematicResample();
+        pubParticles(1);
+        weightedAveragePosePublisher();
+    }
+    else {
+        //init_flag = 1;
+        initParticles();
+        emergency = false;
+    }
 }
 
 
@@ -523,6 +562,10 @@ void ParticleFilter::lidarCallBack(const sensor_msgs::LaserScan::ConstPtr &msg) 
     }
 }
 
+void ParticleFilter::emergencyCallBack(const std_msgs::Bool::ConstPtr &msg) {
+    emergency = msg->data;
+}
+
 void ParticleFilter::weightedAveragePosePublisher() {
     geometry_msgs::Pose2D pose;
     pose.x = 0;
@@ -547,6 +590,10 @@ void ParticleFilter::weightedAveragePosePublisher() {
 
     pose.x /= n_particles;
     pose.y /= n_particles;
+
+    last_pose[0] = pose.x;
+    last_pose[1] = pose.y;
+    last_pose[2] = pose.theta;
 
     pub_weight_pose.publish(pose);
     showPose(pose);

@@ -1,6 +1,7 @@
 #include "ros/ros.h"
 #include "sensor_msgs/LaserScan.h"
 #include "geometry_msgs/Pose2D.h"
+#include <std_msgs/Bool.h>
 #include <math.h>
 #include <vector>
 #include <deque>
@@ -14,6 +15,7 @@ public: /* ros */
 	/* Subscribers and publishers */
         ros::Subscriber sub_lidar;
         ros::Subscriber sub_pose;
+        ros::Subscriber sub_emergency;
         ros::Publisher pub_weight_pose;
         ros::Publisher pub_corrected_pose;
         ros::Publisher pub_object_marker_array;
@@ -33,6 +35,7 @@ public: /* Functions */
         void systematicResample();
         void odometryCallBack(const geometry_msgs::Pose2D::ConstPtr &msg);
         void lidarCallBack(const sensor_msgs::LaserScan::ConstPtr &msg);
+        void emergencyCallBack(const std_msgs::Bool::ConstPtr &msg);
         void weightedAveragePosePublisher();
         void showPose(geometry_msgs::Pose2D &corrected_pose);
         void pubParticles(int before);
@@ -57,7 +60,12 @@ private:
         double dtheta;
 
         double start_pose[3];
-        bool global_flag;
+        double last_pose[3];
+
+        double bounds[4];
+
+        bool emergency;
+        int init_flag;
 
         std::deque<double> z_hat;
 };
