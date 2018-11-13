@@ -64,6 +64,7 @@ private:
 
         double bounds[4];
 
+        double lidar_offset;
         bool emergency;
         int init_flag;
 

@@ -322,6 +322,7 @@ ParticleFilter::ParticleFilter() {
     dy = 0;
     dtheta = 0;
 
+    lidar_offset = -0.06;
     emergency = false;
     init_flag =  0;
 
@@ -408,7 +409,7 @@ void ParticleFilter::associate() {
     std::vector<double> psi_means = std::vector<double>(n_measurements, 0);
     bool outliers[n_measurements];
     for(int i = 0; i < n_particles; i++) {
-        Pose pose = Pose(particles[0][i], particles[1][i], particles[2][i]);
+        Pose pose = Pose(particles[0][i]+lidar_offset*cos(particles[2][i]), particles[1][i]+lidar_offset*sin(particles[2][i]), particles[2][i]);
         std::deque<double> z_hat = intersections.findIntersections(pose, n_measurements);
         for(int j = 0; j < n_measurements; j++) {
             if(isinf(measurements[j])) {
