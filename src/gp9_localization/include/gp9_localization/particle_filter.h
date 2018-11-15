@@ -6,7 +6,6 @@
 #include <vector>
 #include <deque>
 #include <visualization_msgs/Marker.h>
-// #include <visualization_msgs/points.h>
 #include <visualization_msgs/MarkerArray.h>
 
 class ParticleFilter{
