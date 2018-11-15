@@ -533,7 +533,7 @@ public:
         //if(!emergency) {
             predict();
             associate();
-            pubParticles(0);
+            //pubParticles(0);
             systematicResample();
             pubParticles(1);
             weightedAveragePosePublisher();
