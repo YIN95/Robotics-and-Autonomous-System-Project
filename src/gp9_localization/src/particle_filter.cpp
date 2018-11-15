@@ -530,19 +530,19 @@ public:
     }
 
     void MCL() {
-        if(!emergency) {
+        //if(!emergency) {
             predict();
             associate();
             pubParticles(0);
             systematicResample();
             pubParticles(1);
             weightedAveragePosePublisher();
-        }
-        else {
+        //}
+        //else {
             //init_flag = 1;
-            initParticles();
-            emergency = false;
-        }
+            //initParticles();
+            //emergency = false;
+        //}
     }
 
 
