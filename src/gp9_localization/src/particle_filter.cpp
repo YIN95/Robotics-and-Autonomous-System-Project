@@ -381,7 +381,6 @@ public:
         }
     }
 
-
     void predict() {
         random_numbers::RandomNumberGenerator gen;
         for(int i = 0; i < n_particles; i++) {
@@ -457,34 +456,6 @@ public:
         
         for(int i = 0; i < n_particles; i++) {
             particles[3][i] /= weight_sum;
-        }
-    }
-
-    void associate2() {
-        double psi[n_particles];
-        for(int i = 0; i < n_particles; i++) {
-            Pose pose = Pose(particles[0][i], particles[1][i], particles[2][i]);
-            z_hat = intersections.findIntersections(pose, n_measurements);
-            double nu = calcInnovation();
-            if (nu == 0) {
-                psi[i] = 0;
-            } else {
-                psi[i] = pow(10, 20)*exp(-0.5*pow(nu, 2)/std_meas);
-                //ROS_INFO("PSI %f",  psi[i]);
-            }   
-            
-        }
-        double norm_sum = 0;
-        for(int i = 0; i < n_particles; i++) {
-            norm_sum += psi[i];
-            particles[3][i] = psi[i];
-            //ROS_INFO("WEIGHT: %f", particles[3][i]);
-        }
-        
-        //ROS_INFO("NORM %f", norm_sum);
-        for(int i = 0; i < n_particles; i++) {
-            particles[3][i] /= norm_sum;
-            //ROS_INFO("x: %f, y: %f, theta: %f, w: %lf", particles[0][i], particles[1][i], particles[2][i], particles[3][i]);
         }
     }
 
