@@ -90,9 +90,6 @@ void ObjectDetection::imageRGBCallback(const sensor_msgs::ImageConstPtr &msg){
         cvtColor(frame_threshold, frame_threshold, COLOR_GRAY2BGR);
         origin_frame = (cv_rgb_ptr->image).clone();
         bitwise_and((cv_rgb_ptr->image), frame_threshold, origin_frame_masked);
-                
-        imshow("image_hsv", origin_frame_masked);
-        cv::waitKey(3);
         
         detectAndDisplay(cv_rgb_ptr);
     }
@@ -115,25 +112,29 @@ void ObjectDetection::detectBarrier(){
         }
     }
     ROS_INFO("|||||MinHeight: %d", height);
-    if (height < 92){
+    if (height < 89){
         ROS_INFO("[WARNING] Obstacle or Wall !!!!!");
         std_msgs::String msg;
         msg.data = "Obstacle or Wall";
         pub_speak.publish(msg);
+        String result = "I see a battery";
+        Point org(50, 30);
+        putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+        ROS_INFO("BATTERY");
     }
 }
 
 void ObjectDetection::imageDepthCallback(const sensor_msgs::ImageConstPtr &msg){
     try{
         cv_depth_ptr = cv_bridge::toCvCopy(msg);
-        detectBarrier();
+        // detectBarrier();
         // , sensor_msgs::image_encodings::mono8
     }
     catch (...){
         return;
     }
-    cv::imshow("DEPTH_WINDOW", cv_depth_ptr->image);
-    cv::waitKey(3);  
+    // cv::imshow("DEPTH_WINDOW", cv_depth_ptr->image);
+    // cv::waitKey(3);  
 }
 
 void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
@@ -199,6 +200,7 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                     // int now_see = check_now_object_color_shape();
                     
                     if ((now_see > 0)){
+                        showCresult();
                         bool is_new_object = check_pre_object(now_object);
                         bool is_new_object_p = check_pre_object_by_position(now_object, pose.x, pose.y);
                         if (is_new_object_p){
@@ -212,8 +214,10 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                             //ROS_INFO("now::: %d", now_object);
                             //preDetectColor = now_object;
                         }
+                        now_color = -1;
                     }
                     now_shape = -1;
+                    now_object = -1;
                                         
                 }
             }
@@ -225,8 +229,11 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                 ellipse(frame, center, Size(objects[i].width/2, objects[i].height/2 ), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
             }
         }
-        imshow("RESULT", frame);
-        char keyr = (char)waitKey(1);
+        detectBarrier();
+        imshow("RESULT", cv_rgb_ptr->image);
+        // char keyr = (char)waitKey(1);
+        imshow("image_hsv", origin_frame_masked);
+        cv::waitKey(3);
        
     }
     catch(...){
@@ -463,7 +470,7 @@ int ObjectDetection::colorClassifier(int h, int s, int v, int b, int g, int r){
             return -1;
         }
 
-        if (0 <= h && h <= 7 && 0 <= s && s <= 255 && 0 <= v && v <= 255){   
+        if (0 <= h && h <= 4 && 0 <= s && s <= 255 && 0 <= v && v <= 255){   
             ROS_INFO("COLOR_RED");
             return obj.COLOR_RED;
         }
@@ -471,7 +478,7 @@ int ObjectDetection::colorClassifier(int h, int s, int v, int b, int g, int r){
             ROS_INFO("COLOR_RED");
             return obj.COLOR_RED;
         }
-        else if ((8 <= h && h <= 16) && (0 <= s && s <= 255) && (0 <= v && v <= 255)){
+        else if ((5 <= h && h <= 16) && (0 <= s && s <= 255) && (0 <= v && v <= 255)){
             ROS_INFO("COLOR_ORANGE");
             return obj.COLOR_ORANGE;
         }
@@ -489,14 +496,14 @@ int ObjectDetection::colorClassifier(int h, int s, int v, int b, int g, int r){
             return obj.COLOR_GREEN;
         }
         else if (87 <= h && h <= 128 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
-            if (v>150){
+            if (v<161){
                 ROS_INFO("COLOR_LIGHT_BLUE");
                 return obj.COLOR_LIGHT_BLUE;
             }
             
         }
         else if (87 <= h && h <= 128 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
-            if (v<150){
+            if (v>160){
                 ROS_INFO("COLOR_BLUE");
                 return obj.COLOR_BLUE;
             }
@@ -625,7 +632,7 @@ void ObjectDetection::showResult(int index, int obi){
         default : //Optional
             return;
     }
-    putText(cv_rgb_ptr->image, text, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+    putText(origin_frame_masked, text, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
     
     return;
 }
@@ -723,7 +730,7 @@ bool ObjectDetection::check_pre_object_by_position(int temp, int x, int y){
 
 int ObjectDetection::getTrueDepth(int depth){
     double TD;
-    int height = 180;
+    int height = 120;
     TD = sqrt(depth*depth - height*height);
     TD = std::max(int(TD), 0);
     return int(TD);
@@ -861,6 +868,7 @@ int ObjectDetection::check_now_object_color_shape(){
             break;
         
         default :
+            now_object = -1;
             ROS_INFO("classification error");
     }
  
@@ -946,6 +954,10 @@ int ObjectDetection::check_now_object(){
                     ROS_INFO("I SEE RED CYLINDER");
                 }
                 else if (now_shape == obj.SHAPE_HOLLOW_CUBE){
+                    now_object = obj.Red_Hollow_Cube;
+                    ROS_INFO("I SEE RED HOLLOW CUBE");
+                }
+                else if (now_shape == obj.SHAPE_TRIANGLE){
                     now_object = obj.Red_Hollow_Cube;
                     ROS_INFO("I SEE RED HOLLOW CUBE");
                 }
@@ -1139,65 +1151,167 @@ int ObjectDetection::check_now_object(){
     return now_object;
 }
 
-void ObjectDetection::speakResult(){
+void ObjectDetection::showCresult(){
     String result;
-    std_msgs::String msg;
-    
+    Point org(30, 50);
+    ROS_INFO("now:%d", now_object);
     switch(now_object) {
         case 1 :
             result = "I see a yellow ball";
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
             break;
 
         case 2 :
             result = "I see a yellow cube";
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
             break;
         
         case 3 :
             result = "I see a green cube";
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
             break;
 
         case 4 :
             result = "I see a green cylinder";
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
             break;
         
         case 5 :
             result = "I see a green hollow cube";
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
             break;
 
         case 6 :
             result = "I see a orange cross";
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
             break;
         
         case 7 :
             result = "I see a Patric";
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
             break;
 
         case 8 :
             result = "I see a red cylinder";
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
             break;
 
         case 9 :
             result = "I see a red hollow cube";
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
             break;
         
         case 10 :
             result = "I see a red ball";
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
             break;
 
         case 11 :
             result = "I see a blue cube";
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
             break;
         
         case 12 :
             result = "I see a blue triangle";
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
             break;
 
         case 13 :
             result = "I see a purple cross";
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
             break;
         
         case 14 :
             result = "I see a purple star";
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+            break;
+        
+        case 99 :
+            // result = "I see an object";
+            result = " ";
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+            break;
+        default :
+            result = "";
+            ROS_INFO("speak error");
+    }
+
+}
+
+
+void ObjectDetection::speakResult(){
+    String result;
+    std_msgs::String msg;
+    Point org(30, 50);
+    switch(now_object) {
+        case 1 :
+            result = "I see a yellow ball";
+            //putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+            break;
+
+        case 2 :
+            result = "I see a yellow cube";
+            //putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+            break;
+        
+        case 3 :
+            result = "I see a green cube";
+            //putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+            break;
+
+        case 4 :
+            result = "I see a green cylinder";
+            //putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+            break;
+        
+        case 5 :
+            result = "I see a green hollow cube";
+            //putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+            break;
+
+        case 6 :
+            result = "I see a orange cross";
+            //putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+            break;
+        
+        case 7 :
+            result = "I see a Patric";
+            //putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+            break;
+
+        case 8 :
+            result = "I see a red cylinder";
+            //putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+            break;
+
+        case 9 :
+            result = "I see a red hollow cube";
+            //putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+            break;
+        
+        case 10 :
+            result = "I see a red ball";
+            //putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+            break;
+
+        case 11 :
+            result = "I see a blue cube";
+            //putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+            break;
+        
+        case 12 :
+            result = "I see a blue triangle";
+            //putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+            break;
+
+        case 13 :
+            result = "I see a purple cross";
+            //putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+            break;
+        
+        case 14 :
+            result = "I see a purple star";
+            //putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
             break;
         
         case 99 :

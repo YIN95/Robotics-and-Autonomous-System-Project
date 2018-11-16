@@ -74,6 +74,7 @@ public:
     int check_now_object();
     int check_now_object_color_shape();
     void speakResult();
+    void showCresult();
     bool check_pre_object_by_position(int temp, int x, int y);
     void publishEvidence(String object_id, Mat image, int x, int y);
     String getEvidenceID(int index);
