@@ -43,6 +43,7 @@ public: /* ros */
     ros::Publisher pose_pub;
     ros::Publisher pub_speak;
     ros::Publisher pub_evidence;
+    ros::Publisher pub_findBattery;
     //ros::Publisher pub_classification_target;
 
     visualization_msgs::Marker marker;
@@ -74,12 +75,16 @@ public:
     int check_now_object();
     int check_now_object_color_shape();
     void speakResult();
-    bool check_pre_object_by_position(int temp, int x, int y);
-    void publishEvidence(String object_id, Mat image, int x, int y);
+    void showCresult();
+    bool check_pre_object_by_position(int temp, double x, double y);
+    void publishEvidence(String object_id, Mat image, double x, double y);
     String getEvidenceID(int index);
     void robotCallback(const geometry_msgs::Pose2D::ConstPtr &msg);
     double calculateDiatance(double x1, double y1, double x2, double y2);
     void stateMovingCallback(const std_msgs::Int32ConstPtr &msg);
+    int getDepth_onePoint(int x, int y);
+    bool detectBarrier(bool detect);
+
 public:
     static const int img_rgb_height = 480;
     static const int img_rgb_width = 640;
@@ -93,12 +98,17 @@ public:
     cv_bridge::CvImagePtr cv_depth_ptr;
     string cascade_name;
     CascadeClassifier cascade;
+    CascadeClassifier cascade_battery;
     std::vector<Rect> objects;
+    std::vector<Rect> objects_battery;
     ObjectColorShape obj;
     geometry_msgs::Pose2D pose;
     Mat origin_frame;
     Mat evidence_frame;
     Mat origin_frame_masked;
+    geometry_msgs::PointStamped obj_tf_camera;
+    geometry_msgs::PointStamped obj_tf_map;
+    geometry_msgs::Pose2D pose_;
     double evidence_x;
     double evidence_y;
     String evidence_id;
@@ -107,6 +117,8 @@ public:
     int now_object;
     double robot_x;
     double robot_y;
+    double robot_theta;
 
 };
 
+ 

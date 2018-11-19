@@ -21,7 +21,7 @@ int main(int argc, char** argv){
 void TF_Robot_Camera::setTransform() {
     static tf::TransformBroadcaster br;
     tf::Transform transform;
-    transform.setOrigin(tf::Vector3(0.08, 0.0, 0.0));
+    transform.setOrigin(tf::Vector3(0.105, 0.0, 0.0));
     tf::Quaternion q;
     q.setRPY(0, 0, 0);
     transform.setRotation(q);

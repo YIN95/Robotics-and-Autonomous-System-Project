@@ -9,7 +9,7 @@ int main(int argc, char** argv)
 	ros::init(argc, argv, "object_detection");
 	ObjectDetection objectDetection;
 
-	ros::Rate rate(2);
+	ros::Rate rate(1);
 	
 	while (objectDetection.nh.ok()) {
         
@@ -42,6 +42,7 @@ ObjectDetection::ObjectDetection(){
     pose_pub = nh.advertise<geometry_msgs::Pose2D>("/global_pose/object", 1);
     pub_speak = nh.advertise<std_msgs::String>("/espeak/string", 30);
     pub_evidence = nh.advertise<ras_msgs::RAS_Evidence>("/evidence", 5);
+    pub_findBattery = nh.advertise<geometry_msgs::Pose2D>("/findBattery", 5);
     //pub_classification_target = nh.advertise<geometry_msgs::Pose2D>("/classification/target", 1);
 
     char *buffer;
@@ -56,6 +57,13 @@ ObjectDetection::ObjectDetection(){
     if(!cascade.load(cascade_name)){ 
         ROS_ERROR("Error loading cascade!"); 
     };
+    
+    fullPath = "/home/ras19/catkin_ws/src/gp9_objects_detection/src/cascade_battery.xml";
+    cascade_name = fullPath;
+    if(!cascade_battery.load(cascade_name)){ 
+        ROS_ERROR("Error loading cascade!"); 
+    };
+
 }
 
 void ObjectDetection::robotCallback(const geometry_msgs::Pose2D::ConstPtr &msg){
@@ -90,9 +98,6 @@ void ObjectDetection::imageRGBCallback(const sensor_msgs::ImageConstPtr &msg){
         cvtColor(frame_threshold, frame_threshold, COLOR_GRAY2BGR);
         origin_frame = (cv_rgb_ptr->image).clone();
         bitwise_and((cv_rgb_ptr->image), frame_threshold, origin_frame_masked);
-                
-        //imshow("image_hsv", origin_frame_masked);
-        //cv::waitKey(3);
         
         detectAndDisplay(cv_rgb_ptr);
     }
@@ -103,9 +108,57 @@ void ObjectDetection::imageRGBCallback(const sensor_msgs::ImageConstPtr &msg){
     // cv::waitKey(3);    
 }
 
+bool ObjectDetection::detectBarrier(bool detect){
+    int i, j, temp;
+    int height = 999;
+    geometry_msgs::Pose2D pose_tobattery;
+    pose_tobattery.x = robot_x;
+    pose_tobattery.y = robot_y;
+    pose_tobattery.theta = robot_theta;
+    for (i=0; i<640; i++){
+        for (j=0; j<480; j++){
+            temp = getDepth_onePoint(i, j);
+            if ((temp > 1) && (temp < height)){
+                height = temp;
+            }
+        }
+    }
+    // ROS_INFO("|||||MinHeight: %d", height);
+    if (detect){
+        if (height < 110){
+            ROS_INFO("[WARNING] Obstacle or Wall !!!!!");
+            std_msgs::String msg;
+            msg.data = "Obstacle or Wall";
+            pub_speak.publish(msg);
+            String result = "I see a battery";
+            Point org(50, 30);
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 255, 0 ), 4, 8, 0);
+            ROS_INFO("BATTERY");
+            pub_findBattery.publish(pose_tobattery);
+            return true;
+        }
+    }
+    else{
+        if (height < 89){
+            ROS_INFO("[WARNING] Obstacle or Wall !!!!!");
+            std_msgs::String msg;
+            msg.data = "Obstacle or Wall";
+            pub_speak.publish(msg);
+            String result = "I see a battery";
+            Point org(50, 30);
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 255, 0 ), 4, 8, 0);
+            ROS_INFO("BATTERY");
+            pub_findBattery.publish(pose_tobattery);
+            return true;
+        }
+    }
+    return false;
+}
+
 void ObjectDetection::imageDepthCallback(const sensor_msgs::ImageConstPtr &msg){
     try{
         cv_depth_ptr = cv_bridge::toCvCopy(msg);
+        // detectBarrier();
         // , sensor_msgs::image_encodings::mono8
     }
     catch (...){
@@ -119,18 +172,26 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
 {
     try{
         bool only_detect_one = true;
-        int detect_size = 5;
+        int detect_size = 3;
         Mat frame = ptr->image;
         Mat frame_gray;
         Mat frame_target;
         cvtColor(frame, frame_gray, COLOR_BGR2GRAY);
         equalizeHist(frame_gray, frame_gray);
         //-- Detect objects
-        cascade.detectMultiScale(frame_gray, objects, 1.1, 3, 0|CASCADE_SCALE_IMAGE, Size(90, 90), Size(170, 170));
+        cascade.detectMultiScale(frame_gray, objects, 1.1, 3, 0|CASCADE_SCALE_IMAGE, Size(77, 77), Size(190, 190));
         detect_size = std::min(int(objects.size()), detect_size);
 
+        cascade_battery.detectMultiScale(frame_gray, objects_battery, 1.1, 3, 0|CASCADE_SCALE_IMAGE, Size(280, 280), Size(600, 600));
+        bool barreryFlag;
+        for (int i=0; i<int(objects_battery.size()); i++){
+            // Point pt1(objects_battery[i].x, objects_battery[i].y);
+            // Point pt2(objects_battery[i].x + objects_battery[i].width, objects_battery[i].y + objects_battery[i].height);
+            // rectangle(ptr->image, pt1, pt2, Scalar( 255, 255, 0 ), 4, 8, 0 );
+            barreryFlag = detectBarrier(true);
+        }
 
-        if (only_detect_one && objects.size()>0){
+        if (only_detect_one && objects.size()>0 && (!detectBarrier(false)) && (!barreryFlag)){
             int i;
             for (i=0; i<detect_size; i++){
                 int center_x = objects[i].x + objects[i].width/2;
@@ -165,7 +226,7 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                             now_color = color_result;
                             publishClassificationTarget(frame_target);
                             //imshow("target", frame_target);
-                            char keyt = (char)waitKey(1);
+                            //char keyt = (char)waitKey(1);
                         }
                         
 
@@ -178,34 +239,42 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                     // int now_see = check_now_object_color_shape();
                     
                     if ((now_see > 0)){
+                        showCresult();
                         bool is_new_object = check_pre_object(now_object);
                         bool is_new_object_p = check_pre_object_by_position(now_object, pose.x, pose.y);
-                        if (is_new_object_p){
+                        if (is_new_object_p && (now_object>0) && (now_object<30)){
                         // if (is_new_object && (object_depth >= 50) && (object_depth <=650)){
                             //frame_target = cropTarget(pose.x, pose.y);
                             speakResult();
                             evidence_frame = frame_target;
                             listen_obj_map(pose.x, pose.y, now_object);
                             evidence_id = getEvidenceID(now_object);
+                            ROS_INFO("|||||||||||||222222, %f", evidence_x);
                             publishEvidence(evidence_id, evidence_frame, evidence_x, evidence_y);
                             //ROS_INFO("now::: %d", now_object);
                             //preDetectColor = now_object;
                         }
+                        now_color = -1;
                     }
                     now_shape = -1;
+                    now_object = -1;
                                         
                 }
             }
 
         }
-        else{
-            for (size_t i = 0; i < objects.size(); i++ ){
-                Point center(objects[i].x + objects[i].width/2, objects[i].y + objects[i].height/2);
-                ellipse(frame, center, Size(objects[i].width/2, objects[i].height/2 ), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
-            }
-        }
-        imshow("RESULT", frame);
-        char keyr = (char)waitKey(1);
+        // else{
+        //     for (size_t i = 0; i < objects.size(); i++ ){
+        //         Point center(objects[i].x + objects[i].width/2, objects[i].y + objects[i].height/2);
+        //         ellipse(frame, center, Size(objects[i].width/2, objects[i].height/2 ), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
+        //     }
+        // }
+        
+        imshow("RESULT", cv_rgb_ptr->image);
+        // char keyr = (char)waitKey(1);
+        
+        imshow("image_hsv", origin_frame_masked);
+        cv::waitKey(3);
        
     }
     catch(...){
@@ -214,24 +283,25 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
 }
 
 void ObjectDetection::listen_obj_map(double x, double y, int type){
-    geometry_msgs::PointStamped obj_tf_camera;
+    
     obj_tf_camera.header.frame_id = "camera";
     obj_tf_camera.header.stamp = ros::Time();
     obj_tf_camera.point.x = x;
     obj_tf_camera.point.y = y;
     obj_tf_camera.point.z = 0.0;
     try{
-        geometry_msgs::PointStamped obj_tf_map;
+        
         listener.transformPoint("map", obj_tf_camera, obj_tf_map);
 
         ROS_INFO("camera: (%.2f, %.2f. %.2f) -----> map: (%.2f, %.2f, %.2f) at time %.2f",
             obj_tf_camera.point.x, obj_tf_camera.point.y, obj_tf_camera.point.z,
             obj_tf_map.point.x, obj_tf_map.point.y, obj_tf_map.point.z, obj_tf_map.header.stamp.toSec());
-        geometry_msgs::Pose2D pose_;
+        
         pose_.x = obj_tf_map.point.x;
         pose_.y = obj_tf_map.point.y;
         evidence_x = pose_.x;
         evidence_y = pose_.y;
+        ROS_INFO("|||||||||||||1111111, %f", evidence_x);
         pose_pub.publish(pose_);
         pubPose(pose_.x, pose_.y, type);
     }
@@ -272,6 +342,111 @@ void ObjectDetection::pubPose(double x, double y, int type){
     marker.color.r = 0.0;
     marker.color.g = 1.0;
     marker.color.b = 0.0;
+
+//////////////////////////////////////////////////////////
+
+        if (type == obj.Blue_Cube){
+            marker.type = visualization_msgs::Marker::CUBE;
+            marker.color.r = 0.0;
+            marker.color.g = 0.0;
+            marker.color.b = 1.0;
+        }
+            
+        
+        else if (type == obj.Blue_Triangle){
+            marker.type = visualization_msgs::Marker::ARROW;
+            marker.color.r = 0.0;
+            marker.color.g = 0.0;
+            marker.color.b = 1.0;
+        }
+          
+        
+        else if (type == obj.Green_Cube){
+            marker.type = visualization_msgs::Marker::CUBE;
+            marker.color.r = 0.0;
+            marker.color.g = 1.0;
+            marker.color.b = 0.0;
+        }
+        
+        else if (type == obj.Green_Cylinder){
+            marker.type = visualization_msgs::Marker::CYLINDER;
+            marker.color.r = 0.0;
+            marker.color.g = 1.0;
+            marker.color.b = 0.0;
+        }
+
+        else if (type == obj.Green_Hollow_Cube){
+            marker.type = visualization_msgs::Marker::CUBE;
+            marker.color.r = 0.0;
+            marker.color.g = 1.0;
+            marker.color.b = 0.0;
+        }
+
+        else if (type == obj.Orange_Cross){
+            marker.type = visualization_msgs::Marker::CUBE;
+            marker.color.r = 1;
+            marker.color.g = 0.5;
+            marker.color.b = 0.05;
+        }
+        
+        else if (type == obj.Patric){
+            marker.type = visualization_msgs::Marker::SPHERE;
+            marker.color.r = 1;
+            marker.color.g = 0.5;
+            marker.color.b = 0.05;
+        }
+        
+        else if (type == obj.Purple_Cross){
+            marker.type = visualization_msgs::Marker::CUBE;
+            marker.color.r = 0.6;
+            marker.color.g = 0.13;
+            marker.color.b = 0.9;
+        }
+
+        else if (type == obj.Purple_Star){
+            marker.type = visualization_msgs::Marker::SPHERE;
+            marker.color.r = 0.6;
+            marker.color.g = 0.13;
+            marker.color.b = 0.9;
+        }
+
+        else if (type == obj.Red_Ball){
+            marker.type = visualization_msgs::Marker::SPHERE;
+            marker.color.r = 1;
+            marker.color.g = 0;
+            marker.color.b = 0;
+        }
+ 
+        else if (type == obj.Red_Cylinder){
+            marker.type = visualization_msgs::Marker::CYLINDER;
+            marker.color.r = 1;
+            marker.color.g = 0;
+            marker.color.b = 0;
+        }
+
+        else if (type == obj.Red_Hollow_Cube){
+            marker.type = visualization_msgs::Marker::CUBE;
+            marker.color.r = 1;
+            marker.color.g = 0;
+            marker.color.b = 0;
+        }
+        
+        else if (type == obj.Yellow_Ball){
+            marker.type = visualization_msgs::Marker::SPHERE;
+            marker.color.r = 1;
+            marker.color.g = 1;
+            marker.color.b = 0;
+        }
+
+        else if (type == obj.Yellow_Cube){
+            marker.type = visualization_msgs::Marker::CUBE;
+            marker.color.r = 1;
+            marker.color.g = 1;
+            marker.color.b = 0;
+        }
+        
+/////////////////////////////////////////////////////////
+
     // //only if using a MESH_RESOURCE marker type:
     // marker.mesh_resource = "package://pr2_description/meshes/base_v0/base.dae";
     // pub_object_marker.publish(marker);
@@ -337,15 +512,15 @@ int ObjectDetection::colorClassifier(int h, int s, int v, int b, int g, int r){
             return -1;
         }
 
-        if (0 <= h && h <= 7 && 0 <= s && s <= 255 && 0 <= v && v <= 255){   
+        if (0 <= h && h <= 4 && 0 <= s && s <= 255 && 0 <= v && v <= 255){   
             ROS_INFO("COLOR_RED");
             return obj.COLOR_RED;
         }
-        else if ((156 <= h && h <= 180) && (0 <= s && s <= 255) && (0 <= v && v <= 255)){
+        else if ((176 <= h && h <= 180) && (0 <= s && s <= 255) && (0 <= v && v <= 255)){
             ROS_INFO("COLOR_RED");
             return obj.COLOR_RED;
         }
-        else if ((8 <= h && h <= 16) && (0 <= s && s <= 255) && (0 <= v && v <= 255)){
+        else if ((5 <= h && h <= 16) && (0 <= s && s <= 255) && (0 <= v && v <= 255)){
             ROS_INFO("COLOR_ORANGE");
             return obj.COLOR_ORANGE;
         }
@@ -357,25 +532,25 @@ int ObjectDetection::colorClassifier(int h, int s, int v, int b, int g, int r){
             ROS_INFO("COLOR_LIGHT_GREEN");
             return obj.COLOR_LIGHT_GREEN;
         }
-        
+
         else if (67 <= h && h < 86 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
             ROS_INFO("COLOR_GREEN");
             return obj.COLOR_GREEN;
         }
         else if (87 <= h && h <= 128 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
-            if (v>150){
+            if (b>101){
                 ROS_INFO("COLOR_LIGHT_BLUE");
                 return obj.COLOR_LIGHT_BLUE;
             }
             
         }
         else if (87 <= h && h <= 128 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
-            if (v<150){
+            if (b<100){
                 ROS_INFO("COLOR_BLUE");
                 return obj.COLOR_BLUE;
             }
         }
-        else if (129 <= h && h < 155 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
+        else if (129 <= h && h <= 175 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
             ROS_INFO("COLOR_PURPLE");
             return obj.COLOR_PURPLE;
         }
@@ -397,6 +572,7 @@ int ObjectDetection::colorClassifier(int h, int s, int v, int b, int g, int r){
             return obj.COLOR_LIGHT_GREEN;
         }
         else if (0 <= b && b < 10 && 30 < g && g < 70 && 150 < r && r < 220){
+
             ROS_INFO("COLOR_ORANGE");
             return obj.COLOR_ORANGE;
         }
@@ -499,7 +675,7 @@ void ObjectDetection::showResult(int index, int obi){
         default : //Optional
             return;
     }
-    putText(cv_rgb_ptr->image, text, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+    putText(origin_frame_masked, text, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
     
     return;
 }
@@ -530,6 +706,18 @@ int ObjectDetection::getDepth(int x, int y){
     return depth;
 }
 
+int ObjectDetection::getDepth_onePoint(int x, int y){
+
+    Mat frame_depth = cv_depth_ptr->image;
+    uchar* d = frame_depth.ptr<uchar>(y); 
+    int depth = d[2*x] + 255*d[2*x+1];            
+    
+    // ROS_INFO("||||| Depth: %d", depth);
+
+    return depth;
+
+}
+
 bool ObjectDetection::check_pre_object(int temp){
     int size = marker_array.markers.size();
     int index = 1;
@@ -551,7 +739,7 @@ bool ObjectDetection::check_pre_object(int temp){
     return true;
 }
 
-bool ObjectDetection::check_pre_object_by_position(int temp, int x, int y){
+bool ObjectDetection::check_pre_object_by_position(int temp, double x, double y){
     double gx;
     double gy;
     double Dis;
@@ -585,7 +773,7 @@ bool ObjectDetection::check_pre_object_by_position(int temp, int x, int y){
 
 int ObjectDetection::getTrueDepth(int depth){
     double TD;
-    int height = 180;
+    int height = 120;
     TD = sqrt(depth*depth - height*height);
     TD = std::max(int(TD), 0);
     return int(TD);
@@ -723,6 +911,7 @@ int ObjectDetection::check_now_object_color_shape(){
             break;
         
         default :
+            now_object = -1;
             ROS_INFO("classification error");
     }
  
@@ -732,6 +921,14 @@ int ObjectDetection::check_now_object_color_shape(){
 int ObjectDetection::check_now_object(){
     bool color_first = true;
     if (color_first){
+        if (now_color > 0){
+            if (now_shape == 99){
+                ROS_INFO("I SEE AN OBJECT");
+                now_object = 99;
+                return now_object;
+            }
+        }
+
         switch(now_color) {
         
             // yellow
@@ -740,7 +937,19 @@ int ObjectDetection::check_now_object(){
                     now_object = obj.Yellow_Ball;
                     ROS_INFO("I SEE YELLOW BALL");
                 }
+                else if (now_shape == obj.SHAPE_CYLINDER){
+                    now_object = obj.Yellow_Ball;
+                    ROS_INFO("I SEE YELLOW CUBE");
+                }
                 else if (now_shape == obj.SHAPE_CUBE){
+                    now_object = obj.Yellow_Cube;
+                    ROS_INFO("I SEE YELLOW CUBE");
+                }
+                else if (now_shape == obj.SHAPE_CROSS){
+                    now_object = obj.Yellow_Cube;
+                    ROS_INFO("I SEE YELLOW CUBE");
+                }
+                else if (now_shape == obj.SHAPE_TRIANGLE){
                     now_object = obj.Yellow_Cube;
                     ROS_INFO("I SEE YELLOW CUBE");
                 }
@@ -796,6 +1005,10 @@ int ObjectDetection::check_now_object(){
                     ROS_INFO("I SEE RED CYLINDER");
                 }
                 else if (now_shape == obj.SHAPE_HOLLOW_CUBE){
+                    now_object = obj.Red_Hollow_Cube;
+                    ROS_INFO("I SEE RED HOLLOW CUBE");
+                }
+                else if (now_shape == obj.SHAPE_TRIANGLE){
                     now_object = obj.Red_Hollow_Cube;
                     ROS_INFO("I SEE RED HOLLOW CUBE");
                 }
@@ -989,65 +1202,167 @@ int ObjectDetection::check_now_object(){
     return now_object;
 }
 
-void ObjectDetection::speakResult(){
+void ObjectDetection::showCresult(){
     String result;
-    std_msgs::String msg;
-    
+    Point org(30, 50);
+    ROS_INFO("now:%d", now_object);
     switch(now_object) {
         case 1 :
             result = "I see a yellow ball";
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
             break;
 
         case 2 :
             result = "I see a yellow cube";
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
             break;
         
         case 3 :
             result = "I see a green cube";
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
             break;
 
         case 4 :
             result = "I see a green cylinder";
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
             break;
         
         case 5 :
             result = "I see a green hollow cube";
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
             break;
 
         case 6 :
             result = "I see a orange cross";
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
             break;
         
         case 7 :
             result = "I see a Patric";
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
             break;
 
         case 8 :
             result = "I see a red cylinder";
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
             break;
 
         case 9 :
             result = "I see a red hollow cube";
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
             break;
         
         case 10 :
             result = "I see a red ball";
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
             break;
 
         case 11 :
             result = "I see a blue cube";
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
             break;
         
         case 12 :
             result = "I see a blue triangle";
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
             break;
 
         case 13 :
             result = "I see a purple cross";
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
             break;
         
         case 14 :
             result = "I see a purple star";
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+            break;
+        
+        case 99 :
+            result = " ";
+            // result = " ";
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+            break;
+        default :
+            result = "";
+            ROS_INFO("speak error");
+    }
+
+}
+
+
+void ObjectDetection::speakResult(){
+    String result;
+    std_msgs::String msg;
+    Point org(30, 50);
+    switch(now_object) {
+        case 1 :
+            result = "I see a yellow ball";
+            //putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+            break;
+
+        case 2 :
+            result = "I see a yellow cube";
+            //putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+            break;
+        
+        case 3 :
+            result = "I see a green cube";
+            //putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+            break;
+
+        case 4 :
+            result = "I see a green cylinder";
+            //putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+            break;
+        
+        case 5 :
+            result = "I see a green hollow cube";
+            //putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+            break;
+
+        case 6 :
+            result = "I see a orange cross";
+            //putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+            break;
+        
+        case 7 :
+            result = "I see a Patric";
+            //putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+            break;
+
+        case 8 :
+            result = "I see a red cylinder";
+            //putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+            break;
+
+        case 9 :
+            result = "I see a red hollow cube";
+            //putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+            break;
+        
+        case 10 :
+            result = "I see a red ball";
+            //putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+            break;
+
+        case 11 :
+            result = "I see a blue cube";
+            //putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+            break;
+        
+        case 12 :
+            result = "I see a blue triangle";
+            //putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+            break;
+
+        case 13 :
+            result = "I see a purple cross";
+            //putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
+            break;
+        
+        case 14 :
+            result = "I see a purple star";
+            //putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
             break;
         
         case 99 :
@@ -1062,7 +1377,7 @@ void ObjectDetection::speakResult(){
     pub_speak.publish(msg);
 }
 
-void ObjectDetection::publishEvidence(String object_id, Mat image, int x, int y){
+void ObjectDetection::publishEvidence(String object_id, Mat image, double x, double y){
     cv_bridge::CvImage img;
     img.header.stamp = ros::Time::now();
     img.encoding = sensor_msgs::image_encodings::BGR8;
@@ -1073,10 +1388,17 @@ void ObjectDetection::publishEvidence(String object_id, Mat image, int x, int y)
     msg.group_number = 9;
     msg.image_evidence = *img.toImageMsg();
     msg.object_id = object_id;
-
-    geometry_msgs::TransformStamped location;
-    location.transform.translation.x = x;
-    location.transform.translation.y = y;
+    ROS_INFO("3333333333333333333333333, %f", x);
+    msg.object_location.header.stamp = ros::Time::now();
+    msg.object_location.transform.translation.x = x;
+    msg.object_location.transform.translation.y = y;
+    
+    // geometry_msgs::TransformStamped location;
+    // location.header.stamp = ros::Time::now();
+    // location.header.
+    // location.transform.translation.x = x;
+    // location.transform.translation.y = y;
+    // msg.object_location = *location;
     pub_evidence.publish(msg);
 }
 

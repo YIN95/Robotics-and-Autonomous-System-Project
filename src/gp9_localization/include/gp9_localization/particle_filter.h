@@ -1,11 +1,11 @@
 #include "ros/ros.h"
 #include "sensor_msgs/LaserScan.h"
 #include "geometry_msgs/Pose2D.h"
+#include <std_msgs/Bool.h>
 #include <math.h>
 #include <vector>
 #include <deque>
 #include <visualization_msgs/Marker.h>
-// #include <visualization_msgs/points.h>
 #include <visualization_msgs/MarkerArray.h>
 
 class ParticleFilter{
@@ -14,16 +14,14 @@ public: /* ros */
 	/* Subscribers and publishers */
         ros::Subscriber sub_lidar;
         ros::Subscriber sub_pose;
+        ros::Subscriber sub_emergency;
         ros::Publisher pub_weight_pose;
         ros::Publisher pub_corrected_pose;
-
-        ros::Time current_time;
-        ros::Time last_time;
+        ros::Publisher pub_object_marker_array;
 
         visualization_msgs::Marker marker;
         visualization_msgs::MarkerArray marker_array;
         
-        ros::Publisher pub_object_marker_array;
 public: /* Functions */
 	/* Constructor Functions */
         ParticleFilter();
@@ -36,14 +34,12 @@ public: /* Functions */
         void systematicResample();
         void odometryCallBack(const geometry_msgs::Pose2D::ConstPtr &msg);
         void lidarCallBack(const sensor_msgs::LaserScan::ConstPtr &msg);
+        void emergencyCallBack(const std_msgs::Bool::ConstPtr &msg);
         void weightedAveragePosePublisher();
         void showPose(geometry_msgs::Pose2D &corrected_pose);
         void pubParticles(int before);
 
 private:
-        double frequency;
-        double dt;
-
         int n_particles;
         int n_measurements;
         double measurements[30];
@@ -63,7 +59,13 @@ private:
         double dtheta;
 
         double start_pose[3];
-        bool global_flag;
+        double last_pose[3];
+
+        double bounds[4];
+
+        double lidar_offset;
+        bool emergency;
+        int init_flag;
 
         std::deque<double> z_hat;
 };
