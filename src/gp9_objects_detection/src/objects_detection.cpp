@@ -42,6 +42,7 @@ ObjectDetection::ObjectDetection(){
     pose_pub = nh.advertise<geometry_msgs::Pose2D>("/global_pose/object", 1);
     pub_speak = nh.advertise<std_msgs::String>("/espeak/string", 30);
     pub_evidence = nh.advertise<ras_msgs::RAS_Evidence>("/evidence", 5);
+    pub_findBattery = nh.advertise<geometry_msgs::Pose2D>("/findBattery", 5);
     //pub_classification_target = nh.advertise<geometry_msgs::Pose2D>("/classification/target", 1);
 
     char *buffer;
@@ -110,6 +111,10 @@ void ObjectDetection::imageRGBCallback(const sensor_msgs::ImageConstPtr &msg){
 bool ObjectDetection::detectBarrier(bool detect){
     int i, j, temp;
     int height = 999;
+    geometry_msgs::Pose2D pose_tobattery;
+    pose_tobattery.x = robot_x;
+    pose_tobattery.y = robot_y;
+    pose_tobattery.theta = robot_theta;
     for (i=0; i<640; i++){
         for (j=0; j<480; j++){
             temp = getDepth_onePoint(i, j);
@@ -118,7 +123,7 @@ bool ObjectDetection::detectBarrier(bool detect){
             }
         }
     }
-    ROS_INFO("|||||MinHeight: %d", height);
+    // ROS_INFO("|||||MinHeight: %d", height);
     if (detect){
         if (height < 110){
             ROS_INFO("[WARNING] Obstacle or Wall !!!!!");
@@ -129,6 +134,7 @@ bool ObjectDetection::detectBarrier(bool detect){
             Point org(50, 30);
             putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 255, 0 ), 4, 8, 0);
             ROS_INFO("BATTERY");
+            pub_findBattery.publish(pose_tobattery);
             return true;
         }
     }
@@ -142,6 +148,7 @@ bool ObjectDetection::detectBarrier(bool detect){
             Point org(50, 30);
             putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 255, 0 ), 4, 8, 0);
             ROS_INFO("BATTERY");
+            pub_findBattery.publish(pose_tobattery);
             return true;
         }
     }
@@ -235,7 +242,7 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                         showCresult();
                         bool is_new_object = check_pre_object(now_object);
                         bool is_new_object_p = check_pre_object_by_position(now_object, pose.x, pose.y);
-                        if (is_new_object_p){
+                        if (is_new_object_p && (now_object>0) && (now_object<30)){
                         // if (is_new_object && (object_depth >= 50) && (object_depth <=650)){
                             //frame_target = cropTarget(pose.x, pose.y);
                             speakResult();
@@ -293,6 +300,7 @@ void ObjectDetection::listen_obj_map(double x, double y, int type){
         pose_.y = obj_tf_map.point.y;
         evidence_x = pose_.x;
         evidence_y = pose_.y;
+        ROS_INFO("|||||||||||||etst, %f", pose_.x);
         pose_pub.publish(pose_);
         pubPose(pose_.x, pose_.y, type);
     }
@@ -523,7 +531,7 @@ int ObjectDetection::colorClassifier(int h, int s, int v, int b, int g, int r){
             ROS_INFO("COLOR_LIGHT_GREEN");
             return obj.COLOR_LIGHT_GREEN;
         }
-            
+
         else if (67 <= h && h < 86 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
             ROS_INFO("COLOR_GREEN");
             return obj.COLOR_GREEN;
@@ -1379,10 +1387,12 @@ void ObjectDetection::publishEvidence(String object_id, Mat image, int x, int y)
     msg.group_number = 9;
     msg.image_evidence = *img.toImageMsg();
     msg.object_id = object_id;
-
+    
+    
     geometry_msgs::TransformStamped location;
     location.transform.translation.x = x;
     location.transform.translation.y = y;
+    msg.object_location = location;
     pub_evidence.publish(msg);
 }
 

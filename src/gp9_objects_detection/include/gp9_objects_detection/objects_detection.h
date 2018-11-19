@@ -43,6 +43,7 @@ public: /* ros */
     ros::Publisher pose_pub;
     ros::Publisher pub_speak;
     ros::Publisher pub_evidence;
+    ros::Publisher pub_findBattery;
     //ros::Publisher pub_classification_target;
 
     visualization_msgs::Marker marker;
@@ -113,6 +114,7 @@ public:
     int now_object;
     double robot_x;
     double robot_y;
+    double robot_theta;
 
 };
 
