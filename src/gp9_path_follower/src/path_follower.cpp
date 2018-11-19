@@ -127,7 +127,7 @@ public:
 			r_shifted[0] = r * cos(M_PI + deg) - lidar_to_robot_center;
 			r_shifted[1] = r * sin(M_PI + deg);
 
-			laser_distances[i] = sqrt(pow(r_shifted[0], 2) + pow(r_shifted[1], 2));
+			laser_distances[deg] = sqrt(pow(r_shifted[0], 2) + pow(r_shifted[1], 2));
 		}
 	}
 
@@ -346,7 +346,7 @@ public:
 
 	bool obstacleCheck() {
 		double lidar_dist;
-		for (int deg = 90; deg < 270; deg += every_lidar_value) {
+		for (int deg = 135; deg < 225; deg += every_lidar_value) {
 			lidar_dist = laser_distances[deg];
 			if (lidar_dist < min_distance_to_obstacle) {
 				return true;
@@ -507,7 +507,7 @@ int main(int argc, char** argv) {
 
 	int control_frequency = 125;
 	int check_every_laser = 30;
-	double min_distance_to_obstacles = 0.15;
+	double min_distance_to_obstacles = 0.13;
 
 	ros::init(argc, argv, "path_follower");
 	StraightLines sl(control_frequency, min_distance_to_obstacles, check_every_laser);
