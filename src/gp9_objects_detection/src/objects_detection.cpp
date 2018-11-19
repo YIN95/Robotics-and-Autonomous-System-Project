@@ -249,6 +249,7 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                             evidence_frame = frame_target;
                             listen_obj_map(pose.x, pose.y, now_object);
                             evidence_id = getEvidenceID(now_object);
+                            ROS_INFO("|||||||||||||222222, %f", evidence_x);
                             publishEvidence(evidence_id, evidence_frame, evidence_x, evidence_y);
                             //ROS_INFO("now::: %d", now_object);
                             //preDetectColor = now_object;
@@ -282,25 +283,25 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
 }
 
 void ObjectDetection::listen_obj_map(double x, double y, int type){
-    geometry_msgs::PointStamped obj_tf_camera;
+    
     obj_tf_camera.header.frame_id = "camera";
     obj_tf_camera.header.stamp = ros::Time();
     obj_tf_camera.point.x = x;
     obj_tf_camera.point.y = y;
     obj_tf_camera.point.z = 0.0;
     try{
-        geometry_msgs::PointStamped obj_tf_map;
+        
         listener.transformPoint("map", obj_tf_camera, obj_tf_map);
 
         ROS_INFO("camera: (%.2f, %.2f. %.2f) -----> map: (%.2f, %.2f, %.2f) at time %.2f",
             obj_tf_camera.point.x, obj_tf_camera.point.y, obj_tf_camera.point.z,
             obj_tf_map.point.x, obj_tf_map.point.y, obj_tf_map.point.z, obj_tf_map.header.stamp.toSec());
-        geometry_msgs::Pose2D pose_;
+        
         pose_.x = obj_tf_map.point.x;
         pose_.y = obj_tf_map.point.y;
         evidence_x = pose_.x;
         evidence_y = pose_.y;
-        ROS_INFO("|||||||||||||etst, %f", pose_.x);
+        ROS_INFO("|||||||||||||1111111, %f", evidence_x);
         pose_pub.publish(pose_);
         pubPose(pose_.x, pose_.y, type);
     }
@@ -738,7 +739,7 @@ bool ObjectDetection::check_pre_object(int temp){
     return true;
 }
 
-bool ObjectDetection::check_pre_object_by_position(int temp, int x, int y){
+bool ObjectDetection::check_pre_object_by_position(int temp, double x, double y){
     double gx;
     double gy;
     double Dis;
@@ -1376,7 +1377,7 @@ void ObjectDetection::speakResult(){
     pub_speak.publish(msg);
 }
 
-void ObjectDetection::publishEvidence(String object_id, Mat image, int x, int y){
+void ObjectDetection::publishEvidence(String object_id, Mat image, double x, double y){
     cv_bridge::CvImage img;
     img.header.stamp = ros::Time::now();
     img.encoding = sensor_msgs::image_encodings::BGR8;
@@ -1387,12 +1388,17 @@ void ObjectDetection::publishEvidence(String object_id, Mat image, int x, int y)
     msg.group_number = 9;
     msg.image_evidence = *img.toImageMsg();
     msg.object_id = object_id;
+    ROS_INFO("3333333333333333333333333, %f", x);
+    msg.object_location.header.stamp = ros::Time::now();
+    msg.object_location.transform.translation.x = x;
+    msg.object_location.transform.translation.y = y;
     
-    
-    geometry_msgs::TransformStamped location;
-    location.transform.translation.x = x;
-    location.transform.translation.y = y;
-    msg.object_location = location;
+    // geometry_msgs::TransformStamped location;
+    // location.header.stamp = ros::Time::now();
+    // location.header.
+    // location.transform.translation.x = x;
+    // location.transform.translation.y = y;
+    // msg.object_location = *location;
     pub_evidence.publish(msg);
 }
 

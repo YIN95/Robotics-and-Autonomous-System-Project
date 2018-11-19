@@ -76,8 +76,8 @@ public:
     int check_now_object_color_shape();
     void speakResult();
     void showCresult();
-    bool check_pre_object_by_position(int temp, int x, int y);
-    void publishEvidence(String object_id, Mat image, int x, int y);
+    bool check_pre_object_by_position(int temp, double x, double y);
+    void publishEvidence(String object_id, Mat image, double x, double y);
     String getEvidenceID(int index);
     void robotCallback(const geometry_msgs::Pose2D::ConstPtr &msg);
     double calculateDiatance(double x1, double y1, double x2, double y2);
@@ -106,6 +106,9 @@ public:
     Mat origin_frame;
     Mat evidence_frame;
     Mat origin_frame_masked;
+    geometry_msgs::PointStamped obj_tf_camera;
+    geometry_msgs::PointStamped obj_tf_map;
+    geometry_msgs::Pose2D pose_;
     double evidence_x;
     double evidence_y;
     String evidence_id;
