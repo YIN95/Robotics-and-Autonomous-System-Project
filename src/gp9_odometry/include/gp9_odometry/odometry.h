@@ -10,6 +10,7 @@
 #include <visualization_msgs/Marker.h>
 #include <nav_msgs/Odometry.h>
 
+
 class Odometry{
 public: /* ros */
     ros::NodeHandle nh;
@@ -23,6 +24,8 @@ public: /* ros */
 
     /* Subscribers */
 	ros::Subscriber estimatedSpeed;
+    ros::Subscriber sub_weighted_pose;
+
 
     geometry_msgs::Pose2D pose;
 
@@ -34,6 +37,7 @@ public: /* Functions */
     void updateEstimatedDelta();
     void updateEstimatedOdometry();
     void motorCallbackSpeed(const geometry_msgs::Twist::ConstPtr &msg);
+    void poseCallback(const geometry_msgs::Pose2D::ConstPtr &msg);
     void pub_robot_Pose(double x, double y);
     // void cal
     void ismoving(double vx, double vy, double w);
@@ -62,6 +66,7 @@ private: /* robot pose */
     double rob_x_v; // velocity x v*cos theta
     double rob_y_v; // velocity y v*sin theta
     double rob_w; // velocity orientation w
-
+    unsigned int count_value;
+    unsigned int update_time;
 
 };

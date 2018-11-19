@@ -20,6 +20,7 @@ int main(int argc, char** argv){
 Odometry::Odometry(int control_frequency_){
     control_frequency = control_frequency_;
     dt = (current_time - last_time).toSec();
+    sub_weighted_pose = nh.subscribe<geometry_msgs::Pose2D>("/corrected_pose", 1, &Odometry::poseCallback, this);
     estimatedSpeed = nh.subscribe<geometry_msgs::Twist>("/velocity_estimate", 1, &Odometry::motorCallbackSpeed, this);
     pub_pose = nh.advertise<geometry_msgs::Pose2D>("/pose", 1);
     pub_robot_marker = nh.advertise<visualization_msgs::Marker>("/robot/marker", 1);
@@ -35,6 +36,9 @@ Odometry::Odometry(int control_frequency_){
     rob_x_v = 0.0;
     rob_y_v = 0.0;
     rob_w = 0.0;
+    count_value = 0;
+    update_time = 7;
+
 }
 
 void Odometry::updateEstimatedOdometry(){
@@ -130,6 +134,29 @@ void Odometry::motorCallbackSpeed(const geometry_msgs::Twist::ConstPtr &msg){
     ROS_INFO("estimated_w : %f", estimated_w);
     return;
 }
+
+void Odometry::poseCallback(const geometry_msgs::Pose2D::ConstPtr &msg){
+    count_value++;
+    double error_distance = 0;
+    double error_angle = 0;
+    ROS_INFO("countvalue %d", count_value);
+
+    if (count_value == update_time){
+        double error_x = fabs(msg->x - rob_x);
+        double error_y = fabs(msg->y - rob_y);
+        error_distance = std::max(error_x, error_y);
+        error_angle = fabs(msg->theta - rob_theta);
+        if ((error_distance>0.05) && (error_angle>0.05)){
+            rob_x = msg->x;
+            rob_y = msg->y;
+            rob_theta = msg->theta;
+        }
+        count_value = 0;
+   }
+
+    return;
+}
+
 
 void Odometry::pub_robot_Pose(double x, double y){
     visualization_msgs::Marker marker;

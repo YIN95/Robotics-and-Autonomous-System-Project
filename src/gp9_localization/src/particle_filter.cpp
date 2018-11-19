@@ -306,12 +306,12 @@ public:
 
     ParticleFilter() {
         n_measurements = 30;
-        n_particles = 500;
+        n_particles = 400;
         particles = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
         particles_res = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
         std_x = 0.05;
         std_y = 0.05;
-        std_theta = 0.2;
+        std_theta = 0.15;
         std_meas = 0.000001;
         lambda = -1;//0.0001;
 
@@ -333,6 +333,7 @@ public:
         lidar_offset = -0.06;
         emergency = false;
         init_flag =  0;
+        lidar_bool = false;
 
         sub_pose = nh.subscribe<geometry_msgs::Pose2D>("/pose", 1, &ParticleFilter::odometryCallBack, this);
         sub_lidar = nh.subscribe<sensor_msgs::LaserScan>("/scan", 1, &ParticleFilter::lidarCallBack, this);
@@ -347,7 +348,7 @@ public:
         random_numbers::RandomNumberGenerator gen;
 
         if(init_flag == 0) {
-            n_particles = 500;
+            n_particles = 400;
             particles = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
             particles_res = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
             for(int i = 0; i < n_particles; i++) {
@@ -358,7 +359,7 @@ public:
             }
         }
         else if(init_flag == 1) {
-            n_particles = 1000;
+            n_particles = 700;
             particles = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
             particles_res = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
             for(int i = 0; i < n_particles; i++) {
@@ -501,14 +502,13 @@ public:
     }
 
     void MCL() {
-        //if(!emergency) {
+        if(lidar_bool) {
             predict();
             associate();
-            //pubParticles(0);
             systematicResample();
             pubParticles(1);
             weightedAveragePosePublisher();
-        //}
+        }
         //else {
             //init_flag = 1;
             //initParticles();
@@ -531,6 +531,7 @@ public:
     }
 
     void lidarCallBack(const sensor_msgs::LaserScan::ConstPtr &msg) {
+        lidar_bool = true;
         int c = 0;
         int sz = msg->ranges.size()/n_measurements;
         for(int i = 0 ; i < msg->ranges.size() ; i++) {
@@ -674,6 +675,8 @@ private:
 
     Intersections intersections;
     std::deque<double> z_hat;
+
+    bool lidar_bool;
 };
 
 int main(int argc, char** argv) {
