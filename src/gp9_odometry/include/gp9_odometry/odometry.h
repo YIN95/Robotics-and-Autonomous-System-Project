@@ -21,6 +21,7 @@ public: /* ros */
     ros::Publisher pub_pose;
     ros::Publisher pub_robot_marker;
     ros::Publisher pub_moving_state;
+    ros::Publisher pub_delta_pose;
 
     /* Subscribers */
 	ros::Subscriber estimatedSpeed;
@@ -28,6 +29,8 @@ public: /* ros */
 
 
     geometry_msgs::Pose2D pose;
+
+    geometry_msgs::Pose2D delta_pose;
 
 public: /* Functions */
     Odometry(int control_frequency_);
