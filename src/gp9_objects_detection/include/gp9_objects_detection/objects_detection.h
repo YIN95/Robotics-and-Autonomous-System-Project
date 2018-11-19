@@ -82,7 +82,7 @@ public:
     double calculateDiatance(double x1, double y1, double x2, double y2);
     void stateMovingCallback(const std_msgs::Int32ConstPtr &msg);
     int getDepth_onePoint(int x, int y);
-    void detectBarrier();
+    bool detectBarrier(bool detect);
 
 public:
     static const int img_rgb_height = 480;
@@ -97,7 +97,9 @@ public:
     cv_bridge::CvImagePtr cv_depth_ptr;
     string cascade_name;
     CascadeClassifier cascade;
+    CascadeClassifier cascade_battery;
     std::vector<Rect> objects;
+    std::vector<Rect> objects_battery;
     ObjectColorShape obj;
     geometry_msgs::Pose2D pose;
     Mat origin_frame;

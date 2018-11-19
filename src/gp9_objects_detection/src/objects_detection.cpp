@@ -56,6 +56,13 @@ ObjectDetection::ObjectDetection(){
     if(!cascade.load(cascade_name)){ 
         ROS_ERROR("Error loading cascade!"); 
     };
+    
+    fullPath = "/home/ras19/catkin_ws/src/gp9_objects_detection/src/cascade_battery.xml";
+    cascade_name = fullPath;
+    if(!cascade_battery.load(cascade_name)){ 
+        ROS_ERROR("Error loading cascade!"); 
+    };
+
 }
 
 void ObjectDetection::robotCallback(const geometry_msgs::Pose2D::ConstPtr &msg){
@@ -100,7 +107,7 @@ void ObjectDetection::imageRGBCallback(const sensor_msgs::ImageConstPtr &msg){
     // cv::waitKey(3);    
 }
 
-void ObjectDetection::detectBarrier(){
+bool ObjectDetection::detectBarrier(bool detect){
     int i, j, temp;
     int height = 999;
     for (i=0; i<640; i++){
@@ -112,16 +119,33 @@ void ObjectDetection::detectBarrier(){
         }
     }
     ROS_INFO("|||||MinHeight: %d", height);
-    if (height < 89){
-        ROS_INFO("[WARNING] Obstacle or Wall !!!!!");
-        std_msgs::String msg;
-        msg.data = "Obstacle or Wall";
-        pub_speak.publish(msg);
-        String result = "I see a battery";
-        Point org(50, 30);
-        putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
-        ROS_INFO("BATTERY");
+    if (detect){
+        if (height < 110){
+            ROS_INFO("[WARNING] Obstacle or Wall !!!!!");
+            std_msgs::String msg;
+            msg.data = "Obstacle or Wall";
+            pub_speak.publish(msg);
+            String result = "I see a battery";
+            Point org(50, 30);
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 255, 0 ), 4, 8, 0);
+            ROS_INFO("BATTERY");
+            return true;
+        }
     }
+    else{
+        if (height < 89){
+            ROS_INFO("[WARNING] Obstacle or Wall !!!!!");
+            std_msgs::String msg;
+            msg.data = "Obstacle or Wall";
+            pub_speak.publish(msg);
+            String result = "I see a battery";
+            Point org(50, 30);
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 255, 0 ), 4, 8, 0);
+            ROS_INFO("BATTERY");
+            return true;
+        }
+    }
+    return false;
 }
 
 void ObjectDetection::imageDepthCallback(const sensor_msgs::ImageConstPtr &msg){
@@ -141,18 +165,26 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
 {
     try{
         bool only_detect_one = true;
-        int detect_size = 5;
+        int detect_size = 3;
         Mat frame = ptr->image;
         Mat frame_gray;
         Mat frame_target;
         cvtColor(frame, frame_gray, COLOR_BGR2GRAY);
         equalizeHist(frame_gray, frame_gray);
         //-- Detect objects
-        cascade.detectMultiScale(frame_gray, objects, 1.1, 3, 0|CASCADE_SCALE_IMAGE, Size(70, 70), Size(190, 190));
+        cascade.detectMultiScale(frame_gray, objects, 1.1, 3, 0|CASCADE_SCALE_IMAGE, Size(77, 77), Size(190, 190));
         detect_size = std::min(int(objects.size()), detect_size);
 
+        cascade_battery.detectMultiScale(frame_gray, objects_battery, 1.1, 3, 0|CASCADE_SCALE_IMAGE, Size(280, 280), Size(600, 600));
+        bool barreryFlag;
+        for (int i=0; i<int(objects_battery.size()); i++){
+            // Point pt1(objects_battery[i].x, objects_battery[i].y);
+            // Point pt2(objects_battery[i].x + objects_battery[i].width, objects_battery[i].y + objects_battery[i].height);
+            // rectangle(ptr->image, pt1, pt2, Scalar( 255, 255, 0 ), 4, 8, 0 );
+            barreryFlag = detectBarrier(true);
+        }
 
-        if (only_detect_one && objects.size()>0){
+        if (only_detect_one && objects.size()>0 && (!detectBarrier(false)) && (!barreryFlag)){
             int i;
             for (i=0; i<detect_size; i++){
                 int center_x = objects[i].x + objects[i].width/2;
@@ -223,15 +255,16 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
             }
 
         }
-        else{
-            for (size_t i = 0; i < objects.size(); i++ ){
-                Point center(objects[i].x + objects[i].width/2, objects[i].y + objects[i].height/2);
-                ellipse(frame, center, Size(objects[i].width/2, objects[i].height/2 ), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
-            }
-        }
-        detectBarrier();
+        // else{
+        //     for (size_t i = 0; i < objects.size(); i++ ){
+        //         Point center(objects[i].x + objects[i].width/2, objects[i].y + objects[i].height/2);
+        //         ellipse(frame, center, Size(objects[i].width/2, objects[i].height/2 ), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
+        //     }
+        // }
+        
         imshow("RESULT", cv_rgb_ptr->image);
         // char keyr = (char)waitKey(1);
+        
         imshow("image_hsv", origin_frame_masked);
         cv::waitKey(3);
        
@@ -490,20 +523,20 @@ int ObjectDetection::colorClassifier(int h, int s, int v, int b, int g, int r){
             ROS_INFO("COLOR_LIGHT_GREEN");
             return obj.COLOR_LIGHT_GREEN;
         }
-        
+            
         else if (67 <= h && h < 86 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
             ROS_INFO("COLOR_GREEN");
             return obj.COLOR_GREEN;
         }
         else if (87 <= h && h <= 128 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
-            if (v<161){
+            if (b>101){
                 ROS_INFO("COLOR_LIGHT_BLUE");
                 return obj.COLOR_LIGHT_BLUE;
             }
             
         }
         else if (87 <= h && h <= 128 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
-            if (v>160){
+            if (b<100){
                 ROS_INFO("COLOR_BLUE");
                 return obj.COLOR_BLUE;
             }
@@ -530,6 +563,7 @@ int ObjectDetection::colorClassifier(int h, int s, int v, int b, int g, int r){
             return obj.COLOR_LIGHT_GREEN;
         }
         else if (0 <= b && b < 10 && 30 < g && g < 70 && 150 < r && r < 220){
+
             ROS_INFO("COLOR_ORANGE");
             return obj.COLOR_ORANGE;
         }
@@ -878,6 +912,14 @@ int ObjectDetection::check_now_object_color_shape(){
 int ObjectDetection::check_now_object(){
     bool color_first = true;
     if (color_first){
+        if (now_color > 0){
+            if (now_shape == 99){
+                ROS_INFO("I SEE AN OBJECT");
+                now_object = 99;
+                return now_object;
+            }
+        }
+
         switch(now_color) {
         
             // yellow
@@ -1227,8 +1269,8 @@ void ObjectDetection::showCresult(){
             break;
         
         case 99 :
-            // result = "I see an object";
             result = " ";
+            // result = " ";
             putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 0, 255 ), 4, 8, 0);
             break;
         default :
