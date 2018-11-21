@@ -23,6 +23,10 @@ public: /* ros */
 
 	ros::Subscriber sub_has_reached_goal;
 
+	ros::Time current_time;
+    ros::Time arrival_time;
+
+
     
 	StateMachine(){
 		currentState = STATE_READY;
@@ -30,6 +34,7 @@ public: /* ros */
 
 		nextPose = 0;
 		numberOfPoses = 3;
+		stop_seconds = 2;
 
 		global_pose = std::vector<double>(3, 0);
 		previous_pose = std::vector<double>(3, 0);
@@ -93,8 +98,9 @@ public: /* ros */
 			case STATE_MOVING:
 				ROS_INFO("MOVING");
 				if(hasReachedGoal){
-					currentState = STATE_NEXT_POSE;
+					currentState = STATE_STOP;
 					hasReachedGoal = false;
+					arrival_time = ros::Time::now();
 				}
 				break;
 
@@ -104,6 +110,15 @@ public: /* ros */
 				global_pose[1] = 0.225;
 				global_pose[2] = 0.0;
 				currentState = STATE_MOVING;
+				break;
+
+			case STATE_STOP:	//Stop
+				ROS_INFO("STOP");
+
+				current_time = ros::Time::now();
+				if ((current_time - arrival_time).toSec() > stop_seconds){
+					currentState = STATE_NEXT_POSE;
+				};
 				break;
 		}
 		
@@ -145,6 +160,8 @@ private:
 
 	int nextPose;
 	int numberOfPoses;
+
+	int stop_seconds;
 
 	geometry_msgs::Pose2D global_desired_pose;
 
