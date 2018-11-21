@@ -5,6 +5,13 @@
 #include <std_msgs/Bool.h>
 #include <geometry_msgs/Pose2D.h>
 
+#define STATE_READY -1
+#define STATE_NEXT_POSE 0
+#define STATE_MOVING 1
+#define STATE_GO_HOME 2
+#define STATE_STOP 3
+#define STATE_GRIPPERS 4
+#define STATE_ROTATING 5
 
 class StateMachine{
 
@@ -18,7 +25,7 @@ public: /* ros */
 
     
 	StateMachine(){
-		currentState = -1;
+		currentState = STATE_READY;
 		hasReachedGoal = false;
 
 		nextPose = 0;
@@ -65,38 +72,38 @@ public: /* ros */
 
 	void run(){
 		switch(currentState){
-			case -1: //Needed to give time to the other nodes to listen to the topics
-				currentState = 0;
+			case STATE_READY: //Needed to give time to the other nodes to listen to the topics
+				currentState = STATE_NEXT_POSE;
 				break;
 
-			case 0: //Take A Pose
+			case STATE_NEXT_POSE: //Take A Pose
 				ROS_INFO("NEXT POSE");
 				if(nextPose < numberOfPoses){
 					global_pose[0] = pose_sequence[nextPose][0];
 					global_pose[1] = pose_sequence[nextPose][1];
 					global_pose[2] = pose_sequence[nextPose][2];
 					nextPose += 1;
-					currentState = 1;
+					currentState = STATE_MOVING;
 				}
 				else{
-					currentState = 2;
+					currentState = STATE_GO_HOME;
 				}
 				break;
 
-			case 1:
+			case STATE_MOVING:
 				ROS_INFO("MOVING");
 				if(hasReachedGoal){
-					currentState = 0;
+					currentState = STATE_NEXT_POSE;
 					hasReachedGoal = false;
 				}
 				break;
 
-			case 2:	//Go Home
+			case STATE_GO_HOME:	//Go Home
 				ROS_INFO("GO HOME");
 				global_pose[0] = 0.225;
 				global_pose[1] = 0.225;
 				global_pose[2] = 0.0;
-				currentState = 1;
+				currentState = STATE_MOVING;
 				break;
 		}
 		
