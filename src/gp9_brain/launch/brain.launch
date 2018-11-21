@@ -1,0 +1,7 @@
+<launch>
+    <include file="$(find transforms)/launch/transforms.launch"/>
+    <include file="$(find gp9_path_follower)/launch/path_execution.launch"/>
+    <include file="$(find gp9_motor_controller)/launch/motor_controller.launch"/>
+
+</launch>
+

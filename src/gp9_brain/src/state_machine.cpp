@@ -40,16 +40,16 @@ public: /* ros */
 		previous_pose[1] = 0.225;
 		previous_pose[2] = M_PI / 2;
 
-		pose_sequence[0][0] = 1.0;
+		pose_sequence[0][0] = 0.525;
 		pose_sequence[0][1] = 2.15;
 		pose_sequence[0][2] = 0.0;
 
-		pose_sequence[1][0] = 2.0;
-		pose_sequence[1][1] = 0.225;
+		pose_sequence[1][0] = 0.225;
+		pose_sequence[1][1] = 2.125;
 		pose_sequence[1][2] = 0.0;
 
-		pose_sequence[2][0] = 2.0;
-		pose_sequence[2][1] = 2.0;
+		pose_sequence[2][0] = 0.225;
+		pose_sequence[2][1] = 0.725;
 		pose_sequence[2][2] = 0.0;
 
 		pub_currentState = nh.advertise<std_msgs::Int32>("/brain_state", 1);
