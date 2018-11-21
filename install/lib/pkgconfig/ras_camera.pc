@@ -1,0 +1,8 @@
+prefix=/home/ras19/catkin_ws/install
+
+Name: ras_camera
+Description: Description of ras_camera
+Version: 0.0.1
+Cflags: -I/home/ras19/catkin_ws/install/include
+Libs: -L/home/ras19/catkin_ws/install/lib -lras_camera_nodelet
+Requires: image_transport nodelet pcl_conversions pcl_ros roscpp rospy sensor_msgs

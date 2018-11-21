@@ -15,32 +15,22 @@ class Rotation {
 
 public:
     ros::NodeHandle nh;
+
 	ros::Subscriber sub_pose;
 	ros::Subscriber sub_brain;
 	ros::Subscriber sub_goal;
 
-    ros::Publisher pub_close_enough;
 	ros::Publisher pub_velocity;
-	ros::Publisher pub_has_reached_goal;
 
     Rotation(int control_frequency_) {
         nh = ros::NodeHandle("~");
 
         control_frequency = control_frequency_;
 		sub_pose = nh.subscribe<geometry_msgs::Pose2D>("/pose", 1, &Rotation::poseCallBack, this);
-		sub_brain = nh.subscribe<std_msgs::Int32>("/brain_state", 1, &Rotation::brainStateCallBack, this);
 		sub_goal = nh.subscribe<geometry_msgs::Pose2D>("/global_desired_pose", 10, &Rotation::globalDesiredPoseCallBack, this);
 
-		pub_close_enough = nh.advertise<std_msgs::Bool>("/close_enough", 1);
 		pub_velocity = nh.advertise<geometry_msgs::Twist>("/motor_controller/velocity", 1);
-		pub_has_reached_goal = nh.advertise<std_msgs::Bool>("/has_reached_goal", 1);
 
-        reached_goal_msg.data = false;
-        previous_hasReachedGoal = true;
-        newInfoAboutGoal = false;
-        stopped = false;
-
-        brain_state = -10;
         current_angle = M_PI / 2;
         desired_angle = M_PI / 2;
 
@@ -48,17 +38,12 @@ public:
         angle_threshold = degToRad(threshold_deg);
     }
 
-    void brainStateCallBack(const std_msgs::Int32::ConstPtr& brain_msg) {
-		brain_state = brain_msg->data;
-	}
-
 	void poseCallBack(const geometry_msgs::Pose2D::ConstPtr& pose_msg) {
 		current_angle = pose_msg->theta;
 	}
 
 	void globalDesiredPoseCallBack(const geometry_msgs::Pose2D::ConstPtr& global_desired_pose_msg) {
 		desired_angle = global_desired_pose_msg->theta;
-        stopped = false;
 	}
 
     double degToRad(double degrees) {
@@ -81,8 +66,6 @@ public:
 
     void rotate() {
 
-        reached_goal_msg.data = false;
-
         double error_angle = getErrorAngle();
 		double sign = error_angle / fabs(error_angle);
 
@@ -96,59 +79,27 @@ public:
         else {
             ROS_INFO("stopping, i.e. close enough");
             stop();
+            // return the server bool
         }
-
-        updateGoalInfo();
-        if(newInfoAboutGoal){
-			pub_has_reached_goal.publish(reached_goal_msg);
-		}
 		
 	}
 
-    void updateGoalInfo() {
-		if(reached_goal_msg.data != previous_hasReachedGoal){
-			newInfoAboutGoal = true;
-		}
-		else{
-			newInfoAboutGoal = false;
-		}
-		previous_hasReachedGoal = reached_goal_msg.data;
-
-	}
     
     void stop() {
 		velocity_msg.linear.x = 0;
 		velocity_msg.angular.z = 0;
         pub_velocity.publish(velocity_msg);
-        stopped = true;
-        reached_goal_msg.data = true;
-        
 	}
-
-    bool has_stopped() {
-		return stopped;
-	}
-
-    int getBrainState() {
-        return brain_state;
-    }
 
 
 private:
 
     int control_frequency;
-    int brain_state;
-    bool stopped;
     double current_angle;
     double desired_angle;
     double angle_threshold;
-    bool previous_hasReachedGoal;
-    bool newInfoAboutGoal;
 
     geometry_msgs::Twist velocity_msg;
-    std_msgs::Bool reached_goal_msg;
-    
-
 
 };
 
@@ -162,14 +113,9 @@ int main(int argc, char** argv) {
 
 	while (rotation.nh.ok()) {
 		ros::spinOnce();
-		if (!rotation.has_stopped()) {
-            if(rotation.getBrainState() == 5) {
-                ROS_INFO("Going into rotation.rotate()!");
-                rotation.rotate();
-            }
-        
-            rate.sleep();
-        }
+        ROS_INFO("Going into rotation.rotate()!");
+        rotation.rotate();
+        rate.sleep();
 		
 	}
 

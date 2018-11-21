@@ -1,0 +1,14 @@
+<package>
+  <name>ras_espeak</name>
+  <version>1.0.0</version>
+  <description>Node that plays a text string over the computer's speakers with a robotic-like voice (espeak terminal tool)</description>
+  <maintainer email="fevb@kth.se">Francisco Viña</maintainer>
+  <license>BSD</license>
+  <url type="website"></url>
+  <author email="fevb@kth.se">Francisco Viña</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>rospy</build_depend>
+  <run_depend>rospy</run_depend>
+
+</package>

@@ -1,0 +1,26 @@
+<package>
+  <name>ras_lab1</name>
+  <version>0.1.0</version>
+  <description>
+    Packages for lab1 of the RAS 2017 course.
+  </description>
+  <license>BSD</license>
+
+  <url>http://wiki.ros.org/ras_lab1</url>
+
+  <author email="fevb@kth.se">Francisco Vina</author>
+  <author email="raambrus@kth.se">Rares Ambrus</author>
+  <maintainer email="diogoa@kth.se">Diogo Almeida</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>ras_lab1_distance_sensor</run_depend>
+  <run_depend>ras_lab1_launch</run_depend>
+  <run_depend>ras_lab1_motors</run_depend>
+  <run_depend>ras_lab1_msgs</run_depend>
+  <run_depend>ras_lab1_world</run_depend>
+
+  <export>
+    <metapackage/>
+  </export>
+</package>

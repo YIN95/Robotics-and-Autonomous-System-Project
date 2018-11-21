@@ -1,0 +1,22 @@
+<package>
+ <name>ras_maze_map</name>
+  <version>0.1.0</version>
+  <description>
+    Node that reads the maze map from a file and publishes it as a set of markers. 
+  </description>
+  <license>BSD</license>
+
+  <url type="website">TODO</url>
+
+  <author email="raambrus@kth.se">Rares Ambrus</author>
+  <maintainer email="raambrus@kth.se">Rares Ambrus</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend>
+  <build_depend>std_msgs</build_depend>
+
+  <run_depend>roscpp</run_depend>
+  <run_depend>std_msgs</run_depend>
+
+</package>
