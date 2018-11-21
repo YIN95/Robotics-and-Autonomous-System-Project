@@ -26,5 +26,8 @@ target_link_libraries(path_follower ${catkin_LIBRARIES})
 add_executable(rotation src/rotation.cpp)
 target_link_libraries(rotation ${catkin_LIBRARIES})
 
+add_executable(grab src/grab.cpp)
+target_link_libraries(grab ${catkin_LIBRARIES})
+
 # add_executable(intersection src/intersection.cpp)
 # target_link_libraries(intersection ${catkin_LIBRARIES})
