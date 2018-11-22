@@ -15,11 +15,11 @@ class Rotation {
 
 public:
     ros::NodeHandle nh;
+
 	ros::Subscriber sub_pose;
 	ros::Subscriber sub_brain;
 	ros::Subscriber sub_goal;
 
-    ros::Publisher pub_close_enough;
 	ros::Publisher pub_velocity;
 	ros::Publisher pub_has_reached_orientation;
 
@@ -27,10 +27,8 @@ public:
         nh = ros::NodeHandle("~");
 
 		sub_pose = nh.subscribe<geometry_msgs::Pose2D>("/pose", 1, &Rotation::poseCallBack, this);
-		sub_brain = nh.subscribe<std_msgs::Int32>("/brain_state", 1, &Rotation::brainStateCallBack, this);
 		sub_goal = nh.subscribe<geometry_msgs::Pose2D>("/global_desired_pose", 10, &Rotation::globalDesiredPoseCallBack, this);
 
-		pub_close_enough = nh.advertise<std_msgs::Bool>("/close_enough", 1);
 		pub_velocity = nh.advertise<geometry_msgs::Twist>("/motor_controller/velocity", 1);
 		pub_has_reached_orientation = nh.advertise<std_msgs::Bool>("/has_reached_orientation", 1);
 
@@ -39,7 +37,6 @@ public:
         newInfoAboutGoal = false;
         stopped = false;
 
-        brain_state = -10;
         current_angle = M_PI / 2;
         desired_angle = M_PI / 2;
 
@@ -47,17 +44,12 @@ public:
         angle_threshold = degToRad(threshold_deg);
     }
 
-    void brainStateCallBack(const std_msgs::Int32::ConstPtr& brain_msg) {
-		brain_state = brain_msg->data;
-	}
-
 	void poseCallBack(const geometry_msgs::Pose2D::ConstPtr& pose_msg) {
 		current_angle = pose_msg->theta;
 	}
 
 	void globalDesiredPoseCallBack(const geometry_msgs::Pose2D::ConstPtr& global_desired_pose_msg) {
 		desired_angle = global_desired_pose_msg->theta;
-        stopped = false;
 	}
 
     double degToRad(double degrees) {
@@ -95,6 +87,7 @@ public:
         else {
             ROS_INFO("stopping, i.e. close enough");
             stop();
+            // return the server bool
         }
 
         updateGoalInfo();
@@ -124,14 +117,6 @@ public:
         
 	}
 
-    bool has_stopped() {
-		return stopped;
-	}
-
-    int getBrainState() {
-        return brain_state;
-    }
-
 
 private:
 
@@ -158,14 +143,9 @@ int main(int argc, char** argv) {
 
 	while (rotation.nh.ok()) {
 		ros::spinOnce();
-		if (!rotation.has_stopped()) {
-            if(rotation.getBrainState() == 5) {
-                ROS_INFO("Going into rotation.rotate()!");
-                rotation.rotate();
-            }
-        
-            rate.sleep();
-        }
+        ROS_INFO("Going into rotation.rotate()!");
+        rotation.rotate();
+        rate.sleep();
 		
 	}
 

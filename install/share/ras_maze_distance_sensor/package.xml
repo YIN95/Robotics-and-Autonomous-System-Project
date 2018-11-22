@@ -1,0 +1,28 @@
+<package>
+ <name>ras_maze_distance_sensor</name>
+  <version>0.1.0</version>
+  <description>
+    Node of distance sensor for the ras maze.
+  </description>
+  <license>BSD</license>
+
+  <author email="raambrus@kth.se">Rares Ambrus</author>
+  <maintainer email="diogoa@kth.se">Diogo Almeida</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>ras_lab1_msgs</build_depend>
+  <build_depend>tf</build_depend>
+  <build_depend>orocos_kdl</build_depend>
+  <build_depend>kdl_conversions</build_depend>
+
+  <run_depend>roscpp</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>ras_lab1_msgs</run_depend>
+  <run_depend>tf</run_depend>
+  <run_depend>orocos_kdl</run_depend>
+  <run_depend>kdl_conversions</run_depend>
+
+</package>

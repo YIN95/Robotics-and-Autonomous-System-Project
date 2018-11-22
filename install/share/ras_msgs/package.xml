@@ -1,0 +1,26 @@
+<package>
+ <name>ras_msgs</name>
+  <version>0.1.0</version>
+  <description>
+    ROS messages used in the RAS course, particularly for gathering evidence of detected/identified objects.
+  </description>
+  <license>BSD</license>
+
+  <url type="website">https://anywiki.csc.kth.se/DD2425/doku.php?id=ras2017:cv_evidence</url>
+
+  <author email="fevb@kth.se">Francisco Vina</author>
+  <maintainer email="diogoa@kth.se">Diogo Almeida</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>message_generation</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+
+  <run_depend>message_runtime</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+
+</package>

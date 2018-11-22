@@ -7,6 +7,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   sensor_msgs
   std_msgs
+  message_generation
 )
 
 catkin_package(
@@ -18,6 +19,11 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
+)
+
+add_service_files(
+  FILES
+  Rotation.srv
 )
 
 add_executable(path_follower src/path_follower.cpp)
