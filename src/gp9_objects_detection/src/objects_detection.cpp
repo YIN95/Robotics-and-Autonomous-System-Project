@@ -249,7 +249,6 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                             evidence_frame = frame_target;
                             listen_obj_map(pose.x, pose.y, now_object);
                             evidence_id = getEvidenceID(now_object);
-                            ROS_INFO("|||||||||||||222222, %f", evidence_x);
                             publishEvidence(evidence_id, evidence_frame, evidence_x, evidence_y);
                             //ROS_INFO("now::: %d", now_object);
                             //preDetectColor = now_object;
