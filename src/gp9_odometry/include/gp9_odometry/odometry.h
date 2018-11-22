@@ -21,7 +21,7 @@ public: /* ros */
     ros::Publisher pub_pose;
     ros::Publisher pub_robot_marker;
     ros::Publisher pub_moving_state;
-    ros::Publisher pub_delta_pose;
+    ros::Publisher pub_uncorrected_pose;
 
     /* Subscribers */
 	ros::Subscriber estimatedSpeed;
@@ -30,7 +30,7 @@ public: /* ros */
 
     geometry_msgs::Pose2D pose;
 
-    geometry_msgs::Pose2D delta_pose;
+    geometry_msgs::Pose2D uncorrected_pose;
 
 public: /* Functions */
     Odometry(int control_frequency_);
@@ -51,6 +51,10 @@ private: /* robot pose */
     double rob_x;   // position x
     double rob_y;   // position y
     double rob_theta;   // orientation
+
+    double rob_x_uncorrected;
+    double rob_y_uncorrected;
+    double rob_theta_uncorrected;
 
     int control_frequency;
     double dt;

@@ -297,7 +297,6 @@ public:
 	/* Subscribers and publishers */
     ros::Subscriber sub_lidar;
     ros::Subscriber sub_pose;
-    ros::Subscriber sub_emergency;
     ros::Publisher pub_weight_pose;
     ros::Publisher pub_corrected_pose;
     ros::Publisher pub_object_marker_array;
@@ -305,7 +304,8 @@ public:
     visualization_msgs::MarkerArray marker_array;
 
     ParticleFilter() {
-        n_measurements = 30;
+        n_measurements = 45;
+        measurements = std::vector<double>(n_measurements, 0);
         n_particles = 400;
         particles = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
         particles_res = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
@@ -313,7 +313,7 @@ public:
         std_y = 0.05;
         std_theta = 0.15;
         std_meas = 0.000001;
-        lambda = -1;//0.0001;
+        lambda = 0.0001;
 
         start_pose[0] = 0.225;
         start_pose[1] = 0.225;
@@ -331,13 +331,11 @@ public:
         dtheta = 0;
 
         lidar_offset = -0.06;
-        emergency = false;
         init_flag =  0;
         lidar_bool = false;
 
-        sub_pose = nh.subscribe<geometry_msgs::Pose2D>("/pose", 1, &ParticleFilter::odometryCallBack, this);
+        sub_pose = nh.subscribe<geometry_msgs::Pose2D>("/uncorrected_pose", 1, &ParticleFilter::odometryCallBack, this);
         sub_lidar = nh.subscribe<sensor_msgs::LaserScan>("/scan", 1, &ParticleFilter::lidarCallBack, this);
-        sub_emergency = nh.subscribe<std_msgs::Bool>("/emergency_break", 1, &ParticleFilter::emergencyCallBack, this);
         pub_weight_pose = nh.advertise<geometry_msgs::Pose2D>("/corrected_pose", 1);
         pub_corrected_pose = nh.advertise<visualization_msgs::Marker>("/visualization_filter", 1);
         pub_object_marker_array = nh.advertise<visualization_msgs::Marker>("/particle/points", 100);
@@ -347,17 +345,17 @@ public:
     void initParticles() {
         random_numbers::RandomNumberGenerator gen;
 
-        if(init_flag == 0) {
+        /* if(init_flag == 0) {
             n_particles = 400;
             particles = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
-            particles_res = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
-            for(int i = 0; i < n_particles; i++) {
-                particles[0][i] = start_pose[0];
-                particles[1][i] = start_pose[1];
-                particles[2][i] = start_pose[2];
-                particles[3][i] = 1.0/n_particles;
-            }
+            particles_res = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0)); */
+        for(int i = 0; i < n_particles; i++) {
+            particles[0][i] = start_pose[0];
+            particles[1][i] = start_pose[1];
+            particles[2][i] = start_pose[2];
+            particles[3][i] = 1.0/n_particles;
         }
+        /* }
         else if(init_flag == 1) {
             n_particles = 700;
             particles = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
@@ -379,6 +377,16 @@ public:
                 particles[2][i] = gen.uniform01()*2*M_PI;
                 particles[3][i] = 1.0/n_particles;
             }
+        } */
+    }
+
+    void MCL() {
+        if(lidar_bool) {
+            predict();
+            associate();
+            systematicResample();
+            pubParticles(1);
+            weightedAveragePosePublisher();
         }
     }
 
@@ -424,7 +432,7 @@ public:
                 } else {
                     double nu = measurements[j] - z_hat[j];
                     //ROS_INFO("DIFFERENCE INNOVATION \n MODEL: %f \n MEASUREMENT: %f \n", z_hat[j],measurements[j]);
-                    psi[i][j] = exp(-(0.5*pow(nu, 2))/std_meas);///(std_meas*sqrt(2*M_PI));
+                    psi[i][j] = exp(-(0.5*pow(nu, 2))/std_meas)/(std_meas*sqrt(2*M_PI));
                 }
                 psi_means[j] += psi[i][j]/n_particles;
             }
@@ -501,22 +509,6 @@ public:
         
     }
 
-    void MCL() {
-        if(lidar_bool) {
-            predict();
-            associate();
-            systematicResample();
-            pubParticles(1);
-            weightedAveragePosePublisher();
-        }
-        //else {
-            //init_flag = 1;
-            //initParticles();
-            //emergency = false;
-        //}
-    }
-
-
     void odometryCallBack(const geometry_msgs::Pose2D::ConstPtr &msg) {
         double x_new = msg->x;
         double y_new = msg->y;
@@ -540,10 +532,6 @@ public:
                 c++;
             }
         }
-    }
-
-    void emergencyCallBack(const std_msgs::Bool::ConstPtr &msg) {
-        emergency = msg->data;
     }
 
     void weightedAveragePosePublisher() {
@@ -648,7 +636,7 @@ public:
 private:
     int n_particles;
     int n_measurements;
-    double measurements[30];
+    std::vector<double> measurements;
     std::vector<std::vector<double> > particles; // particles with [x, y, theta, w]
     std::vector<std::vector<double> > particles_res; // resampled particles
     double std_x;
@@ -670,7 +658,6 @@ private:
     double bounds[4];
 
     double lidar_offset;
-    bool emergency;
     int init_flag;
 
     Intersections intersections;
@@ -680,7 +667,7 @@ private:
 };
 
 int main(int argc, char** argv) {
-    int control_frequency = 5;
+    int control_frequency = 4;
 
     ros::init(argc, argv, "particle_filter");
     ParticleFilter pf;
