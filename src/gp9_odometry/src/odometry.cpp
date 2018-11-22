@@ -164,7 +164,7 @@ void Odometry::poseCallback(const geometry_msgs::Pose2D::ConstPtr &msg){
 //            rob_theta = msg->theta;
 //        }
 
-        if ((!turning) && ((error_angle > 0.05))){
+        if ((!turning) && ((error_distance > 0.05) && (error_angle > 0.05))){
             rob_x = msg->x;
             rob_y = msg->y;
             rob_theta = msg->theta;

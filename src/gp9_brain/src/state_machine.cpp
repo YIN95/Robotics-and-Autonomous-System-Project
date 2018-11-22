@@ -33,7 +33,7 @@ public: /* ros */
 		hasReachedGoal = false;
 
 		nextPose = 0;
-		numberOfPoses = 3;
+		numberOfPoses = 4;
 		stop_seconds = 2;
 
 		global_pose = std::vector<double>(3, 0);
@@ -52,17 +52,21 @@ public: /* ros */
 		previous_pose[1] = 0.225;
 		previous_pose[2] = M_PI / 2;
 
-		pose_sequence[0][0] = 0.525;
-		pose_sequence[0][1] = 2.15;
+		pose_sequence[0][0] = 0.425;
+		pose_sequence[0][1] = 1.70;
 		pose_sequence[0][2] = 0.0;
 
 		pose_sequence[1][0] = 0.225;
-		pose_sequence[1][1] = 2.125;
+		pose_sequence[1][1] = 1.50;
 		pose_sequence[1][2] = 0.0;
 
 		pose_sequence[2][0] = 0.225;
 		pose_sequence[2][1] = 0.725;
 		pose_sequence[2][2] = 0.0;
+
+		pose_sequence[3][0] = 0.225;
+		pose_sequence[3][1] = 0.725;
+		pose_sequence[3][2] = M_PI / 2;
 
 		pub_currentState = nh.advertise<std_msgs::Int32>("/brain_state", 1);
 		pub_globalDesiredPose = nh.advertise<geometry_msgs::Pose2D>("/global_desired_pose", 1);
