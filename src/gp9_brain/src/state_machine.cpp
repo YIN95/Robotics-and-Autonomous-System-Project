@@ -69,7 +69,7 @@ public: /* ros */
 		pub_globalDesiredPose = nh.advertise<geometry_msgs::Pose2D>("/global_desired_pose", 1);
 
 		sub_has_reached_goal = nh.subscribe<std_msgs::Bool>("/has_reached_goal", 1, &StateMachine::hasReachedGoalCallBack, this);
-		sub_has_reached_orientation = nh.subscribe<std_msgs::Bool>("/has_reached_goal", 1, &StateMachine::hasReachedOrientationCallBack, this);
+		sub_has_reached_orientation = nh.subscribe<std_msgs::Bool>("/has_reached_orientation", 1, &StateMachine::hasReachedOrientationCallBack, this);
 	};
 
 	void hasReachedGoalCallBack(const std_msgs::Bool::ConstPtr& hasReachedGoal_msg) {
@@ -165,8 +165,9 @@ public: /* ros */
 			previous_pose[1] = global_pose[1];
 			previous_pose[2] = global_pose[2];
 		}
-		// ROS_INFO("Has Reached Goal? %d", hasReachedGoal);
-		// ROS_INFO("---------------------------------------------------------------------------------");
+		ROS_INFO("Has Reached Goal? %d", hasReachedGoal);
+		ROS_INFO("Has Reached Orientation? %d", has_reached_orientation);
+		ROS_INFO("---------------------------------------------------------------------------------");
 	}
 
 	int getCurrentState(){
