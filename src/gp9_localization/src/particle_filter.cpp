@@ -345,17 +345,17 @@ public:
     void initParticles() {
         random_numbers::RandomNumberGenerator gen;
 
-        if(init_flag == 0) {
+        /* if(init_flag == 0) {
             n_particles = 400;
             particles = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
-            particles_res = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
-            for(int i = 0; i < n_particles; i++) {
-                particles[0][i] = start_pose[0];
-                particles[1][i] = start_pose[1];
-                particles[2][i] = start_pose[2];
-                particles[3][i] = 1.0/n_particles;
-            }
+            particles_res = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0)); */
+        for(int i = 0; i < n_particles; i++) {
+            particles[0][i] = start_pose[0];
+            particles[1][i] = start_pose[1];
+            particles[2][i] = start_pose[2];
+            particles[3][i] = 1.0/n_particles;
         }
+        /* }
         else if(init_flag == 1) {
             n_particles = 700;
             particles = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
@@ -377,6 +377,16 @@ public:
                 particles[2][i] = gen.uniform01()*2*M_PI;
                 particles[3][i] = 1.0/n_particles;
             }
+        } */
+    }
+
+    void MCL() {
+        if(lidar_bool) {
+            predict();
+            associate();
+            systematicResample();
+            pubParticles(1);
+            weightedAveragePosePublisher();
         }
     }
 
@@ -498,17 +508,6 @@ public:
         particles = particles_res;
         
     }
-
-    void MCL() {
-        if(lidar_bool) {
-            predict();
-            associate();
-            systematicResample();
-            pubParticles(1);
-            weightedAveragePosePublisher();
-        }
-    }
-
 
     void odometryCallBack(const geometry_msgs::Pose2D::ConstPtr &msg) {
         double x_new = msg->x;
