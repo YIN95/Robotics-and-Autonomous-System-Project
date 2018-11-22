@@ -334,7 +334,7 @@ public:
         init_flag =  0;
         lidar_bool = false;
 
-        sub_pose = nh.subscribe<geometry_msgs::Pose2D>("/pose", 1, &ParticleFilter::odometryCallBack, this);
+        sub_pose = nh.subscribe<geometry_msgs::Pose2D>("/uncorrected_pose", 1, &ParticleFilter::odometryCallBack, this);
         sub_lidar = nh.subscribe<sensor_msgs::LaserScan>("/scan", 1, &ParticleFilter::lidarCallBack, this);
         pub_weight_pose = nh.advertise<geometry_msgs::Pose2D>("/corrected_pose", 1);
         pub_corrected_pose = nh.advertise<visualization_msgs::Marker>("/visualization_filter", 1);

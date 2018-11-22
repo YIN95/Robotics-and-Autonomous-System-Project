@@ -23,7 +23,7 @@ Odometry::Odometry(int control_frequency_){
     sub_weighted_pose = nh.subscribe<geometry_msgs::Pose2D>("/corrected_pose", 1, &Odometry::poseCallback, this);
     estimatedSpeed = nh.subscribe<geometry_msgs::Twist>("/velocity_estimate", 1, &Odometry::motorCallbackSpeed, this);
     pub_pose = nh.advertise<geometry_msgs::Pose2D>("/pose", 1);
-    pub_delta_pose = nh.advertise<geometry_msgs::Pose2D>("/delta_pose", 1);
+    pub_uncorrected_pose = nh.advertise<geometry_msgs::Pose2D>("/uncorrected_pose", 1);
     pub_robot_marker = nh.advertise<visualization_msgs::Marker>("/robot/marker", 1);
     pub_moving_state = nh.advertise<std_msgs::Int32>("/state/ismoving", 1);
 
@@ -33,6 +33,10 @@ Odometry::Odometry(int control_frequency_){
     rob_x = 0.225;
     rob_y = 0.225;
     rob_theta = 0.5 * M_PI; // Map is defined so that robot starts along y-axis. Therefore, we rotate it
+
+    rob_x_uncorrected = 0.225;
+    rob_y_uncorrected = 0.225;
+    rob_theta_uncorrected = 0.5 * M_PI;
 
     rob_x_v = 0.0;
     rob_y_v = 0.0;
@@ -72,6 +76,22 @@ void Odometry::updateEstimatedPosition(){
         rob_theta -= 2*M_PI;
     }
 
+    rob_x_uncorrected = rob_x_uncorrected + rob_x_delta;
+    rob_y_uncorrected = rob_y_uncorrected + rob_y_delta;
+    rob_theta_uncorrected = rob_theta_uncorrected + rob_theta_delta;
+    if (rob_theta_uncorrected < 0) {
+        rob_theta_uncorrected += 2*M_PI;
+    }
+    else if (rob_theta_uncorrected > 2*M_PI) {
+        rob_theta_uncorrected -= 2*M_PI;
+    }
+
+    uncorrected_pose.x = rob_x_uncorrected;
+    uncorrected_pose.y = rob_y_uncorrected;
+    uncorrected_pose.theta = rob_theta_uncorrected;
+
+    pub_uncorrected_pose.publish(uncorrected_pose);
+
     return;
 }
 
@@ -81,12 +101,6 @@ void Odometry::updateEstimatedDelta(){
     rob_x_delta = rob_x_v * dt;
     rob_y_delta = rob_y_v * dt;
     rob_theta_delta = rob_w * dt;
-
-    delta_pose.x = rob_x_delta;
-    delta_pose.y = rob_y_delta;
-    delta_pose.theta = rob_theta_delta;
-
-    pub_delta_pose.publish(delta_pose);
 
     ROS_INFO("rob_x_delta : %f", rob_x_delta);
     ROS_INFO("rob_y_delta : %f", rob_y_delta);
