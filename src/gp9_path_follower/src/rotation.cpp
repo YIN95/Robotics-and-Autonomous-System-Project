@@ -21,22 +21,21 @@ public:
 
     ros::Publisher pub_close_enough;
 	ros::Publisher pub_velocity;
-	ros::Publisher pub_has_reached_goal;
+	ros::Publisher pub_has_reached_orientation;
 
-    Rotation(int control_frequency_) {
+    Rotation() {
         nh = ros::NodeHandle("~");
 
-        control_frequency = control_frequency_;
 		sub_pose = nh.subscribe<geometry_msgs::Pose2D>("/pose", 1, &Rotation::poseCallBack, this);
 		sub_brain = nh.subscribe<std_msgs::Int32>("/brain_state", 1, &Rotation::brainStateCallBack, this);
 		sub_goal = nh.subscribe<geometry_msgs::Pose2D>("/global_desired_pose", 10, &Rotation::globalDesiredPoseCallBack, this);
 
 		pub_close_enough = nh.advertise<std_msgs::Bool>("/close_enough", 1);
 		pub_velocity = nh.advertise<geometry_msgs::Twist>("/motor_controller/velocity", 1);
-		pub_has_reached_goal = nh.advertise<std_msgs::Bool>("/has_reached_goal", 1);
+		pub_has_reached_orientation = nh.advertise<std_msgs::Bool>("/has_reached_orientation", 1);
 
-        reached_goal_msg.data = false;
-        previous_hasReachedGoal = true;
+        reached_orientation_msg.data = false;
+        previous_has_reached_orientation = true;
         newInfoAboutGoal = false;
         stopped = false;
 
@@ -81,7 +80,7 @@ public:
 
     void rotate() {
 
-        reached_goal_msg.data = false;
+        reached_orientation_msg.data = false;
 
         double error_angle = getErrorAngle();
 		double sign = error_angle / fabs(error_angle);
@@ -100,19 +99,19 @@ public:
 
         updateGoalInfo();
         if(newInfoAboutGoal){
-			pub_has_reached_goal.publish(reached_goal_msg);
+			pub_has_reached_orientation.publish(reached_orientation_msg);
 		}
 		
 	}
 
     void updateGoalInfo() {
-		if(reached_goal_msg.data != previous_hasReachedGoal){
+		if(reached_orientation_msg.data != previous_has_reached_orientation){
 			newInfoAboutGoal = true;
 		}
 		else{
 			newInfoAboutGoal = false;
 		}
-		previous_hasReachedGoal = reached_goal_msg.data;
+		previous_has_reached_orientation = reached_orientation_msg.data;
 
 	}
     
@@ -121,7 +120,7 @@ public:
 		velocity_msg.angular.z = 0;
         pub_velocity.publish(velocity_msg);
         stopped = true;
-        reached_goal_msg.data = true;
+        reached_orientation_msg.data = true;
         
 	}
 
@@ -136,19 +135,16 @@ public:
 
 private:
 
-    int control_frequency;
     int brain_state;
     bool stopped;
     double current_angle;
     double desired_angle;
     double angle_threshold;
-    bool previous_hasReachedGoal;
+    bool previous_has_reached_orientation;
     bool newInfoAboutGoal;
 
     geometry_msgs::Twist velocity_msg;
-    std_msgs::Bool reached_goal_msg;
-    
-
+    std_msgs::Bool reached_orientation_msg;
 
 };
 
@@ -157,7 +153,7 @@ int main(int argc, char** argv) {
 	int control_frequency = 125;
 
 	ros::init(argc, argv, "rotation");
-    Rotation rotation(control_frequency);
+    Rotation rotation;
 	ros::Rate rate(control_frequency);
 
 	while (rotation.nh.ok()) {

@@ -22,15 +22,16 @@ public: /* ros */
 	ros::Publisher pub_globalDesiredPose;
 
 	ros::Subscriber sub_has_reached_goal;
+	ros::Subscriber sub_has_reached_orientation;
 
 	ros::Time current_time;
     ros::Time arrival_time;
 
 
-    
 	StateMachine(){
 		currentState = STATE_READY;
 		hasReachedGoal = false;
+		has_reached_orientation = false;
 
 		nextPose = 0;
 		numberOfPoses = 3;
@@ -68,11 +69,17 @@ public: /* ros */
 		pub_globalDesiredPose = nh.advertise<geometry_msgs::Pose2D>("/global_desired_pose", 1);
 
 		sub_has_reached_goal = nh.subscribe<std_msgs::Bool>("/has_reached_goal", 1, &StateMachine::hasReachedGoalCallBack, this);
+		sub_has_reached_orientation = nh.subscribe<std_msgs::Bool>("/has_reached_goal", 1, &StateMachine::hasReachedOrientationCallBack, this);
 	};
 
 	void hasReachedGoalCallBack(const std_msgs::Bool::ConstPtr& hasReachedGoal_msg) {
 		hasReachedGoal = hasReachedGoal_msg->data;
 		ROS_INFO("In hasReachedGoal Callback.");
+	}
+
+	void hasReachedOrientationCallBack(const std_msgs::Bool::ConstPtr& hasReachedOrientation_msg) {
+		has_reached_orientation = hasReachedOrientation_msg->data;
+		ROS_INFO("In hasReachedOrientation Callback.");
 	}
 
 	void run(){
@@ -88,7 +95,14 @@ public: /* ros */
 					global_pose[1] = pose_sequence[nextPose][1];
 					global_pose[2] = pose_sequence[nextPose][2];
 					nextPose += 1;
-					currentState = STATE_MOVING;
+					if ((global_pose[0] == previous_pose[0]) && (global_pose[1] == previous_pose[1])){
+						currentState = STATE_ROTATING;
+					}
+					else{
+						currentState = STATE_MOVING;
+					}
+					previous_pose[0] = global_pose[0];
+					previous_pose[1] = global_pose[1];
 				}
 				else{
 					currentState = STATE_GO_HOME;
@@ -110,6 +124,15 @@ public: /* ros */
 				global_pose[1] = 0.225;
 				global_pose[2] = 0.0;
 				currentState = STATE_MOVING;
+				break;
+
+			case STATE_ROTATING:
+				ROS_INFO("ROTATING");
+				if(has_reached_orientation){
+					currentState = STATE_STOP;
+					has_reached_orientation = false;
+					arrival_time = ros::Time::now();
+				}
 				break;
 
 			case STATE_STOP:	//Stop
@@ -167,6 +190,7 @@ private:
 	std::vector< std::vector<double> > pose_sequence;
 
 	bool hasReachedGoal;
+	bool has_reached_orientation;
 };
 
 
