@@ -344,7 +344,7 @@ void ObjectDetection::pubPose(double x, double y, int type){
     marker.color.r = 0.0;
     marker.color.g = 1.0;
     marker.color.b = 0.0;
-
+    
 //////////////////////////////////////////////////////////
 
         if (type == obj.Blue_Cube){

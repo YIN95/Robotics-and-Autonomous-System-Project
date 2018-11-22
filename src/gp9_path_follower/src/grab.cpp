@@ -34,7 +34,7 @@ public:
 
 		pub_close_enough = nh.advertise<std_msgs::Bool>("/close_enough", 1);
 		pub_velocity = nh.advertise<geometry_msgs::Twist>("/motor_controller/velocity", 1);
-		pub_has_reached_goal = nh.advertise<std_msgs::Bool>("/has_reached_goal", 1);
+		pub_has_reached_goal = nh.advertise<std_msgs::Bool>("/has_reached_grab_goal", 1);
 
         pub_grab = nh.advertise<std_msgs::Int32>("/grab", 1);
 

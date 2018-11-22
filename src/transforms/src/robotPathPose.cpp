@@ -6,6 +6,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <robotPathPose.h>
+#include <fstream>
 
 int main(int argc, char** argv){
     ros::init(argc, argv, "robotPathPose");
@@ -49,6 +50,17 @@ void robotPathPose::objectCallback(const geometry_msgs::Pose2D::ConstPtr &msg){
 
     pub_global_robot_coor_theta.publish(pose);
     ROS_INFO("pose: (%f, %f, %f)", robot_x, robot_y, pose.theta);
+    
+    //std::ofstream myfile ("/home/ras19/catkin_ws/src/transforms/src/objposition.txt");
+
+    std::fstream myfile;
+    myfile.open ("/home/ras19/catkin_ws/src/transforms/src/objposition.txt", std::fstream::app);
+    if (myfile.is_open())
+    {
+        myfile << robot_x << " " << robot_y << " " << pose.theta << " " << '\n';
+        myfile.close();
+    }
+       
 
     return;
 }
