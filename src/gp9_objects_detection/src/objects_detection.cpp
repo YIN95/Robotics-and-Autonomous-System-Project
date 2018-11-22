@@ -179,7 +179,7 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
         cvtColor(frame, frame_gray, COLOR_BGR2GRAY);
         equalizeHist(frame_gray, frame_gray);
         //-- Detect objects
-        cascade.detectMultiScale(frame_gray, objects, 1.1, 3, 0|CASCADE_SCALE_IMAGE, Size(77, 77), Size(190, 190));
+        cascade.detectMultiScale(frame_gray, objects, 1.1, 3, 0|CASCADE_SCALE_IMAGE, Size(77, 77), Size(240, 240));
         detect_size = std::min(int(objects.size()), detect_size);
 
         cascade_battery.detectMultiScale(frame_gray, objects_battery, 1.1, 3, 0|CASCADE_SCALE_IMAGE, Size(280, 280), Size(600, 600));
