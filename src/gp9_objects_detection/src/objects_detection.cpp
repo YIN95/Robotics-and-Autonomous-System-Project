@@ -51,7 +51,7 @@ ObjectDetection::ObjectDetection(){
     string filePath = "/gp9_objects_detection/src/cascade.xml";
     string fullPath = path + filePath;
     
-    fullPath = "/home/ras19/catkin_ws/src/gp9_objects_detection/src/cascade2.xml";
+    fullPath = "/home/ras19/catkin_ws/src/gp9_objects_detection/src/cascade_small_mask.xml";
     cascade_name = fullPath;
     //cascade.mode = ;
     if(!cascade.load(cascade_name)){ 
@@ -176,10 +176,14 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
         Mat frame = ptr->image;
         Mat frame_gray;
         Mat frame_target;
+
+        Mat element = getStructuringElement(MORPH_RECT, Size(5, 5));       	
+       	dilate(origin_frame_masked, origin_frame_masked, element);
+
         cvtColor(frame, frame_gray, COLOR_BGR2GRAY);
         equalizeHist(frame_gray, frame_gray);
         //-- Detect objects
-        cascade.detectMultiScale(frame_gray, objects, 1.1, 3, 0|CASCADE_SCALE_IMAGE, Size(77, 77), Size(240, 240));
+        cascade.detectMultiScale(origin_frame_masked, objects, 1.1, 3, 0|CASCADE_SCALE_IMAGE, Size(77, 77), Size(240, 240));
         detect_size = std::min(int(objects.size()), detect_size);
 
         cascade_battery.detectMultiScale(frame_gray, objects_battery, 1.1, 3, 0|CASCADE_SCALE_IMAGE, Size(280, 280), Size(600, 600));
@@ -300,7 +304,6 @@ void ObjectDetection::listen_obj_map(double x, double y, int type){
         pose_.y = obj_tf_map.point.y;
         evidence_x = pose_.x;
         evidence_y = pose_.y;
-        ROS_INFO("|||||||||||||1111111, %f", evidence_x);
         pose_pub.publish(pose_);
         pubPose(pose_.x, pose_.y, type);
     }
