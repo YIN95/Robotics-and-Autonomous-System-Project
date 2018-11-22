@@ -34,7 +34,7 @@ public: /* ros */
 		has_reached_orientation = false;
 
 		nextPose = 0;
-		numberOfPoses = 3;
+		numberOfPoses = 4;
 		stop_seconds = 2;
 
 		global_pose = std::vector<double>(3, 0);
@@ -65,6 +65,10 @@ public: /* ros */
 		pose_sequence[2][1] = 0.725;
 		pose_sequence[2][2] = 0.0;
 
+		pose_sequence[3][0] = 0.225;
+		pose_sequence[3][1] = 0.725;
+		pose_sequence[3][2] = M_PI / 2;
+
 		pub_currentState = nh.advertise<std_msgs::Int32>("/brain_state", 1);
 		pub_globalDesiredPose = nh.advertise<geometry_msgs::Pose2D>("/global_desired_pose", 1);
 
@@ -91,20 +95,24 @@ public: /* ros */
 			case STATE_NEXT_POSE: //Take A Pose
 				ROS_INFO("NEXT POSE");
 				if(nextPose < numberOfPoses){
+					ROS_INFO("Taking a new position");
 					global_pose[0] = pose_sequence[nextPose][0];
 					global_pose[1] = pose_sequence[nextPose][1];
 					global_pose[2] = pose_sequence[nextPose][2];
 					nextPose += 1;
-					if ((global_pose[0] == previous_pose[0]) && (global_pose[1] == previous_pose[1])){
+					bool same_x = fabs(previous_pose[0] - global_pose[0]) < 1e-6;;
+					bool same_y = fabs(previous_pose[1] - global_pose[1]) < 1e-6;;
+					if (same_x && same_y){
 						currentState = STATE_ROTATING;
 					}
 					else{
 						currentState = STATE_MOVING;
 					}
-					previous_pose[0] = global_pose[0];
-					previous_pose[1] = global_pose[1];
+					//previous_pose[0] = global_pose[0];
+					//previous_pose[1] = global_pose[1];
 				}
 				else{
+					ROS_INFO("Taking a new position");
 					currentState = STATE_GO_HOME;
 				}
 				break;
