@@ -1,0 +1,8 @@
+prefix=/home/ras19/catkin_ws/install
+
+Name: gp9_objects_detection
+Description: Description of gp9_objects_detection
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/ras19/catkin_ws/install/lib 
+Requires: 
