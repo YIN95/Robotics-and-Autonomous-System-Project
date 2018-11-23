@@ -116,8 +116,8 @@ public: /* ros */
 	void run(){
 		switch(currentState){
 			case STATE_READY: //Needed to give time to the other nodes to listen to the topics
-				readExplorePosition();
-				readObjectPosition();
+				readExplorePosition();  // for phase 1
+				readObjectPosition();   // for phase 2
 				currentState = STATE_NEXT_POSE;
 				break;
 
