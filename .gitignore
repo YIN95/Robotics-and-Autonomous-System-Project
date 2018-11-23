@@ -2,3 +2,4 @@
 venv/
 build/
 *.pyc
+/home/ras19/catkin_ws/src/transforms/src/objposition.txt
