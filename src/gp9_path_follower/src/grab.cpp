@@ -113,7 +113,7 @@ public:
         pub_grab.publish(msg);
         if (fabs(error_distance) > distance_threshold) {
             ROS_INFO("Giving signal to motor");
-            velocity_msg.linear.x = sign * 1.2;
+            velocity_msg.linear.x = sign * 0.5;
             velocity_msg.angular.z = 0; // 1.2 is a okay value
             pub_velocity.publish(velocity_msg);
         }
