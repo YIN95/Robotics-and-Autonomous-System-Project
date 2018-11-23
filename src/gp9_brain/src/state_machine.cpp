@@ -36,6 +36,7 @@ public: /* ros */
 		hasReachedGoal = false;
 		has_reached_orientation = false;
 		has_reached_grab = false;
+		yet_done = false;
 
 		nextPose = 0;
 		numberOfPoses = 4;
@@ -118,16 +119,13 @@ public: /* ros */
 					
 					bool same_x = fabs(previous_pose[0] - global_pose[0]) < 1e-6;
 					bool same_y = fabs(previous_pose[1] - global_pose[1]) < 1e-6;
-					if (fabs(pose_sequence[nextPose][3]-1) < 1e-6){
-						currentState = STATE_OPEN_GRIPPERS;
-						objectPosition();
-					}
-					else if (same_x && same_y){
+					if (same_x && same_y){
 						currentState = STATE_ROTATING;
 					}
 					else{
 						currentState = STATE_MOVING;
 					}
+					yet_done = false;
 					nextPose += 1;
 				}
 				else{
@@ -142,6 +140,11 @@ public: /* ros */
 					currentState = STATE_STOP;
 					hasReachedGoal = false;
 					arrival_time = ros::Time::now();
+				}
+				if ((!yet_done) && (fabs(pose_sequence[nextPose-1][3]-1) < 1e-6)){
+						objectPosition();
+						yet_done = true;
+						currentState = STATE_OPEN_GRIPPERS;
 				}
 				break;
 
@@ -167,7 +170,13 @@ public: /* ros */
 
 				current_time = ros::Time::now();
 				if ((current_time - arrival_time).toSec() > stop_seconds){
-					currentState = STATE_CLOSE_GRIPPERS;
+					if ((yet_done) && (fabs(pose_sequence[nextPose-1][3]-1) < 1e-6)){
+						currentState = STATE_CLOSE_GRIPPERS;
+					}
+					else{
+						currentState = STATE_NEXT_POSE;
+					}
+					
 				}
 				break;
 
@@ -177,10 +186,9 @@ public: /* ros */
 				// 	currentState = STATE_STOP;
 				// 	has_reached_grab = false;
 				// }
+        		msg.data = 1;
+        		pub_grab.publish(msg);
 				currentState = STATE_MOVING;
-				
-        		msg1.data = 1;
-        		pub_grab.publish(msg1);
 				break;
 			
 			case STATE_CLOSE_GRIPPERS:
@@ -190,9 +198,9 @@ public: /* ros */
 				// 	currentState = STATE_STOP;
 				// 	has_reached_grab = false;
 				// }
-				msg0.data = 0;
-            	pub_grab.publish(msg0);
-				currentState = STATE_NEXT_POSE;
+				msg.data = 0;
+            	pub_grab.publish(msg);
+				currentState = STATE_GO_HOME;
         		
 				break;
 		}
@@ -235,6 +243,56 @@ public: /* ros */
 		global_pose[1] += distance_y;
 	}
 
+	// void readPosition(){ //TAKEN FROM INTERSECTION --> MUST BE CHANGED AND RIADAPTED!
+	// 	{
+
+    //     const char* path_to_file = "/home/ras19/catkin_ws/src/gp9_localization/src/maze.txt";
+        
+    //     std::string line;
+    //     std::string past_value;
+    //     std::ifstream myfile;
+    //     myfile.open(path_to_file, std::ifstream::in);
+
+    //     if (myfile.is_open()) {
+
+    //         std::deque<std::vector<double> > points;
+    //         boost::char_separator<char> sep(" ");
+    //         int i = 0;
+    //         while(getline(myfile, line)){
+                
+    //             boost::tokenizer< boost::char_separator<char> > values(line, sep);
+    //             BOOST_FOREACH (const std::string& value, values) {
+    //                 i++;
+    //                 if (i % 2 == 0){
+    //                     double x = atof(past_value.c_str());
+    //                     double y = atof(value.c_str());
+    //                     Point p = Point(x, y);
+    //                     points.push_back(p);
+    //                 }
+    //                 past_value = value;
+    //             }
+    //         }
+
+    //         Point past_point;
+    //         std::deque<Point>::iterator it = points.begin();
+    //         i = 0;
+    //         while (it != points.end()) {
+    //             i++;
+    //             Point point = *it++;
+    //             if (i % 2 == 0){
+    //                     Line l = Line(past_point, point);
+    //                     walls.push_back(l);
+    //                 }
+    //             past_point = point;
+    //         }
+
+    //         myfile.close();
+    //     }
+
+    //     else std::cout << "Unable to open file";
+    // }
+	// }
+
 private:
 	int currentState;
 
@@ -244,8 +302,7 @@ private:
 	int stop_seconds;
 
 	geometry_msgs::Pose2D global_desired_pose;
-	std_msgs::Int32 msg1;
-	std_msgs::Int32 msg0;
+	std_msgs::Int32 msg;
 	std::vector<double> global_pose;
 	std::vector<double> previous_pose;
 
@@ -254,6 +311,7 @@ private:
 	bool hasReachedGoal;
 	bool has_reached_orientation;
 	bool has_reached_grab;
+	bool yet_done;
 };
 
 
