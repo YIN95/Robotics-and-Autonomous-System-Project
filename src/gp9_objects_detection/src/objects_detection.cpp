@@ -52,6 +52,7 @@ ObjectDetection::ObjectDetection(){
     string fullPath = path + filePath;
     
     fullPath = "/home/ras19/catkin_ws/src/gp9_objects_detection/src/cascade_small_mask.xml";
+    fullPath = "/home/ras19/catkin_ws/src/gp9_objects_detection/src/cascade_new_mask.xml";
     cascade_name = fullPath;
     //cascade.mode = ;
     if(!cascade.load(cascade_name)){ 
