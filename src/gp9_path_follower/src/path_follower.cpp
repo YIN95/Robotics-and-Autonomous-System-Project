@@ -214,9 +214,9 @@ public:
 
 		pub_velocity.publish(velocity_msg);
 		pub_close_enough.publish(close_enough_msg);
-		// if(newInfoAboutGoal){
-		// 	pub_has_reached_goal.publish(has_reached_goal_msg);
-		// }
+		if(newInfoAboutGoal){
+			pub_has_reached_goal.publish(has_reached_goal_msg);
+		}
 		
 		// ROS_INFO("=============================================");
 	}
@@ -392,7 +392,7 @@ public:
 		if(pose_goal == pose_desired)
 		{
 			has_reached_goal_msg.data = true;
-			pub_has_reached_goal.publish(has_reached_goal_msg); //ADDDED
+			// pub_has_reached_goal.publish(has_reached_goal_msg); //ADDDED
 			ROS_INFO("hasReachedGoal");
 		}
 		else

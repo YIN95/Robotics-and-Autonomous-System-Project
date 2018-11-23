@@ -42,14 +42,14 @@ public: /* ros */
 		open_grippers = false;
 
 		nextPose = 0;
-		numberOfPoses = 4;
 		stop_seconds = 2;
+
+        num_objects = countObjects();
+
 
 		global_pose = std::vector<double>(3, 0);
 		previous_pose = std::vector<double>(3, 0);
-		pose_sequence = std::vector<std::vector<double> >(numberOfPoses, std::vector<double>(4, 0)); 
-		obj_pose_sequence = std::vector<std::vector<double> >(numberOfPoses, std::vector<double>(4, 0)); 
-		explore_pose_sequence = std::vector<std::vector<double> >(numberOfPoses, std::vector<double>(4, 0));
+		pose_sequence = std::vector<std::vector<double> >(num_objects, std::vector<double>(4, 0));
 		//The fourth value of the row could be:
 		//- 0 if there is nothing to grab;
 		//- 1 if it is an object pose;
@@ -63,21 +63,30 @@ public: /* ros */
 		previous_pose[1] = 0.225;
 		previous_pose[2] = M_PI / 2;
 
-		pose_sequence[0][0] = 0.525;
-		pose_sequence[0][1] = 1.70;
-		pose_sequence[0][2] = 0.0;
-		pose_sequence[0][3] = 0;
+		// pose_sequence[0][0] = 0.225;
+		// pose_sequence[0][1] = 1.70;
+		// pose_sequence[0][2] = 0.0;
+		// pose_sequence[0][3] = 0;
 
-		for (int i = 1; i < 4; i++) {
-			double angle = (1 + i) * (M_PI / 2);
-			if (angle > 2 * M_PI) {
-				angle -= 2 * M_PI;
-			}
-			pose_sequence[i][0] = 0.525;
-			pose_sequence[i][1] = 1.70;
-			pose_sequence[i][2] = angle;
-			pose_sequence[i][3] = 0;
-		}
+		// pose_sequence[1][0] = 0.225;
+		// pose_sequence[1][1] = 1.50;
+		// pose_sequence[1][2] = 0.0;
+		// pose_sequence[1][3] = 0;
+
+		// pose_sequence[2][0] = 0.225;
+		// pose_sequence[2][1] = 1.50;
+		// pose_sequence[2][2] = 0.0;
+		// pose_sequence[2][3] = 1;
+
+		// // pose_sequence[2][0] = 0.225;
+		// // pose_sequence[2][1] = 0.725;
+		// // pose_sequence[2][2] = 0.0;
+		// // pose_sequence[2][3] = 0;
+
+		// pose_sequence[3][0] = 0.225;
+		// pose_sequence[3][1] = 0.725;
+		// pose_sequence[3][2] = M_PI / 2;
+		// pose_sequence[3][3] = 0;
 
 		pub_currentState = nh.advertise<std_msgs::Int32>("/brain_state", 1);
 		pub_globalDesiredPose = nh.advertise<geometry_msgs::Pose2D>("/global_desired_pose", 1);
@@ -107,14 +116,16 @@ public: /* ros */
 	void run(){
 		switch(currentState){
 			case STATE_READY: //Needed to give time to the other nodes to listen to the topics
+                msg.data = 0;
+            	pub_grab.publish(msg);
 				// readExplorePosition();  // for phase 1
-				// readObjectPosition();   // for phase 2
+				readObjectPosition();   // for phase 2
 				currentState = STATE_NEXT_POSE;
 				break;
 
 			case STATE_NEXT_POSE: //Take A Pose
 				ROS_INFO("NEXT POSE");
-				if(nextPose < numberOfPoses){
+				if(nextPose < num_objects){
 					ROS_INFO("Taking a new position");
 					global_pose[0] = pose_sequence[nextPose][0];
 					global_pose[1] = pose_sequence[nextPose][1];
@@ -269,80 +280,49 @@ public: /* ros */
 		}
 	}
 
+    int countObjects(){
+        std::fstream fin("/home/ras19/catkin_ws/src/transforms/src/objposition.txt");
+        int num_points = 0;
+		if (fin){
+            double x, y, theta;
+            while(fin>>x>>y>>theta) {
+                num_points++;
+            }
+        }
+        return 2*num_points;
+    }
+
 	void readObjectPosition(){	// read the position of the object we detected in phase 1
 		std::fstream fin("/home/ras19/catkin_ws/src/transforms/src/objposition.txt");
 
 		if (fin){
-			double x, y, theta;
+
+            double x, y, theta;
 			unsigned obj_count = 0;
+
 			while(fin>>x>>y>>theta){
 				
-				obj_pose_sequence[obj_count][0] = x;
-				obj_pose_sequence[obj_count][1] = y;
-				obj_pose_sequence[obj_count][2] = theta;
-				obj_pose_sequence[obj_count][3] = 1;
-				ROS_INFO("[Object Pose] x:%f, y:%f, theta:%f, flag:%f", obj_pose_sequence[obj_count][0], obj_pose_sequence[obj_count][1], obj_pose_sequence[obj_count][2], obj_pose_sequence[obj_count][3]);
+				pose_sequence[obj_count][0] = x;
+				pose_sequence[obj_count][1] = y;
+				pose_sequence[obj_count][2] = theta;
+				pose_sequence[obj_count][3] = 0;
+                pose_sequence[obj_count+1][0] = x;
+				pose_sequence[obj_count+1][1] = y;
+				pose_sequence[obj_count+1][2] = theta;
+				pose_sequence[obj_count+1][3] = 1;
+				// ROS_INFO("[Object Pose] x:%f, y:%f, theta:%f, flag:%f", pose_sequence[obj_count][0], pose_sequence[obj_count][1], pose_sequence[obj_count][2], pose_sequence[obj_count][3]);
+                // ROS_INFO("counter: %d", obj_count);
+                obj_count += 2;
 			}
 		}
 
 	}
 
-
-	// void readPosition(){ //TAKEN FROM INTERSECTION --> MUST BE CHANGED AND RIADAPTED!
-	// 	{
-
-    //     const char* path_to_file = "/home/ras19/catkin_ws/src/gp9_localization/src/maze.txt";
-        
-    //     std::string line;
-    //     std::string past_value;
-    //     std::ifstream myfile;
-    //     myfile.open(path_to_file, std::ifstream::in);
-
-    //     if (myfile.is_open()) {
-
-    //         std::deque<std::vector<double> > points;
-    //         boost::char_separator<char> sep(" ");
-    //         int i = 0;
-    //         while(getline(myfile, line)){
-                
-    //             boost::tokenizer< boost::char_separator<char> > values(line, sep);
-    //             BOOST_FOREACH (const std::string& value, values) {
-    //                 i++;
-    //                 if (i % 2 == 0){
-    //                     double x = atof(past_value.c_str());
-    //                     double y = atof(value.c_str());
-    //                     Point p = Point(x, y);
-    //                     points.push_back(p);
-    //                 }
-    //                 past_value = value;
-    //             }
-    //         }
-
-    //         Point past_point;
-    //         std::deque<Point>::iterator it = points.begin();
-    //         i = 0;
-    //         while (it != points.end()) {
-    //             i++;
-    //             Point point = *it++;
-    //             if (i % 2 == 0){
-    //                     Line l = Line(past_point, point);
-    //                     walls.push_back(l);
-    //                 }
-    //             past_point = point;
-    //         }
-
-    //         myfile.close();
-    //     }
-
-    //     else std::cout << "Unable to open file";
-    // }
-	// }
-
 private:
 	int currentState;
 
 	int nextPose;
-	int numberOfPoses;
+	int num_objects;
 
 	int stop_seconds;
 
@@ -367,7 +347,7 @@ private:
 int main(int argc, char** argv) 
 {	
 
-	ros::init(argc, argv, "state_machine");
+	ros::init(argc, argv, "state_machine2");
 	StateMachine st;
 
 	std_msgs::Int32 currentState_msg;
