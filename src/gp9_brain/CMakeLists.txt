@@ -134,6 +134,9 @@ include_directories(
 add_executable(state_machine src/state_machine.cpp)
 target_link_libraries(state_machine ${catkin_LIBRARIES})
 
+add_executable(state_machine2 src/state_machine2.cpp)
+target_link_libraries(state_machine2 ${catkin_LIBRARIES})
+
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide

@@ -151,7 +151,7 @@ public:
 		pose_previous[1] = pose_desired[1];
 		pose_previous[2] = pose_desired[2];
 
-		// ROS_INFO("Local Pose Callback");
+		ROS_INFO("Local Pose Callback");
 
 		show_desired_pose();
 	}
@@ -161,7 +161,11 @@ public:
 		pose_goal[1] = global_desired_pose_msg->y;
 		pose_goal[2] = global_desired_pose_msg->theta;
 
-		// ROS_INFO("Global Pose Callback");
+		ROS_INFO("Global Pose Callback");
+		ROS_INFO("Point: %f %f %f", pose_goal[0], pose_goal[1], pose_goal[2]);
+		newInfoAboutGoal = true;
+		has_reached_goal_msg.data = false;
+		previous_hasReachedGoal = has_reached_goal_msg.data;
 
 		// bool x_close = fabs(pose_previous[0] - pose_desired[0]) < 1e-6;
 		// bool y_close = fabs(pose_previous[1] - pose_desired[1]) < 1e-6;
@@ -214,9 +218,12 @@ public:
 
 		pub_velocity.publish(velocity_msg);
 		pub_close_enough.publish(close_enough_msg);
-		// if(newInfoAboutGoal){
-		// 	pub_has_reached_goal.publish(has_reached_goal_msg);
-		// }
+		ROS_INFO("New info? %d", newInfoAboutGoal);
+
+		if(newInfoAboutGoal){
+		 	pub_has_reached_goal.publish(has_reached_goal_msg);
+	 	}
+		newInfoAboutGoal = false;
 		
 		// ROS_INFO("=============================================");
 	}
@@ -389,17 +396,17 @@ public:
 	}
 
 	void hasReachedGoal() {
-		if(pose_goal == pose_desired)
+		double dist_to_goal = sqrt(pow(pose_goal[0] - pose[0], 2) + pow(pose_goal[1] - pose[1], 2));
+		bool close_enough_to_goal = dist_to_goal < distance_threshold;
+
+		if((pose_goal[0] == pose_desired[0]) && (pose_goal[1] == pose_desired[1]))
+		// if (close_enough_to_goal)
 		{
 			has_reached_goal_msg.data = true;
-			pub_has_reached_goal.publish(has_reached_goal_msg); //ADDDED
+			//pub_has_reached_goal.publish(has_reached_goal_msg); //ADDED
 			ROS_INFO("hasReachedGoal");
 		}
-		else
-		{
-			has_reached_goal_msg.data = false;
-			// ROS_INFO("NO");
-		}
+
 		if(has_reached_goal_msg.data != previous_hasReachedGoal){
 			newInfoAboutGoal = true;
 		}
@@ -508,7 +515,7 @@ int main(int argc, char** argv) {
 
 	int control_frequency = 125;
 	int check_every_laser = 30;
-	double min_distance_to_obstacles = 0.13;
+	double min_distance_to_obstacles = 0.03;
 
 	ros::init(argc, argv, "path_follower");
 	StraightLines sl(control_frequency, min_distance_to_obstacles, check_every_laser);
