@@ -2,7 +2,7 @@
 
     <node pkg="gp9_path_follower" name="path_follower" type="path_follower" output="screen"/>
     <node pkg="gp9_path_follower" name="rotation" type="rotation" output="screen"/>
-    <node pkg="gp9_path_follower" name="grab" type="grab" output="screen"/>
+    <!-- <node pkg="gp9_path_follower" name="grab" type="grab" output="screen"/> -->
     <node pkg="gp9_path_follower" name="execute_path" type="execute_path.py"/>
     <node pkg="gp9_path_planning" name="path_publisher" type="path_publisher.py"/>
 

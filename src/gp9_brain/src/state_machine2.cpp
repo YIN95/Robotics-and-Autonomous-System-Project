@@ -43,6 +43,7 @@ public: /* ros */
 
 		nextPose = 0;
 		stop_seconds = 2;
+		desired_distance_from_object = 0.12;
 
         num_objects = countObjects();
 
@@ -50,10 +51,10 @@ public: /* ros */
 		global_pose = std::vector<double>(3, 0);
 		previous_pose = std::vector<double>(3, 0);
 		pose_sequence = std::vector<std::vector<double> >(num_objects, std::vector<double>(4, 0));
-		//The fourth value of the row could be:
-		//- 0 if there is nothing to grab;
-		//- 1 if it is an object pose;
-		//- 2 if there is an obstacle to avoid.
+		obj_pose_sequence = std::vector<std::vector<double> >(num_objects, std::vector<double>(2, 0));
+		// The fourth value of the row could be:
+		// 0 if there is nothing to grab;
+		// 1 if it is an object pose;
 
 		global_pose[0] = 0.225;
 		global_pose[1] = 0.225;
@@ -63,30 +64,6 @@ public: /* ros */
 		previous_pose[1] = 0.225;
 		previous_pose[2] = M_PI / 2;
 
-		// pose_sequence[0][0] = 0.225;
-		// pose_sequence[0][1] = 1.70;
-		// pose_sequence[0][2] = 0.0;
-		// pose_sequence[0][3] = 0;
-
-		// pose_sequence[1][0] = 0.225;
-		// pose_sequence[1][1] = 1.50;
-		// pose_sequence[1][2] = 0.0;
-		// pose_sequence[1][3] = 0;
-
-		// pose_sequence[2][0] = 0.225;
-		// pose_sequence[2][1] = 1.50;
-		// pose_sequence[2][2] = 0.0;
-		// pose_sequence[2][3] = 1;
-
-		// // pose_sequence[2][0] = 0.225;
-		// // pose_sequence[2][1] = 0.725;
-		// // pose_sequence[2][2] = 0.0;
-		// // pose_sequence[2][3] = 0;
-
-		// pose_sequence[3][0] = 0.225;
-		// pose_sequence[3][1] = 0.725;
-		// pose_sequence[3][2] = M_PI / 2;
-		// pose_sequence[3][3] = 0;
 
 		pub_currentState = nh.advertise<std_msgs::Int32>("/brain_state", 1);
 		pub_globalDesiredPose = nh.advertise<geometry_msgs::Pose2D>("/global_desired_pose", 1);
@@ -119,7 +96,8 @@ public: /* ros */
                 msg.data = 0;
             	pub_grab.publish(msg);
 				// readExplorePosition();  // for phase 1
-				readObjectPosition();   // for phase 2
+				//readObjectPosition();   // for phase 2
+				readObjectPosition_trial();
 				currentState = STATE_NEXT_POSE;
 				break;
 
@@ -156,7 +134,8 @@ public: /* ros */
 					arrival_time = ros::Time::now();
 				}
 				if ((!open_grippers) && (fabs(pose_sequence[nextPose-1][3]-1) < 1e-6)){
-						objectPosition();
+						//objectPosition();
+						objectPosition_trial(nextPose-1);
 						open_grippers = true;
 						currentState = STATE_OPEN_GRIPPERS;
 				}
@@ -178,7 +157,8 @@ public: /* ros */
 					arrival_time = ros::Time::now();
 				}
 				if ((!open_grippers) && (fabs(pose_sequence[nextPose-1][3]-1) < 1e-6)){
-						objectPosition();
+						//objectPosition();
+						objectPosition_trial(nextPose-1);
 						open_grippers = true;
 						currentState = STATE_OPEN_GRIPPERS;
 				}
@@ -201,10 +181,6 @@ public: /* ros */
 
 			case STATE_OPEN_GRIPPERS:
 				ROS_INFO("OPEN GRIPPERS");
-				// if(has_reached_grab){
-				// 	currentState = STATE_STOP;
-				// 	has_reached_grab = false;
-				// }
         		msg.data = 1;
         		pub_grab.publish(msg);
 				currentState = STATE_MOVING;
@@ -213,10 +189,6 @@ public: /* ros */
 			case STATE_CLOSE_GRIPPERS:
 				ROS_INFO("CLOSE GRIPPERS");
 				ROS_INFO("======================================================");
-				// if(has_reached_grab){
-				// 	currentState = STATE_STOP;
-				// 	has_reached_grab = false;
-				// }
 				msg.data = 0;
             	pub_grab.publish(msg);
 				currentState = STATE_GO_HOME;
@@ -227,9 +199,6 @@ public: /* ros */
 	}
 
 	void publishNewPose(){
-		// ROS_INFO("Global Desired Pose: \t%f, \t%f, \t%f", global_pose[0], global_pose[1], global_pose[2]);
-		// ROS_INFO("Previous Pose: \t%f, \t%f, \t%f", previous_pose[0], previous_pose[1], previous_pose[2]);
-	
 		bool same_x = fabs(previous_pose[0] - global_pose[0]) < 1e-6;;
 		bool same_y = fabs(previous_pose[1] - global_pose[1]) < 1e-6;;
 		bool same_angle = fabs(previous_pose[2] - global_pose[2]) < 1e-6;
@@ -256,29 +225,32 @@ public: /* ros */
 	void objectPosition(){
 		double distance_x;
 		double distance_y;
-		distance_x = 0.2 * cos(global_pose[2]);
-		distance_y = 0.2 * sin(global_pose[2]);
+		distance_x = 0.4 * cos(global_pose[2]);
+		distance_y = 0.4 * sin(global_pose[2]);
 		global_pose[0] += distance_x;
 		global_pose[1] += distance_y;
 	}
 
+	void objectPosition_trial(int obj_count){
+		
+		double dx = obj_pose_sequence[obj_count][0] - global_pose[0];
+		double dy = obj_pose_sequence[obj_count][1] - global_pose[1];
+		double dist = sqrt(pow(dx, 2) + pow(dy, 2));
+		double distance_x;
+		double distance_y;
 
-	void readExplorePosition(){	// read the position we need to explore for phase 1
-		std::fstream fin("/home/ras19/catkin_ws/src/gp9_path_planning/scripts/ShortestPath.txt");
+		ROS_INFO("distance: %f", dist - desired_distance_from_object);
+		ROS_INFO("global x: %f", global_pose[0]);
+		ROS_INFO("object x: %f", obj_pose_sequence[obj_count][0]);
+		distance_x = (dist - desired_distance_from_object) * cos(global_pose[2]);
+		distance_y = (dist - desired_distance_from_object) * sin(global_pose[2]);
 
-		if (fin){
-			double x, y;
-			unsigned point_count = 0;
-			while(fin>>x>>y){
-				
-				explore_pose_sequence[point_count][0] = x;
-				explore_pose_sequence[point_count][1] = y;
-				explore_pose_sequence[point_count][2] = 0;
-			
-				ROS_INFO("[Explore Pose] x:%f, y:%f, theta:%f, flag:%f", explore_pose_sequence[point_count][0], explore_pose_sequence[point_count][1], explore_pose_sequence[point_count][2], explore_pose_sequence[point_count][3]);
-			}
-		}
+		global_pose[0] += distance_x;
+		global_pose[1] += distance_y;
+
+
 	}
+
 
     int countObjects(){
         std::fstream fin("/home/ras19/catkin_ws/src/transforms/src/objposition.txt");
@@ -297,10 +269,10 @@ public: /* ros */
 
 		if (fin){
 
-            double x, y, theta;
+            double x, y, theta, xo, yo;
 			unsigned obj_count = 0;
 
-			while(fin>>x>>y>>theta){
+			while(fin>>x>>y>>theta>>xo>>yo){
 				
 				pose_sequence[obj_count][0] = x;
 				pose_sequence[obj_count][1] = y;
@@ -310,10 +282,43 @@ public: /* ros */
 				pose_sequence[obj_count+1][1] = y;
 				pose_sequence[obj_count+1][2] = theta;
 				pose_sequence[obj_count+1][3] = 1;
+
 				// ROS_INFO("[Object Pose] x:%f, y:%f, theta:%f, flag:%f", pose_sequence[obj_count][0], pose_sequence[obj_count][1], pose_sequence[obj_count][2], pose_sequence[obj_count][3]);
                 // ROS_INFO("counter: %d", obj_count);
                 obj_count += 2;
 			}
+			
+		}
+
+	}
+
+	void readObjectPosition_trial(){	// read the position of the object we detected in phase 1
+		std::fstream fin("/home/ras19/catkin_ws/src/transforms/src/objposition.txt");
+
+		if (fin){
+
+            double x, y, theta, xo, yo;
+			unsigned obj_count = 0;
+
+			while(fin>>x>>y>>theta>>xo>>yo){
+				
+				pose_sequence[obj_count][0] = x;
+				pose_sequence[obj_count][1] = y;
+				pose_sequence[obj_count][2] = theta;
+				pose_sequence[obj_count][3] = 0;
+                pose_sequence[obj_count+1][0] = x;
+				pose_sequence[obj_count+1][1] = y;
+				pose_sequence[obj_count+1][2] = theta;
+				pose_sequence[obj_count+1][3] = 1;
+
+				obj_pose_sequence[obj_count+1][0] = xo;
+				obj_pose_sequence[obj_count+1][1] = yo;
+
+				// ROS_INFO("[Object Pose] x:%f, y:%f, theta:%f, flag:%f", pose_sequence[obj_count][0], pose_sequence[obj_count][1], pose_sequence[obj_count][2], pose_sequence[obj_count][3]);
+                // ROS_INFO("counter: %d", obj_count);
+                obj_count += 2;
+			}
+			
 		}
 
 	}
@@ -325,6 +330,7 @@ private:
 	int num_objects;
 
 	int stop_seconds;
+	double desired_distance_from_object;
 
 	geometry_msgs::Pose2D global_desired_pose;
 	std_msgs::Int32 msg;
@@ -333,7 +339,6 @@ private:
 
 	std::vector< std::vector<double> > pose_sequence;
 	std::vector< std::vector<double> > obj_pose_sequence;
-	std::vector< std::vector<double> > explore_pose_sequence;
 
 	
 	bool hasReachedGoal;

@@ -65,7 +65,7 @@ def tsp(path_to_map, robot_radius, grid):
 if __name__ == '__main__':
     path_to_map = '/home/ras19/catkin_ws/src/gp9_path_planning/maps/maze.txt'
     robot_radius = 0.16
-    grid = [2.41, 2.41, 4, 4]
+    grid = [2.41, 2.41, 5, 5]
     ShortestPath = tsp(path_to_map, robot_radius, grid)
     print("Shortest Path: ")
     print(ShortestPath)
