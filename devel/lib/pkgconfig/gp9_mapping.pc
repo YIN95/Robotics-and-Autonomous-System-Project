@@ -1,0 +1,8 @@
+prefix=/home/ras19/catkin_ws/devel
+
+Name: gp9_mapping
+Description: Description of gp9_mapping
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/ras19/catkin_ws/devel/lib 
+Requires: 
