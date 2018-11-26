@@ -29,7 +29,7 @@ class TargetClassification:
         self.pub_shape = rospy.Publisher("/classification/shape", Int32, queue_size=1)
 
         ### parapeters ###
-        self.model_file = "/home/ras19/catkin_ws/src/gp9_objects_detection/tf_files/graph_shape.pb"
+        self.model_file = "/home/ras19/catkin_ws/src/gp9_objects_detection/tf_files/graph_shape_new.pb"
         self.label_file = "/home/ras19/catkin_ws/src/gp9_objects_detection/tf_files/labels_shape.txt"
         self.input_height = 128
         self.input_width = 128
