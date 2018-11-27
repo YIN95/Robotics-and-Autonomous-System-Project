@@ -139,7 +139,7 @@ void Odometry::ismoving(double vx, double vy, double w){
     v1 = std::fabs(vx);
     v2 = std::fabs(vy);
     v3 = std::fabs(w);
-    if ((v3 > 0.00001)){
+    if ((v3 > 0.00001) && (v1 > 0.0001) && (v2 > 0.0001)){
         _ismoving = true;
     }
     else{

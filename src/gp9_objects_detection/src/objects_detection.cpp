@@ -515,45 +515,45 @@ int ObjectDetection::colorClassifier(int h, int s, int v, int b, int g, int r){
             return -1;
         }
 
-        if (0 <= h && h <= 4 && 0 <= s && s <= 255 && 0 <= v && v <= 255){   
+        if (0 <= h && h <= 4 && 150 <= s && s <= 255 && 0 <= v && v <= 255){   
             ROS_INFO("COLOR_RED");
             return obj.COLOR_RED;
         }
-        else if ((176 <= h && h <= 180) && (0 <= s && s <= 255) && (0 <= v && v <= 255)){
+        else if ((176 <= h && h <= 180) && (150 <= s && s <= 255) && (0 <= v && v <= 255)){
             ROS_INFO("COLOR_RED");
             return obj.COLOR_RED;
         }
-        else if ((5 <= h && h <= 16) && (0 <= s && s <= 255) && (0 <= v && v <= 255)){
+        else if ((5 <= h && h <= 16) && (150 <= s && s <= 255) && (0 <= v && v <= 255)){
             ROS_INFO("COLOR_ORANGE");
             return obj.COLOR_ORANGE;
         }
-        else if (17 <= h && h <= 34 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
+        else if (17 <= h && h <= 34 && 150 <= s && s <= 255 && 0 <= v && v <= 255){
             ROS_INFO("COLOR_YELLOW");
             return obj.COLOR_YELLOW;
         }
-        else if ((35 <= h && h <= 66) && 0 <= s && s <= 255 && 0 <= v && v <= 255){
+        else if ((35 <= h && h <= 66) && 150 <= s && s <= 255 && 0 <= v && v <= 255){
             ROS_INFO("COLOR_LIGHT_GREEN");
             return obj.COLOR_LIGHT_GREEN;
         }
 
-        else if (67 <= h && h < 86 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
+        else if (67 <= h && h < 86 && 130 <= s && s <= 255 && 0 <= v && v <= 255){
             ROS_INFO("COLOR_GREEN");
             return obj.COLOR_GREEN;
         }
-        else if (87 <= h && h <= 128 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
+        else if (87 <= h && h <= 128 && 130 <= s && s <= 255 && 0 <= v && v <= 255){
             if (b>101){
                 ROS_INFO("COLOR_LIGHT_BLUE");
                 return obj.COLOR_LIGHT_BLUE;
             }
             
         }
-        else if (87 <= h && h <= 128 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
+        else if (87 <= h && h <= 128 && 100 <= s && s <= 255 && 0 <= v && v <= 255){
             if (b<100){
                 ROS_INFO("COLOR_BLUE");
                 return obj.COLOR_BLUE;
             }
         }
-        else if (129 <= h && h <= 175 && 0 <= s && s <= 255 && 0 <= v && v <= 255){
+        else if (129 <= h && h <= 175 && 40 <= s && s <= 255 && 0 <= v && v <= 255){
             ROS_INFO("COLOR_PURPLE");
             return obj.COLOR_PURPLE;
         }
