@@ -32,26 +32,26 @@ using namespace std;
 class ObjectDetection{
 public: /* ros */
 	ros::NodeHandle nh;
-    ros::Subscriber sub_image_rgb;
-    ros::Subscriber sub_image_depth;
-    ros::Subscriber sub_tensorflow_state;
-    ros::Subscriber sub_classification_shape;
-    ros::Subscriber sub_rob_position;
-    ros::Subscriber sub_moving_state;
+    ros::Subscriber sub_image_rgb;  // subscribe the rgb image from the realsence
+    ros::Subscriber sub_image_depth;    // subscribe the depth image from the realsence
+    ros::Subscriber sub_tensorflow_state;   // subscribe the classification state (busy or not busy)
+    ros::Subscriber sub_classification_shape;   // subscaribe the result of classification from tensorflow
+    ros::Subscriber sub_rob_position;   // subscribe the robot global position from tf
+    ros::Subscriber sub_moving_state;   // subscribe the moving state (moving or stop)
 
-    ros::Publisher pub_object_pose;
-    ros::Publisher pub_object_marker;
-    ros::Publisher pub_object_marker_array;
-    ros::Publisher pose_pub;
-    ros::Publisher pub_speak;
-    ros::Publisher pub_evidence;
-    ros::Publisher pub_findBattery;
+    ros::Publisher pub_object_pose; // publish the detected object pose
+    ros::Publisher pub_object_marker;   // publish the object marker to rviz
+    ros::Publisher pub_object_marker_array; // publish all object marker to rviz
+    ros::Publisher pose_pub;    // publish the global pose of robot
+    ros::Publisher pub_speak;   // publish the classifiction results to espeak
+    ros::Publisher pub_evidence;    // publish the evidence
+    ros::Publisher pub_findBattery; // if detect an battery, publish to a topic. 
     //ros::Publisher pub_classification_target;
 
     visualization_msgs::Marker marker;
-    visualization_msgs::MarkerArray marker_array;
+    visualization_msgs::MarkerArray marker_array;   // object array, shown in rviz
 
-    tf::TransformListener listener;
+    tf::TransformListener listener; // tf listener, used to subscribe the global pose of robot and object. 
     
 public:
     ObjectDetection();
@@ -92,29 +92,29 @@ public:
     static const int img_rgb_width = 640;
     static const double fx = 619.7237548828125;
     static const double cx = 304.5382995605469;
-    int preDetectColor;
-    int object_depth;
-    int tensorflowState;
-    int movingState;
-    cv_bridge::CvImagePtr cv_rgb_ptr;
-    cv_bridge::CvImagePtr cv_depth_ptr;
-    string cascade_name;
-    CascadeClassifier cascade;
-    CascadeClassifier cascade_battery;
-    std::vector<Rect> objects;
-    std::vector<Rect> objects_battery;
+    int preDetectColor; // now useless
+    int object_depth;   // the depth of object
+    int tensorflowState;    // whether the classification is busy 1 busy 0 not busy
+    int movingState;    // 1 moving 0 stop
+    cv_bridge::CvImagePtr cv_rgb_ptr;   // rgb image pointer 
+    cv_bridge::CvImagePtr cv_depth_ptr; // depth image pointer
+    string cascade_name;    // the haar cascade name
+    CascadeClassifier cascade;  // the haar cascade of object
+    CascadeClassifier cascade_battery; // the haar cascade of battery
+    std::vector<Rect> objects;  // all object
+    std::vector<Rect> objects_battery;  // all battery
     ObjectColorShape obj;
-    geometry_msgs::Pose2D pose;
-    Mat origin_frame;
-    Mat evidence_frame;
-    Mat origin_frame_masked;
+    geometry_msgs::Pose2D pose; 
+    Mat origin_frame;   // the origin rgb image
+    Mat evidence_frame; // the image used for evidence
+    Mat origin_frame_masked;    // the origin image with hsv mask
     geometry_msgs::PointStamped obj_tf_camera;
     geometry_msgs::PointStamped obj_tf_map;
     geometry_msgs::Pose2D pose_;
-    double evidence_x;
+    double evidence_x;  
     double evidence_y;
     String evidence_id;
-    int now_color;
+    int now_color;  
     int now_shape;
     int now_object;
     double robot_x;
