@@ -29,6 +29,7 @@ class Solution:
             copy = future_sets[:]
             copy.pop(i) 
             distance.append(self.X[node][s_i] + self.solve(s_i,copy))
+            # print('training%d'%i)
         d = min(distance)
         next_one = future_sets[distance.index(d)]
         c = self.transfer(future_sets)
@@ -41,7 +42,7 @@ def tsp(path_to_map, robot_radius, grid):
     print(D)
     S = Solution(D,0)
     PathLength = S.tsp()
-
+    print(A)
     print("PathLength: ")
     print(PathLength)
     
@@ -63,9 +64,9 @@ def tsp(path_to_map, robot_radius, grid):
     return np.array(ShortestPath)
 
 if __name__ == '__main__':
-    path_to_map = '/home/ras19/catkin_ws/src/gp9_path_planning/maps/maze.txt'
+    path_to_map = '/home/ras19/catkin_ws/src/gp9_path_planning/maps/maze2018.txt'
     robot_radius = 0.16
-    grid = [2.41, 2.41, 5, 5]
+    grid = [2.41, 2.41, 4, 4]
     ShortestPath = tsp(path_to_map, robot_radius, grid)
     print("Shortest Path: ")
     print(ShortestPath)
