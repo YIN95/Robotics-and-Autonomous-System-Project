@@ -13,7 +13,7 @@ class MapRepresentation:
 
     def __init__(self, cell_size, maze_path=None):
         if maze_path is None:
-            self.path_to_maze = '/home/ras19/catkin_ws/src/ras_project/ras_maze/ras_maze_map/maps/lab_maze_2018.txt'
+            self.path_to_maze = '/home/ras19/catkin_ws/src/gp9_path_planning/maps/maze2018.txt'
         else:
             self.path_to_maze = maze_path
 

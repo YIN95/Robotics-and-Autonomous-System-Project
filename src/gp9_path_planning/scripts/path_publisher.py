@@ -69,7 +69,7 @@ if __name__ == '__main__':
     control_frequency = 30
     rate = rospy.Rate(control_frequency)
 
-    path_to_map = "/home/ras19/catkin_ws/src/gp9_path_planning/maps/maze.txt"
+    path_to_map = "/home/ras19/catkin_ws/src/gp9_path_planning/maps/maze2018.txt"
     robot_radius = 0.16
     pb = PathPublisher(visibility_graph=build_graph(path_to_map, robot_radius))
 
