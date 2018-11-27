@@ -57,7 +57,7 @@ void robotPathPose::objectCallback(const geometry_msgs::Pose2D::ConstPtr &msg){
     myfile.open ("/home/ras19/catkin_ws/src/transforms/src/objposition.txt", std::fstream::app);
     if (myfile.is_open())
     {
-        myfile << robot_x << " " << robot_y << " " << pose.theta << " " << '\n';
+        myfile << robot_x << " " << robot_y << " " << pose.theta << " " << object_x << " " << object_y <<'\n';
         myfile.close();
     }
        
