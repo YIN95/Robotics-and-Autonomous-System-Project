@@ -46,7 +46,7 @@ void VelocityController::turnRight(){
 
 void VelocityController::twistCallBack(const geometry_msgs::Twist::ConstPtr& msg){
 	velocity_msg.linear.x = msg->linear.x;
-	velocity_msg.angular.z = 6*msg->angular.z;
+	velocity_msg.angular.z = 8*msg->angular.z; // 6*
 }
 
 

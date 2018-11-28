@@ -2,4 +2,6 @@
 venv/
 build/
 *.pyc
-/home/ras19/catkin_ws/src/transforms/src/objposition.txt
+src/transforms/src/objposition.txt
+src/gp9_mapping/measurements/
+

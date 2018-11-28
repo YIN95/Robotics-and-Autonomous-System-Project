@@ -21,7 +21,7 @@ class Pose:
 
 class LaserCollector:
 
-    def __init__(self, path):
+    def __init__(self, path_to_write):
         self.subscriber_laser = rospy.Subscriber("/scan", LaserScan, self.callback_laser)
         self.subscriber_pose = rospy.Subscriber("/pose", Pose2D, self.callback_pose)
         self.subscriber_pose = rospy.Subscriber("/velocity_estimate", Twist, self.callback_velocity)
@@ -29,7 +29,7 @@ class LaserCollector:
         self.angular_speed = 0
         self.previous_write_time = rospy.get_rostime()
         self.seconds_between_writes = 2
-        self.f = open(path, 'w+')
+        self.f = open(path_to_write, 'w+')
 
     def callback_pose(self, pose):
         self.current_pose = Pose(pose.x, pose.y, pose.theta)
@@ -40,8 +40,8 @@ class LaserCollector:
     def callback_laser(self, laser):
 
         if (rospy.get_rostime() - self.previous_write_time).to_sec() > self.seconds_between_writes:
-            turning = self.angular_speed > 0.8
-            rospy.loginfo("Turning...")
+            # rospy.loginfo("Angular speed: %.2f" % self.angular_speed)
+            turning = abs(self.angular_speed) > 0.5
             if not turning:
                 rospy.loginfo("writing measurements!")
                 ranges = laser.ranges
@@ -55,7 +55,7 @@ if __name__ == '__main__':
     control_frequency = 10
     rate = rospy.Rate(control_frequency)
 
-    collector = LaserCollector("/home/ras19/catkin_ws/src/gp9_mapping/measurements/measurements2.txt")
+    collector = LaserCollector("/home/ras19/catkin_ws/src/gp9_mapping/measurements/measurements.txt")
 
     while not rospy.is_shutdown():
         rospy.spin()

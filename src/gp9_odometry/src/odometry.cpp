@@ -164,21 +164,14 @@ void Odometry::poseCallback(const geometry_msgs::Pose2D::ConstPtr &msg){
     ROS_INFO("countvalue %d", count_value);
 
     if (count_value == update_time){
-        bool standing_still = (estimated_v < 0.01 && estimated_w < 0.01);
-        bool turning = (estimated_w > 0.8);
+        bool turning = (fabs(estimated_w) > 0.5);
 
         double error_x = fabs(msg->x - rob_x);
         double error_y = fabs(msg->y - rob_y);
         error_distance = std::max(error_x, error_y);
         error_angle = fabs(msg->theta - rob_theta);
 
-//        if (standing_still) { // Use particle filter!
-//            rob_x = msg->x;
-//            rob_y = msg->y;
-//            rob_theta = msg->theta;
-//        }
-
-        if ((!turning) && ((error_distance > 0.05) && (error_angle > 0.05))){
+        if ((!turning) && ((error_distance > 0.05) || (error_angle > 0.05))){
             rob_x = msg->x;
             rob_y = msg->y;
             rob_theta = msg->theta;
