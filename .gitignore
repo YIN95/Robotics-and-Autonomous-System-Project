@@ -3,5 +3,4 @@ venv/
 build/
 *.pyc
 src/transforms/src/objposition.txt
-src/gp9_mapping/measurements/
 
