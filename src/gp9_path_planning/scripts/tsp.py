@@ -1,73 +1,113 @@
 from explore import explore
 import numpy as np
-class Solution:
-    def __init__(self,X,start_node):
-        self.X = X 
-        self.start_node = start_node 
-        self.array = [[0]*(2**len(self.X)) for i in range(len(self.X))] 
-    def transfer(self,sets):
-        su = 0
-        for s in sets:
-            su = su + 2**s 
-        return su
+import pdb
+import matplotlib.pyplot as plt 
+from matplotlib.lines import Line2D
 
-    def tsp(self):
-        s = self.start_node
-        num = len(self.X)
-        cities = range(num) 
-        past_sets = [s] 
-        cities.pop(cities.index(s)) 
-        node = s
-        return self.solve(node,cities) 
-    def solve(self,node,future_sets):
-        if len(future_sets) == 0:
-            return self.X[node][self.start_node]
-        d = 99999
-        distance = []
-        for i in range(len(future_sets)):
-            s_i = future_sets[i]
-            copy = future_sets[:]
-            copy.pop(i) 
-            distance.append(self.X[node][s_i] + self.solve(s_i,copy))
-            # print('training%d'%i)
-        d = min(distance)
-        next_one = future_sets[distance.index(d)]
-        c = self.transfer(future_sets)
-        self.array[node][c] = next_one
-        return d
+
+def initpara():
+    alpha = 0.99
+    t = (1,100)
+    markovlen = 5000
+ 
+    return alpha,t,markovlen
 
 def tsp(path_to_map, robot_radius, grid):
-    D, A = explore(path_to_map, robot_radius, grid)
+    distmat, A = explore(path_to_map, robot_radius, grid)
     print("CostMatrix: ")
-    print(D)
-    S = Solution(D,0)
-    PathLength = S.tsp()
-    print(A)
-    print("PathLength: ")
-    print(PathLength)
+    print(distmat)
+    num = distmat.shape[0]
+    solutionnew = np.arange(num)
+ 
+    solutioncurrent = solutionnew.copy()
+    valuecurrent =99000  #np.max
+    #print(valuecurrent)
     
-    M = S.array
-    lists = range(len(S.X))
-    start = S.start_node
-
+    solutionbest = solutionnew.copy()
+    valuebest = 99000 #np.max
+    
+    alpha,t2,markovlen = initpara()
+    t = t2[1]
+    
+    result = [] #
+    while t > t2[0]:
+        for i in np.arange(markovlen):
+    
+            if np.random.rand() > 0.5:
+                while True:
+                    loc1 = np.int(np.ceil(np.random.rand()*(num-1)))
+                    loc2 = np.int(np.ceil(np.random.rand()*(num-1)))
+                    ## print(loc1,loc2)
+                    if loc1 != loc2:
+                        break
+                solutionnew[loc1],solutionnew[loc2] = solutionnew[loc2],solutionnew[loc1]
+            else: 
+                while True:
+                    loc1 = np.int(np.ceil(np.random.rand()*(num-1)))
+                    loc2 = np.int(np.ceil(np.random.rand()*(num-1))) 
+                    loc3 = np.int(np.ceil(np.random.rand()*(num-1)))
+    
+                    if((loc1 != loc2)&(loc2 != loc3)&(loc1 != loc3)):
+                        break
+    
+                if loc1 > loc2:
+                    loc1,loc2 = loc2,loc1
+                if loc2 > loc3:
+                    loc2,loc3 = loc3,loc2
+                if loc1 > loc2:
+                    loc1,loc2 = loc2,loc1
+    
+                tmplist = solutionnew[loc1:loc2].copy()
+                solutionnew[loc1:loc3-loc2+1+loc1] = solutionnew[loc2:loc3+1].copy()
+                solutionnew[loc3-loc2+1+loc1:loc3+1] = tmplist.copy()  
+    
+            valuenew = 0
+            for i in range(num-1):
+                valuenew += distmat[solutionnew[i]][solutionnew[i+1]]
+            valuenew += distmat[solutionnew[0]][solutionnew[num-1]]
+        # print (valuenew)
+            if valuenew<valuecurrent:       
+                valuecurrent = valuenew
+                solutioncurrent = solutionnew.copy()
+    
+                if valuenew < valuebest:
+                    valuebest = valuenew
+                    solutionbest = solutionnew.copy()
+            else:
+                if np.random.rand() < np.exp(-(valuenew-valuecurrent)/t):
+                    valuecurrent = valuenew
+                    solutioncurrent = solutionnew.copy()
+                else:
+                    solutionnew = solutioncurrent.copy()
+        t = alpha*t
+        result.append(valuebest)
     ShortestPath = []
-    ShortestPath.append(list(A[start]))
-    
-    while len(lists) > 0:
-        lists.pop(lists.index(start))
-        m = S.transfer(lists)
-        next_node = S.array[start][m]
-        # print (start,"--->" ,next_node)
-        start = next_node
-        ShortestPath.append(list(A[next_node]))
+    for index in solutionnew:
+        ShortestPath.append(list(A[index]))
+        
+    return A, solutionnew, ShortestPath
 
-    return np.array(ShortestPath)
+def visualize(Index, Path):
+    figure, ax = plt.subplots()
+    oldIndex = Index[0]
+    for index in Index:
+        plt.plot(Path[index][0],Path[index][1],marker='*')
+        line = [(Path[oldIndex][0], Path[oldIndex][1]), (Path[index][0], Path[index][1])]
+        (line_xs, line_ys) = zip(*line)
+        # ax.add_line(Line2D(line_xs, line_ys, linewidth=1, color='blue'))
+        oldIndex = index
+    plt.show()
 
 if __name__ == '__main__':
     path_to_map = '/home/ras19/catkin_ws/src/gp9_path_planning/maps/maze2018.txt'
     robot_radius = 0.16
-    grid = [2.41, 2.41, 4, 4]
-    ShortestPath = tsp(path_to_map, robot_radius, grid)
-    print("Shortest Path: ")
+    grid = [2.41, 2.41, 6, 6]
+    A, ShortestIndex, ShortestPath = tsp(path_to_map, robot_radius, grid)
+    print("shortest path index:")
+    print(ShortestIndex)
+    print("shortest path:")
     print(ShortestPath)
     np.savetxt('ShortestPath.txt', ShortestPath, fmt='%f')
+    visualize(ShortestIndex, ShortestPath)
+
+    
