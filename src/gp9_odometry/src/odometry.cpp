@@ -165,7 +165,7 @@ void Odometry::poseCallback(const geometry_msgs::Pose2D::ConstPtr &msg){
 
     if (count_value == update_time){
         bool standing_still = (estimated_v < 0.01 && estimated_w < 0.01);
-        bool turning = (estimated_w > 1);
+        bool turning = (estimated_w > 0.8);
 
         double error_x = fabs(msg->x - rob_x);
         double error_y = fabs(msg->y - rob_y);
