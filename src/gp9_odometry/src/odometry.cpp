@@ -30,13 +30,13 @@ Odometry::Odometry(int control_frequency_){
     current_time = ros::Time::now();
     last_time = ros::Time::now();
 
-    rob_x = 0.225;
-    rob_y = 0.225;
-    rob_theta = 0.5 * M_PI; // Map is defined so that robot starts along y-axis. Therefore, we rotate it
+    nh.getParam("/robot/starting_position/x", rob_x);
+    nh.getParam("/robot/starting_position/y", rob_y);
+    nh.getParam("/robot/starting_position/theta", rob_theta);
 
-    rob_x_uncorrected = 0.225;
-    rob_y_uncorrected = 0.225;
-    rob_theta_uncorrected = 0.5 * M_PI;
+    rob_x_uncorrected = rob_x;
+    rob_y_uncorrected = rob_y;
+    rob_theta_uncorrected = rob_theta;
 
     rob_x_v = 0.0;
     rob_y_v = 0.0;

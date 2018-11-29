@@ -1,5 +1,6 @@
 <launch>
 
+    <rosparam command="load" file="/home/ras19/catkin_ws/src/params.srv" />
     <node pkg="gp9_path_follower" name="path_follower" type="path_follower" output="screen"/>
     <node pkg="gp9_path_follower" name="rotation" type="rotation" output="screen"/>
     <!-- <node pkg="gp9_path_follower" name="grab" type="grab" output="screen"/> -->

@@ -1,4 +1,6 @@
 <launch>
+
+    <rosparam command="load" file="/home/ras19/catkin_ws/src/params.srv" />
     <node pkg="gp9_odometry" name="odometry" type="odometry"/>
     <node pkg="gp9_localization" name="particle_filter" type="particle_filter"/>
     <node pkg="transforms" name="tf_robot_laser" type="tf_robot_laser"/>

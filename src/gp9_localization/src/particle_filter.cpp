@@ -160,7 +160,6 @@ public:
 
     Intersections() {
         
-        // const char* path_to_maze = "/home/ras19/catkin_ws/src/gp9_localization/src/maze.txt";
         const char* path_to_maze = "/home/ras19/catkin_ws/src/gp9_path_planning/maps/maze2018.txt";
         
         std::string line;
@@ -279,17 +278,6 @@ public:
         std::deque<Line> walls;
 
 };
-////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////
 
 class ParticleFilter {
 public:
@@ -305,28 +293,35 @@ public:
     visualization_msgs::MarkerArray marker_array;
 
     ParticleFilter() {
-        n_measurements = 45;
+
+        double start_x, start_y, start_theta;
+        nh.getParam("/robot/starting_position/x", start_x);
+        nh.getParam("/robot/starting_position/y", start_y);
+        nh.getParam("/robot/starting_position/theta", start_theta);
+
+        nh.getParam("/particle_filter/n_measurements", n_measurements);
+        nh.getParam("/particle_filter/n_particles", n_particles);
+        nh.getParam("/particle_filter/std_x", std_x);
+        nh.getParam("/particle_filter/std_y", std_y);
+        nh.getParam("/particle_filter/std_theta", std_theta);
+        nh.getParam("/particle_filter/std_measurements", std_meas);
+        nh.getParam("/particle_filter/lambda", lambda);
+
         measurements = std::vector<double>(n_measurements, 0);
-        n_particles = 400;
         particles = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
         particles_res = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
-        std_x = 0.05;
-        std_y = 0.05;
-        std_theta = 0.15;
-        std_meas = 0.000001;
-        lambda = 0.0001;
 
-        start_pose[0] = 0.225;
-        start_pose[1] = 0.225;
-        start_pose[2] = 0.5*M_PI;
+        start_pose[0] = start_x;
+        start_pose[1] = start_y;
+        start_pose[2] = start_theta;
 
-        last_pose[0] = 0.225;
-        last_pose[1] = 0.225;
-        last_pose[2] = 0.5*M_PI;
+        last_pose[0] = start_x;
+        last_pose[1] = start_y;
+        last_pose[2] = start_theta;
 
-        x_old = start_pose[0];
-        y_old = start_pose[1];
-        theta_old = start_pose[2];
+        x_old = start_x;
+        y_old = start_y;
+        theta_old = start_theta;
         dx = 0;
         dy = 0;
         dtheta = 0;
@@ -346,39 +341,12 @@ public:
     void initParticles() {
         random_numbers::RandomNumberGenerator gen;
 
-        /* if(init_flag == 0) {
-            n_particles = 400;
-            particles = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
-            particles_res = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0)); */
         for(int i = 0; i < n_particles; i++) {
             particles[0][i] = start_pose[0];
             particles[1][i] = start_pose[1];
             particles[2][i] = start_pose[2];
             particles[3][i] = 1.0/n_particles;
         }
-        /* }
-        else if(init_flag == 1) {
-            n_particles = 700;
-            particles = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
-            particles_res = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
-            for(int i = 0; i < n_particles; i++) {
-                particles[0][i] = gen.uniform01()-0.5+last_pose[0];
-                particles[1][i] = gen.uniform01()-0.5+last_pose[1];
-                particles[2][i] = gen.uniform01()-0.5+last_pose[2];
-                particles[3][i] = 1.0/n_particles;
-            }
-        }
-        else {
-            n_particles = 2000;
-            particles = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
-            particles_res = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
-            for(int i = 0; i < n_particles; i++) {
-                particles[0][i] = gen.uniform01()*2.4;
-                particles[1][i] = gen.uniform01()*2.4;
-                particles[2][i] = gen.uniform01()*2*M_PI;
-                particles[3][i] = 1.0/n_particles;
-            }
-        } */
     }
 
     void MCL() {
