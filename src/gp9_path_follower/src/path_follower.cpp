@@ -33,6 +33,7 @@ public:
 	ros::Publisher pub_desired_pose;
 	ros::Publisher pub_velocity;
 	ros::Publisher pub_has_reached_goal;
+	ros::Publisher pub_emergency_break;
 
 	StraightLines(int control_frequency_, double min_distance_to_obstacle_, int every_lidar_value_) {
 		nh = ros::NodeHandle("~");
@@ -48,6 +49,7 @@ public:
 		pub_velocity = nh.advertise<geometry_msgs::Twist>("/motor_controller/velocity", 1);
 		pub_desired_pose = nh.advertise<visualization_msgs::Marker>("/visualization_marker", 1);
 		pub_has_reached_goal = nh.advertise<std_msgs::Bool>("/has_reached_goal", 1);
+		pub_emergency_break = nh.advertise<std_msgs::Bool>("/emergency_break", 1);
 
 		brain_state = -10;
 
@@ -118,7 +120,6 @@ public:
 
 	void batteryCallback(const geometry_msgs::Pose2D::ConstPtr& battery_pos) {
 		ROS_INFO("In callback of battery");
-		// stop();
 		battery_stopped = true;
 	}
 
@@ -212,6 +213,9 @@ public:
 		if (obstacle_in_the_way || battery_stopped) {
 			ROS_INFO("obstacle in the way");
 			stop();
+			std_msgs::Bool msg;
+			msg.data = true;
+			pub_emergency_break.publish(msg);
 		}
 
 		else {

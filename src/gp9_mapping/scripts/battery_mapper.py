@@ -25,7 +25,7 @@ class BatteryMapper:
         self.dx = -0.01
         self.dy = -0.01
         self.batteries = []
-        self.robot_radius = 0.16
+        self.battery_expansion = 0.10
 
     def _create_new_file(self):
         with open(self.maze_path) as f:
@@ -38,29 +38,40 @@ class BatteryMapper:
         x1 = battery.x
         y1 = battery.y
 
-        battery_pos = sh.Point(x1, y1)
+        battery_already_detected = self._is_detected(battery)
+        
+        if not battery_already_detected:
+
+            x2 = x1 + self.dx
+            y2 = y1 + self.dy
+            battery_line = (x1, y1, x2, y2)
+            self._add_battery(battery_line)
+            line_to_write = "\n%.2f %.2f %.2f %.2f" % battery_line
+
+            rospy.loginfo("writing battery position to file!")
+            with open(self.new_path, 'a') as f:
+                f.write(line_to_write)
+
+            self.publisher_battery.publish(Bool(data=True))
+
+    def _is_detected(self, battery):
+        battery_pos = sh.Point(battery.x, battery.y)
         battery_already_detected = False
         for polygon in self.batteries:
             if polygon.contains(battery_pos):
                 battery_already_detected = True
                 rospy.loginfo("Already detected this battery")
                 break
-        
-        if not battery_already_detected:
 
-            x2 = x1 + self.dx
-            y2 = y1 + self.dy
-            line = "\n%.2f %.2f %.2f %.2f" % (x1, y1, x2, y2)
-            linebox = LineBox()
-            linebox.construct_box(np.array((x1, y1)), np.array((x2, y2)), self.robot_radius)
-            battery_polygon = sh.Polygon(linebox.ordered_vertices)
+        return battery_already_detected
 
-            rospy.loginfo("writing battery position to file!")
-            with open(self.new_path, 'a') as f:
-                f.write(line)
+    def _add_battery(self, battery_line):
+        x1, y1, x2, y2 = battery_line
+        linebox = LineBox()
+        linebox.construct_box(np.array((x1, y1)), np.array((x2, y2)), self.battery_expansion)
+        battery_polygon = sh.Polygon(linebox.ordered_vertices)
+        self.batteries.append(battery_polygon)
 
-            self.batteries.append(battery_polygon)
-            self.publisher_battery.publish(Bool(data=True))
 
 
 if __name__ == '__main__':
