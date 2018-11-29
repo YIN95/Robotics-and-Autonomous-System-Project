@@ -7,6 +7,7 @@ import rospy
 import sys
 sys.path.append('/home/ras19/catkin_ws/src/gp9_path_planning/scripts/')
 
+import numpy as np
 import shapely.geometry as sh
 from obstacle_map import LineBox
 from geometry_msgs.msg import Pose2D
@@ -50,7 +51,8 @@ class BatteryMapper:
             x2 = x1 + self.dx
             y2 = y1 + self.dy
             line = "\n%.2f %.2f %.2f %.2f" % (x1, y1, x2, y2)
-            linebox = LineBox(sh.Point(x1, y1), sh.Point(x2, y2), self.robot_radius)
+            linebox = LineBox()
+            linebox.construct_box(np.array((x1, y1)), np.array((x2, y2)), self.robot_radius)
             battery_polygon = sh.Polygon(linebox.ordered_vertices)
 
             rospy.loginfo("writing battery position to file!")

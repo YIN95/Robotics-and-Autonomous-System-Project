@@ -27,6 +27,7 @@ public:
 	ros::Subscriber sub_lidar;
 	ros::Subscriber sub_brain;
 	ros::Subscriber sub_goal;
+	ros::Subscriber sub_battery;
 
     ros::Publisher pub_close_enough;
 	ros::Publisher pub_desired_pose;
@@ -41,7 +42,7 @@ public:
 		sub_desired_pose = nh.subscribe<geometry_msgs::Pose2D>("/desired_pose", 1, &StraightLines::desiredPoseCallBack, this);
 		sub_brain = nh.subscribe<std_msgs::Int32>("/brain_state", 1, &StraightLines::brainStateCallBack, this);
 		sub_goal = nh.subscribe<geometry_msgs::Pose2D>("/global_desired_pose", 10, &StraightLines::globalDesiredPoseCallBack, this);
-
+		sub_battery = nh.subscribe<geometry_msgs::Pose2D>("/findBattery", 1, &StraightLines::batteryCallback, this);
 
 		pub_close_enough = nh.advertise<std_msgs::Bool>("/close_enough", 1);
 		pub_velocity = nh.advertise<geometry_msgs::Twist>("/motor_controller/velocity", 1);
@@ -51,6 +52,7 @@ public:
 		brain_state = -10;
 
 		stopped = false;
+		battery_stopped = false;
 		turn_flag = false;
 		point_flag = false;
 		same_point = false;
@@ -111,8 +113,13 @@ public:
 		close_enough_msg.data = false;
 		has_reached_goal_msg.data = false;
 		
-
 		
+	}
+
+	void batteryCallback(const geometry_msgs::Pose2D::ConstPtr& battery_pos) {
+		ROS_INFO("In callback of battery");
+		// stop();
+		battery_stopped = true;
 	}
 
 	void brainStateCallBack(const std_msgs::Int32::ConstPtr& brain_msg) {
@@ -202,8 +209,8 @@ public:
 	void move() {
 
 		bool obstacle_in_the_way = obstacleCheck();
-		if (obstacle_in_the_way) {
-			//ROS_INFO("obstacle in the way");
+		if (obstacle_in_the_way || battery_stopped) {
+			ROS_INFO("obstacle in the way");
 			stop();
 		}
 
@@ -218,7 +225,7 @@ public:
 
 		pub_velocity.publish(velocity_msg);
 		pub_close_enough.publish(close_enough_msg);
-		ROS_INFO("New info? %d", newInfoAboutGoal);
+		// ROS_INFO("New info? %d", newInfoAboutGoal);
 
 		if(newInfoAboutGoal){
 		 	pub_has_reached_goal.publish(has_reached_goal_msg);
@@ -418,6 +425,7 @@ public:
 	}
 
 	void stop() {
+		// TODO: publish to brain!
 		velocity_msg.linear.x = 0;
 		velocity_msg.angular.z = 0;
 		stopped = true;
@@ -474,6 +482,7 @@ private:
 
 	double dt;
 	bool stopped;
+	bool battery_stopped;
 	bool turn_flag;
 	bool point_flag;
 	bool same_point;
@@ -514,8 +523,8 @@ private:
 int main(int argc, char** argv) {
 
 	int control_frequency = 125;
-	int check_every_laser = 30;
-	double min_distance_to_obstacles = 0.03;
+	int check_every_laser = 2;
+	double min_distance_to_obstacles = 0.13;
 
 	ros::init(argc, argv, "path_follower");
 	StraightLines sl(control_frequency, min_distance_to_obstacles, check_every_laser);
