@@ -171,10 +171,16 @@ void Odometry::poseCallback(const geometry_msgs::Pose2D::ConstPtr &msg){
         error_distance = std::max(error_x, error_y);
         error_angle = fabs(msg->theta - rob_theta);
 
-        if ((!turning) && ((error_distance > 0.05) || (error_angle > 0.05))){
-            rob_x = msg->x;
-            rob_y = msg->y;
-            rob_theta = msg->theta;
+        if (!turning){
+            if (error_distance > 0.05) {
+                rob_x = msg->x;
+                rob_y = msg->y;
+            }
+            
+            if (error_angle > 0.05){
+                rob_theta = msg->theta;
+            }
+            
         }
         
         count_value = 0;
