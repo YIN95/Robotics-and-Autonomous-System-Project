@@ -35,6 +35,14 @@ public: /* ros */
 
 
 	StateMachine(){
+
+		double start_x, start_y, start_theta;
+		nh.getParam("/robot/starting_position/x", start_x);
+        nh.getParam("/robot/starting_position/y", start_y);
+        nh.getParam("/robot/starting_position/theta", start_theta);
+		nh.getParam("/maze/exploration", exploration_file_path);
+		nh.getParam("/statemachine/stop_time", stop_seconds);
+
 		currentState = STATE_READY;
 		hasReachedGoal = false;
 		has_reached_orientation = false;
@@ -42,7 +50,6 @@ public: /* ros */
 		open_grippers = false;
 
 		nextPose = 0;
-		stop_seconds = 2;
 
 		num_points = countObjects();
 		ROS_INFO("num points: %d", num_points);
@@ -54,13 +61,13 @@ public: /* ros */
 		// 0 if there is nothing to grab;
 		// 1 if it is an object pose.
 
-		global_pose[0] = 0.225;
-		global_pose[1] = 0.225;
-		global_pose[2] = M_PI / 2;
+		global_pose[0] = start_x;
+		global_pose[1] = start_y;
+		global_pose[2] = start_theta;
 
-		previous_pose[0] = 0.225;
-		previous_pose[1] = 0.225;
-		previous_pose[2] = M_PI / 2;
+		previous_pose[0] = start_x;
+		previous_pose[1] = start_y;
+		previous_pose[2] = start_theta;
 
 		pub_currentState = nh.advertise<std_msgs::Int32>("/brain_state", 1);
 		pub_globalDesiredPose = nh.advertise<geometry_msgs::Pose2D>("/global_desired_pose", 1);
@@ -176,8 +183,8 @@ public: /* ros */
 				// 	currentState = STATE_STOP;
 				// 	has_reached_grab = false;
 				// }
-        		msg.data = 1;
-        		pub_grab.publish(msg);
+        		grab_msg.data = 1;
+        		pub_grab.publish(grab_msg);
 				currentState = STATE_MOVING;
 				break;
 			
@@ -188,8 +195,8 @@ public: /* ros */
 				// 	currentState = STATE_STOP;
 				// 	has_reached_grab = false;
 				// }
-				msg.data = 0;
-            	pub_grab.publish(msg);
+				grab_msg.data = 0;
+            	pub_grab.publish(grab_msg);
 				currentState = STATE_GO_HOME;
         		
 				break;
@@ -234,7 +241,7 @@ public: /* ros */
 	}
 
 	int countObjects(){
-        std::fstream fin("/home/ras19/catkin_ws/src/gp9_path_planning/scripts/ShortestPath.txt");
+        std::fstream fin(exploration_file_path.c_str());
         int num_points = 0;
 		if (fin){
             double x, y;
@@ -246,31 +253,18 @@ public: /* ros */
     }
 
 	void readExplorePosition(){	// read the position we need to explore for phase 1
-		std::fstream fin("/home/ras19/catkin_ws/src/gp9_path_planning/scripts/ShortestPath.txt");
-		int num_exploration_angles = 12;
+		std::fstream fin(exploration_file_path.c_str());
 		ROS_INFO("In reading file");
 		if (fin){
 			double x, y;
 			unsigned point_count = 0;
 			while(fin>>x>>y){
-				
 				pose_sequence[point_count][0] = x;
 				pose_sequence[point_count][1] = y;
 				pose_sequence[point_count][2] = 0;
 				pose_sequence[point_count][3] = 0;
 
-				// for (int i = 1; i < 4; i++) {
-				// 	double angle = (1 + i) * (M_PI / 2);
-				// 	if (angle > 2 * M_PI) {
-				// 		angle -= 2 * M_PI;
-				// 	}
-				// 	pose_sequence[i][0] = 0.525;
-				// 	pose_sequence[i][1] = 1.70;
-				// 	pose_sequence[i][2] = angle;
-				// 	pose_sequence[i][3] = 0;
-				// }
-
-				ROS_INFO("[Explore Pose] x:%f, y:%f, theta:%f, flag:%f", pose_sequence[point_count][0], pose_sequence[point_count][1], pose_sequence[point_count][2], pose_sequence[point_count][3]);
+				// ROS_INFO("[Explore Pose] x:%f, y:%f, theta:%f, flag:%f", pose_sequence[point_count][0], pose_sequence[point_count][1], pose_sequence[point_count][2], pose_sequence[point_count][3]);
 				
 				point_count += 1;
 			}
@@ -286,8 +280,9 @@ private:
 
 	int stop_seconds;
 
+	std::string exploration_file_path;
 	geometry_msgs::Pose2D global_desired_pose;
-	std_msgs::Int32 msg;
+	std_msgs::Int32 grab_msg;
 	std::vector<double> global_pose;
 	std::vector<double> previous_pose;
 

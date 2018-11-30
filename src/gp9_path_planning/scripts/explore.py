@@ -23,7 +23,7 @@ def initGrid(grid):
 def build_graph(path_to_map, robot_radius):
     obst_map = ObstacleMap(robot_radius)
     obst_map.construct_obstacle_map(path_to_map)
-    graph = Graph(obst_map.obstacles, obst_map.map_dimensions)
+    graph = Graph(obst_map.obstacles, obst_map.map_dimensions, robot_radius)
     graph.build_visibility_graph()
     return graph
 

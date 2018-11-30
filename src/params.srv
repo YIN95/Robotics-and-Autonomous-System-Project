@@ -3,6 +3,8 @@
 /robot/starting_position/theta: 0
 /robot/radius: 0.16
 
+/statemachine/stop_time: 2.0
+
 /gains/rotation/P: 20
 /gains/rotation/I: 0.01
 /gains/rotation/D: 0
@@ -10,7 +12,8 @@
 /path_follower/rotation_threshold/degrees: 3
 
 /maze/path: /home/ras19/catkin_ws/src/gp9_path_planning/maps/maze2018.txt
-/maze/path_updated: /home/ras19/catkin_ws/src/gp9_path_planning/maps/update_maze.txt
+/maze/path_updated: /home/ras19/catkin_ws/src/gp9_path_planning/maps/updated_maze.txt
+/maze/exploration: /home/ras19/catkin_ws/src/gp9_path_planning/scripts/ShortestPath1.txt
 
 
 /particle_filter/n_measurements: 45

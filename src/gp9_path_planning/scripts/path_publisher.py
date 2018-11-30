@@ -5,6 +5,7 @@ from __future__ import print_function
 
 import rospy
 
+from std_msgs.msg import Bool
 from geometry_msgs.msg import Pose2D
 from gp9_path_planning.msg import PathList
 
@@ -15,22 +16,34 @@ from visibility_graph import Vertex, Graph
 def build_graph(path_to_map, robot_radius):
     obst_map = ObstacleMap(robot_radius)
     obst_map.construct_obstacle_map(path_to_map)
-    graph = Graph(obst_map.obstacles, obst_map.map_dimensions)
+    graph = Graph(obst_map.obstacles, obst_map.map_dimensions, robot_radius)
     graph.build_visibility_graph()
     return graph
 
 
 class PathPublisher:
 
-    def __init__(self, visibility_graph):
+    def __init__(self):
+        
+        self.path = rospy.get_param("/maze/path")
+        self.robot_radius = rospy.get_param("/robot/radius")
+        self.path_to_updated_map = rospy.get_param("/maze/path_updated")
+        start_x = rospy.get_param("robot/starting_position/x")
+        start_y = rospy.get_param("robot/starting_position/y")
+
+        self.graph = build_graph(self.path, self.robot_radius)
 
         self.sub_pose = rospy.Subscriber('/pose', Pose2D, self._pose_callback)
+        self.sub_update_map = rospy.Subscriber('/update_map', Bool, self._update_map_callback)
         self.sub_global_desired_pose = rospy.Subscriber('/global_desired_pose', Pose2D,
                                                    self._global_desired_pose_callback)
         self.pub_path = rospy.Publisher('/path', PathList, queue_size=1)
-        self.position = Vertex(0.225, 0.225)
-        self.desired_position = Vertex(0.225, 0.225)
-        self.graph = visibility_graph
+
+        self.pub_global_desired_pose_actual = rospy.Publisher('/global_desired_pose', 
+                                                    Pose2D, queue_size=1)
+        self.position = Vertex(start_x, start_y)
+        self.desired_position = Vertex(start_x, start_y)
+        self.desired_angle = 0
 
         self.new_position = False
 
@@ -41,26 +54,48 @@ class PathPublisher:
         rospy.loginfo("In global callback")
         rospy.loginfo("===================================")
         self.desired_position = Vertex(desired_pose.x, desired_pose.y)
+        self.desired_angle = desired_pose.theta
         self.new_position = True
     
+    def _update_map_callback(self, _):
+        """
+        What comes in the _ is not important (it's a Bool.data = True),
+        just that we receive it means that we should update the map.
+        """
+
+        rospy.loginfo("Rebuilding the visibility graph")
+        self.graph = build_graph(self.path_to_updated_map, self.robot_radius)
+        rospy.loginfo("Done building new graph")
+    
     def _find_path(self):
+        rospy.loginfo("_find_path")
 
         # remove the first element in shortest path since its the starting position
         vertex_path = self.graph.shortest_path(self.position, self.desired_position)[1:]
         path = []
+        pose = Pose2D()
         for vertex in vertex_path:
-            pose = Pose2D()
             pose.x = vertex.x
             pose.y = vertex.y
             path.append(pose)
+        rospy.loginfo("vertex")
+
+        #self.graph.plot_path(path)
+
+        if (vertex_path[-1] - self.desired_position).norm() > 1e-6:
+            pose.theta = self.desired_angle
+            #self.pub_global_desired_pose_actual.publish(pose)
 
         self.new_position = False
+        rospy.loginfo("after check goal")
         path_list = PathList()
         path_list.list = path
+        rospy.loginfo("end of find path")
         return path_list
 
     def publish_path(self):
         path = self._find_path()
+        rospy.loginfo("publish path")
         self.pub_path.publish(path)
 
 
@@ -69,14 +104,14 @@ if __name__ == '__main__':
     control_frequency = 30
     rate = rospy.Rate(control_frequency)
 
-    # path_to_map = "/home/ras19/catkin_ws/src/gp9_path_planning/maps/maze2018.txt"
-    path_to_map = rospy.get_param("/maze/path")
-    robot_radius = rospy.get_param("/robot/radius")
-    pb = PathPublisher(visibility_graph=build_graph(path_to_map, robot_radius))
+    pb = PathPublisher()
 
     while not rospy.is_shutdown():
 
         if pb.new_position:
-            pb.publish_path()
+            try:
+                pb.publish_path()
+            except ValueError:
+                rospy.loginfo("not working, put logic here")
 
         rate.sleep()

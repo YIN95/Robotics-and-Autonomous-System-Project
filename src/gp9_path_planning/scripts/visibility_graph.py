@@ -9,6 +9,7 @@ from collections import defaultdict
 import numpy as np
 import matplotlib.pyplot as plt
 import shapely.geometry as sh
+import shapely.ops as ops
 
 from obstacle_map import ObstacleMap
 
@@ -24,6 +25,18 @@ class Vertex:
 
     def __repr__(self):
         return "(%f, %f)" % (self.x, self.y)
+
+    def __add__(self, other):
+        return Vertex(self.x + other.x, self.y + other.y)
+
+    def __sub__(self, other):
+        return Vertex(self.x - other.x, self.y - other.y)
+
+    def norm(self):
+        return np.sqrt(self.x**2 + self.y**2)
+
+    def mult(self, t):
+        return Vertex(t * self.x, t * self.y)
 
     def __hash__(self):
         return hash(self.x) ^ hash(self.y) ^ hash((self.x, self.y))
@@ -62,7 +75,8 @@ class Edge:
 
 class Graph:
 
-    def __init__(self, obstacles, map_dim):
+    def __init__(self, obstacles, map_dim, robot_radius):
+        self.robot_radius = robot_radius
         self.obstacles = obstacles
         self.visibility_graph = defaultdict(set)
         self.vertices = list()
@@ -152,24 +166,72 @@ class Graph:
         return self.map_dimensions['min_x'] < vertex.x < self.map_dimensions['max_x'] and \
                self.map_dimensions['min_y'] < vertex.y < self.map_dimensions['max_y']
 
+    def _is_on_bounding_walls(self, vertex):
+        return self.map_dimensions['min_x'] == vertex.x or vertex.x == self.map_dimensions['max_x'] or \
+               self.map_dimensions['min_y'] == vertex.y or vertex.y == self.map_dimensions['max_y']
+
     def _add_new_vertex(self, v):
 
         if v in self.vertices:
             return
 
         p = sh.Point(v.x, v.y)
-        for obst in self.obstacles:
-            if obst.contains(p):
-                raise ValueError("Point is in obstacle. Invalid!")
+        within_bounds = self._is_within_bounding_walls(v)
+        on_bounds = self._is_on_bounding_walls(v)
+        print(v)
+        if within_bounds:
+            print("within bounds")
+            for obst in self.obstacles:
+                if obst.contains(p):
+                    print("before shifting point %s" % v)
+                    v = self._shift_point_outside_of_obstacle(p, obst)
+                    p = sh.Point(v.x, v.y)
+                    print("after shifting point %s" % v)
 
-        if not self._is_within_bounding_walls(v):
-            raise ValueError("Point is not within bounds of map. Invalid!")
+        else: # outside of bounds
+            print("outside of bounds")
+            for obst in self.obstacles:
+                origin = sh.Point(self.map_dimensions['min_x'], self.map_dimensions['min_y'])
+                if obst.contains(origin):
+                    print("before shifting point %s" % v)
+                    v = self._shift_point_inside_the_maze(p, obst)
+                    p = sh.Point(v.x, v.y)
+                    print("after shifting point %s" % v)
+                    break
 
         self.vertices.append(v)
         for vertex in self.vertices[:-1]:
             edge = Edge(v, vertex)
             if not self._intersects_obstacle(edge):
                 self._add_visible_edge(edge)
+
+        return v
+
+    def _shift_point_outside_of_obstacle(self, point, obst):
+        nearest = ops.nearest_points(point, obst.boundary)[1]
+
+        point = Vertex(point.x, point.y)
+        nearest = Vertex(nearest.x, nearest.y)
+        unit_vector = (nearest - point).mult(1 / (point - nearest).norm())
+
+        shifted_point = nearest + unit_vector.mult(0.01)
+
+        return shifted_point
+
+
+    def _shift_point_inside_the_maze(self, point, bounding_obst):
+        nearest = ops.nearest_points(point, list(bounding_obst.boundary)[1])[1]
+
+        point = Vertex(point.x, point.y)
+        nearest = Vertex(nearest.x, nearest.y)
+        print("point: %s" % point)
+        print("nearest: %s" % nearest)
+        unit_vector = (nearest - point).mult(1 / (point - nearest).norm())
+
+        shifted_point = nearest + unit_vector.mult(0.01)
+        print("shifted_point: %s" % shifted_point)
+        print("=========================")
+        return shifted_point
 
     def _add_visible_edge(self, e):
         self.visibility_graph[e.start].add(e.end)
@@ -180,8 +242,8 @@ class Graph:
 
         # Creating a temporary graph to not store all start and goal positions
         temp_graph = deepcopy(self)
-        temp_graph._add_new_vertex(start)
-        temp_graph._add_new_vertex(goal)
+        start = temp_graph._add_new_vertex(start)
+        goal = temp_graph._add_new_vertex(goal)
 
         unvisited = set()
         distances = {}
@@ -209,7 +271,7 @@ class Graph:
                     distances[neighbor] = new_distance
                     previous[neighbor] = vertex
 
-        return previous
+        return previous, start, goal
 
     @staticmethod
     def _get_unvisited_vertex_with_smallest_distance(unvisited, distances):
@@ -225,8 +287,8 @@ class Graph:
 
     def shortest_path(self, start, goal):
 
+        previous, start, goal = self._dijkstra(start, goal)
         vertex = goal
-        previous = self._dijkstra(start, goal)
         path = []
         if previous[goal] is not None or start == goal:
             while vertex is not None:
@@ -237,7 +299,7 @@ class Graph:
 
         return path
 
-    def plot_path(self, path, axis_size):
+    def plot_path(self, path, axis_size=[-0.5, 3, -0.5, 3]):
 
         plt.plot(path[0].x, path[0].y, 'bo', label='start')
         plt.plot(path[-1].x, path[-1].y, 'go', label='goal')
@@ -249,3 +311,4 @@ class Graph:
 
         plt.legend()
         self.plot_graph(axis_size=axis_size)
+        plt.show()

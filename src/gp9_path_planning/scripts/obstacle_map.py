@@ -110,7 +110,7 @@ class ObstacleMap:
         with open(path_to_maze) as f:
             for line in f:
                 point_list = line.split()
-                if point_list[0] == '#':
+                if line[0] == '#':
                     continue
                 start_point = np.array(point_list[0:2], dtype=float)
                 end_point = np.array(point_list[2:4], dtype=float)
