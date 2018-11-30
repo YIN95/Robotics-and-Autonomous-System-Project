@@ -20,6 +20,8 @@
 #include <std_msgs/Bool.h>
 #include <time.h>
 
+
+
 class Point{
     public:
 
@@ -159,8 +161,12 @@ class Intersections {
 public:
 
     Intersections() {
-        
-        const char* path_to_maze = "/home/ras19/catkin_ws/src/gp9_path_planning/maps/maze2018.txt";
+
+    }
+
+    Intersections(std::string path) {
+
+        const char* path_to_maze = path.c_str();
         
         std::string line;
         std::string past_value;
@@ -306,6 +312,10 @@ public:
         nh.getParam("/particle_filter/std_theta", std_theta);
         nh.getParam("/particle_filter/std_measurements", std_meas);
         nh.getParam("/particle_filter/lambda", lambda);
+
+        std::string path;
+        nh.getParam("/maze/path", path);
+        intersections = Intersections(path);
 
         measurements = std::vector<double>(n_measurements, 0);
         particles = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));

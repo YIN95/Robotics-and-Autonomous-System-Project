@@ -1,11 +1,13 @@
-/robot/starting_position/x: 0.225
+/robot/starting_position/x: 1.0
 /robot/starting_position/y: 0.225
-/robot/starting_position/theta: 1.5708
+/robot/starting_position/theta: 0
+/robot/radius: 0.16
 
 /gains/rotation/P: 20
 /gains/rotation/I: 0.01
 /gains/rotation/D: 0
 
+/path_follower/rotation_threshold/degrees: 3
 
 /maze/path: /home/ras19/catkin_ws/src/gp9_path_planning/maps/maze2018.txt
 /maze/path_updated: /home/ras19/catkin_ws/src/gp9_path_planning/maps/update_maze.txt
