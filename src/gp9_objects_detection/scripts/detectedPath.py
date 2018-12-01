@@ -24,11 +24,13 @@ class Collector:
         self.subscriber_pose = rospy.Subscriber("/pose", Pose2D, self.callback_pose)
         self.pub_newtarget_pose = rospy.Publisher('/newtarget_pose', Pose2D, queue_size=1)
 
-        self.current_pose = Pose(rospy.get_param("robot/starting_position/x"), rospy.get_param("robot/starting_position/"), 0)
+        self.current_pose = Pose(0.225, 0.225, 0)
+        # self.current_pose = Pose(rospy.get_param("robot/starting_position/x"), rospy.get_param("robot/starting_position/"), 0)
+
         self.sizex = rospy.get_param("/maze/sizeX")
         self.sizey = rospy.get_param("/maze/sizeY")
         self.D = 25
-        self.R = 18
+        self.R = 23
         self.Area = np.zeros((self.sizex, self.sizey))
         self.mapX = 0
         self.mapY = 0
@@ -39,7 +41,7 @@ class Collector:
         np.savetxt(path_to_write, self.Area,fmt='%d')
 
     def callback_pose(self, pose):
-        self.current_pose = Pose( .x, pose.y, pose.theta)
+        self.current_pose = Pose( pose.x, pose.y, pose.theta)
         self.index += 1
         if (self.index > 100):
             self.index = 0
@@ -60,6 +62,7 @@ class Collector:
                     if (self.dis(i, j, visionCenterX, visionCenterY) < self.R):
                         self.Area[i, j] = 1
 
+            self.unExploredPosition()
             np.savetxt(self.path, self.Area,fmt='%d')
 
     def dis (self, x1, y1, x2, y2):
@@ -93,7 +96,7 @@ if __name__ == '__main__':
     control_frequency = 10
     rate = rospy.Rate(control_frequency)
 
-    collector = Collector(rospy.get_param("/maze/unfixed/path"))
+    collector = Collector("/home/ras19/catkin_ws/src/gp9_objects_detection/scripts/detectedPath.txt")
 
     while not rospy.is_shutdown():
         rospy.spin()

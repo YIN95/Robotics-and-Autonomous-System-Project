@@ -1,4 +1,4 @@
-/robot/starting_position/x: 1.0
+/robot/starting_position/x: 0.225
 /robot/starting_position/y: 0.225
 /robot/starting_position/theta: 0
 /robot/radius: 0.16
