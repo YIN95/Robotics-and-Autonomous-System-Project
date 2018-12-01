@@ -1,6 +1,8 @@
 <launch>
+    <rosparam command="load" file="/home/ras19/catkin_ws/src/params.srv" />
     <include file="/home/ras19/catkin_ws/src/ras_project/ras_camera/launch/ras_camera_nodelet.launch"/>
     <node pkg="gp9_objects_detection" name="objects_detection" type="objects_detection"/>
     <node pkg="gp9_objects_detection" name="targetClassification" type="targetClassification.py"/>
+    <node pkg="gp9_objects_detection" name="detectedPath" type="detectedPath.py"/>
     <node pkg="ras_espeak" name="espeak_node" type="espeak_node"/>
 </launch>

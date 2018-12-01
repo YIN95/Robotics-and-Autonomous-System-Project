@@ -1,0 +1,32 @@
+/robot/starting_position/x: 0.225
+/robot/starting_position/y: 0.225
+/robot/starting_position/theta: 1.57
+/robot/radius: 0.16
+
+/statemachine/stop_time: 3
+
+/gains/rotation/P: 20
+/gains/rotation/I: 0.01
+/gains/rotation/D: 0
+
+/path_follower/rotation_threshold/degrees: 3
+
+/maze/to_flip: 0
+/maze/path: /home/ras19/catkin_ws/src/gp9_path_planning/maps/maze_fixed.txt
+/maze/unfixed/path: /home/ras19/catkin_ws/src/gp9_path_planning/maps/maze2018.txt
+/maze/path_updated: /home/ras19/catkin_ws/src/gp9_path_planning/maps/updated_maze.txt
+/maze/exploration: /home/ras19/catkin_ws/src/gp9_path_planning/scripts/ShortestPath.txt
+/maze/sizeX: 241
+/maze/sizeY: 241
+
+/particle_filter/n_measurements: 45
+/particle_filter/n_particles: 400
+/particle_filter/std_x: 0.05
+/particle_filter/std_y: 0.05
+/particle_filter/std_theta: 0.15
+/particle_filter/std_measurements: 0.000001
+/particle_filter/lambda: 0.0001
+
+
+/emergency/distance: 0.13
+/emergency/every_laser: 2

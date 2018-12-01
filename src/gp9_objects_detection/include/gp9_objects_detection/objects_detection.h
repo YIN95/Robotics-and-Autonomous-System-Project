@@ -22,6 +22,7 @@
 #include <string>
 #include <std_msgs/Int32.h>
 #include <std_msgs/String.h>
+#include <std_msgs/Bool.h>
 #include <geometry_msgs/TransformStamped.h>
 #include <ras_msgs/RAS_Evidence.h>
 #include <iostream>
@@ -46,6 +47,7 @@ public: /* ros */
     ros::Publisher pub_speak;   // publish the classifiction results to espeak
     ros::Publisher pub_evidence;    // publish the evidence
     ros::Publisher pub_findBattery; // if detect an battery, publish to a topic. 
+    ros::Publisher pub_findObject;  // if detect an object, publish to a topic. 
     //ros::Publisher pub_classification_target;
 
     visualization_msgs::Marker marker;
@@ -120,6 +122,8 @@ public:
     double robot_x;
     double robot_y;
     double robot_theta;
+    ros::Time current_time;
+    ros::Time arrival_time;
 
     
 };

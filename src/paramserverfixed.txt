@@ -1,0 +1,4 @@
+Fixed:
+odometry
+particle filter
+path follower (not really tested, but should be ok)

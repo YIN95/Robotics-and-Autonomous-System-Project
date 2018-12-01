@@ -20,6 +20,8 @@
 #include <std_msgs/Bool.h>
 #include <time.h>
 
+
+
 class Point{
     public:
 
@@ -159,9 +161,12 @@ class Intersections {
 public:
 
     Intersections() {
-        
-        // const char* path_to_maze = "/home/ras19/catkin_ws/src/gp9_localization/src/maze.txt";
-        const char* path_to_maze = "/home/ras19/catkin_ws/src/gp9_path_planning/maps/maze2018.txt";
+
+    }
+
+    Intersections(std::string path) {
+
+        const char* path_to_maze = path.c_str();
         
         std::string line;
         std::string past_value;
@@ -279,17 +284,6 @@ public:
         std::deque<Line> walls;
 
 };
-////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////
 
 class ParticleFilter {
 public:
@@ -305,28 +299,39 @@ public:
     visualization_msgs::MarkerArray marker_array;
 
     ParticleFilter() {
-        n_measurements = 45;
+
+        double start_x, start_y, start_theta;
+        nh.getParam("/robot/starting_position/x", start_x);
+        nh.getParam("/robot/starting_position/y", start_y);
+        nh.getParam("/robot/starting_position/theta", start_theta);
+
+        nh.getParam("/particle_filter/n_measurements", n_measurements);
+        nh.getParam("/particle_filter/n_particles", n_particles);
+        nh.getParam("/particle_filter/std_x", std_x);
+        nh.getParam("/particle_filter/std_y", std_y);
+        nh.getParam("/particle_filter/std_theta", std_theta);
+        nh.getParam("/particle_filter/std_measurements", std_meas);
+        nh.getParam("/particle_filter/lambda", lambda);
+
+        std::string path;
+        nh.getParam("/maze/path", path);
+        intersections = Intersections(path);
+
         measurements = std::vector<double>(n_measurements, 0);
-        n_particles = 400;
         particles = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
         particles_res = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
-        std_x = 0.05;
-        std_y = 0.05;
-        std_theta = 0.15;
-        std_meas = 0.000001;
-        lambda = 0.0001;
 
-        start_pose[0] = 0.225;
-        start_pose[1] = 0.225;
-        start_pose[2] = 0.5*M_PI;
+        start_pose[0] = start_x;
+        start_pose[1] = start_y;
+        start_pose[2] = start_theta;
 
-        last_pose[0] = 0.225;
-        last_pose[1] = 0.225;
-        last_pose[2] = 0.5*M_PI;
+        last_pose[0] = start_x;
+        last_pose[1] = start_y;
+        last_pose[2] = start_theta;
 
-        x_old = start_pose[0];
-        y_old = start_pose[1];
-        theta_old = start_pose[2];
+        x_old = start_x;
+        y_old = start_y;
+        theta_old = start_theta;
         dx = 0;
         dy = 0;
         dtheta = 0;
@@ -335,50 +340,73 @@ public:
         init_flag =  0;
         lidar_bool = false;
 
+        bounds = std::vector<double>(4, 0); //x_min, x_max, y_min, y_max
+
         sub_pose = nh.subscribe<geometry_msgs::Pose2D>("/uncorrected_pose", 1, &ParticleFilter::odometryCallBack, this);
         sub_lidar = nh.subscribe<sensor_msgs::LaserScan>("/scan", 1, &ParticleFilter::lidarCallBack, this);
         pub_weight_pose = nh.advertise<geometry_msgs::Pose2D>("/corrected_pose", 1);
         pub_corrected_pose = nh.advertise<visualization_msgs::Marker>("/visualization_filter", 1);
         pub_object_marker_array = nh.advertise<visualization_msgs::Marker>("/particle/points", 100);
+        getBounds(path);
         initParticles();
+    }
+
+    void getBounds(std::string path){
+        const char* path_to_maze = path.c_str();
+
+        std::string line;
+        std::string past_value;
+        std::ifstream myfile;
+        double x_min = 0;
+        double x_max = 0;
+        double y_min = 0;
+        double y_max = 0;
+        myfile.open(path_to_maze, std::ifstream::in);
+        if (myfile.is_open()) {
+            boost::char_separator<char> sep(" ");
+            int i = 0;
+            while(getline(myfile, line)){
+                boost::tokenizer< boost::char_separator<char> > values(line, sep);
+                BOOST_FOREACH (const std::string& value, values) {
+                    i++;
+                    if (i % 2 == 0){
+                        double x = atof(past_value.c_str());
+                        double y = atof(value.c_str());
+                        if (x < x_min) {
+                            x_min = x;
+                        }
+                        if (x > x_max) {
+                            x_max = x;
+                        }
+                        if (y < y_min) {
+                            y_min = x;
+                        }
+                        if (y > y_max) {
+                            y_max = y;
+                        }
+                    }
+                    past_value = value;
+                }
+            }
+            myfile.close();
+        }
+        else std::cout << "Unable to open file";
+
+        bounds[0] = x_min;
+        bounds[1] = x_max;
+        bounds[2] = y_min;
+        bounds[3] = y_max;
     }
 
     void initParticles() {
         random_numbers::RandomNumberGenerator gen;
 
-        /* if(init_flag == 0) {
-            n_particles = 400;
-            particles = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
-            particles_res = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0)); */
         for(int i = 0; i < n_particles; i++) {
             particles[0][i] = start_pose[0];
             particles[1][i] = start_pose[1];
             particles[2][i] = start_pose[2];
             particles[3][i] = 1.0/n_particles;
         }
-        /* }
-        else if(init_flag == 1) {
-            n_particles = 700;
-            particles = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
-            particles_res = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
-            for(int i = 0; i < n_particles; i++) {
-                particles[0][i] = gen.uniform01()-0.5+last_pose[0];
-                particles[1][i] = gen.uniform01()-0.5+last_pose[1];
-                particles[2][i] = gen.uniform01()-0.5+last_pose[2];
-                particles[3][i] = 1.0/n_particles;
-            }
-        }
-        else {
-            n_particles = 2000;
-            particles = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
-            particles_res = std::vector<std::vector<double> >(4, std::vector<double>(n_particles, 0));
-            for(int i = 0; i < n_particles; i++) {
-                particles[0][i] = gen.uniform01()*2.4;
-                particles[1][i] = gen.uniform01()*2.4;
-                particles[2][i] = gen.uniform01()*2*M_PI;
-                particles[3][i] = 1.0/n_particles;
-            }
-        } */
     }
 
     void MCL() {
@@ -395,19 +423,19 @@ public:
         random_numbers::RandomNumberGenerator gen;
         for(int i = 0; i < n_particles; i++) {
             particles[0][i] += gen.gaussian(dx, std_x);
-            if (particles[0][i] < 0) {
-                particles[0][i] = 0.0001;
+            if (particles[0][i] < bounds[0]) {
+                particles[0][i] = bounds[0] + 0.0001;
             }
-            else if (particles[0][i] > 2.4) {
-                particles[0][i] = 2.3999;
+            else if (particles[0][i] > bounds[1]) {
+                particles[0][i] = bounds[1] - 0.0001;
             }
 
             particles[1][i] += gen.gaussian(dy, std_y);
-            if (particles[1][i] < 0) {
-                particles[1][i] = 0.0001;
+            if (particles[1][i] < bounds[2]) {
+                particles[1][i] = bounds[2] + 0.0001;
             }
-            else if (particles[1][i] > 2.4) {
-                particles[1][i] = 2.3999;
+            else if (particles[1][i] > bounds[3]) {
+                particles[1][i] = bounds[3] - 0.0001;
             }
 
             particles[2][i] += gen.gaussian(dtheta, std_theta);
@@ -656,8 +684,6 @@ private:
     double start_pose[3];
     double last_pose[3];
 
-    double bounds[4];
-
     double lidar_offset;
     int init_flag;
 
@@ -665,6 +691,7 @@ private:
     std::deque<double> z_hat;
 
     bool lidar_bool;
+    std::vector<double> bounds;
 };
 
 int main(int argc, char** argv) {

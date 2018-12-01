@@ -27,6 +27,7 @@ public:
 	ros::Subscriber sub_lidar;
 	ros::Subscriber sub_brain;
 	ros::Subscriber sub_goal;
+	ros::Subscriber sub_battery;
 
     ros::Publisher pub_close_enough;
 	ros::Publisher pub_desired_pose;
@@ -34,15 +35,32 @@ public:
 	ros::Publisher pub_has_reached_goal;
 	ros::Publisher pub_emergency_break;
 
-	StraightLines(int control_frequency_, double min_distance_to_obstacle_, int every_lidar_value_) {
+	StraightLines(int control_frequency_) {
 		nh = ros::NodeHandle("~");
+
+		double start_x, start_y, start_theta;
+		nh.getParam("/robot/starting_position/x", start_x);
+        nh.getParam("/robot/starting_position/y", start_y);
+        nh.getParam("/robot/starting_position/theta", start_theta);
+
+		double gain_P, gain_I, gain_D;
+		nh.getParam("/gains/rotation/P", gain_P);
+		nh.getParam("/gains/rotation/I", gain_I);
+		nh.getParam("/gains/rotation/D", gain_D);
+
+		nh.getParam("/emergency/distance", min_distance_to_obstacle);
+		nh.getParam("/emergency/every_laser", every_lidar_value);
+
+		double degrees;
+		nh.getParam("/path_follower/rotation_threshold/degrees", degrees);
+		
 
 		sub_odom = nh.subscribe<geometry_msgs::Pose2D>("/pose", 1, &StraightLines::poseCallBack, this);
 		sub_lidar = nh.subscribe<sensor_msgs::LaserScan>("/scan", 1, &StraightLines::lidarCallBack, this);
 		sub_desired_pose = nh.subscribe<geometry_msgs::Pose2D>("/desired_pose", 1, &StraightLines::desiredPoseCallBack, this);
 		sub_brain = nh.subscribe<std_msgs::Int32>("/brain_state", 1, &StraightLines::brainStateCallBack, this);
 		sub_goal = nh.subscribe<geometry_msgs::Pose2D>("/global_desired_pose", 10, &StraightLines::globalDesiredPoseCallBack, this);
-
+		sub_battery = nh.subscribe<geometry_msgs::Pose2D>("/findBattery", 1, &StraightLines::batteryCallback, this);
 
 		pub_close_enough = nh.advertise<std_msgs::Bool>("/close_enough", 1);
 		pub_velocity = nh.advertise<geometry_msgs::Twist>("/motor_controller/velocity", 1);
@@ -53,6 +71,7 @@ public:
 		brain_state = -10;
 
 		stopped = false;
+		battery_stopped = false;
 		turn_flag = false;
 		point_flag = false;
 		same_point = false;
@@ -63,9 +82,7 @@ public:
 		control_frequency = control_frequency_;
 		dt = 1.0 / control_frequency;
 
-		every_lidar_value = every_lidar_value_;
 		laser_distances = std::vector<double>(360, 10000);
-		min_distance_to_obstacle = min_distance_to_obstacle_;
 
 		pose = std::vector<double>(3, 0);
         pose_desired = std::vector<double>(3, 0);
@@ -73,24 +90,22 @@ public:
         pose_previous = std::vector<double>(3, 0);
         last_checkpoint = std::vector<double>(3, 0);
 
-		// HAS TO BE THE SAME AS FOR STARTING POSITION IN ODOMETRY! TAKE FROM PARAM SERVER
-		pose_desired[0] = 0.225;
-		pose_desired[1] = 0.225;
-		pose_desired[2] = M_PI / 2;
+		pose_desired[0] = start_x;
+		pose_desired[1] = start_y;
+		pose_desired[2] = start_theta;
 
-		pose_previous[0] = 0.225;
-		pose_previous[1] = 0.225;
-		pose_previous[2] = M_PI / 2;
+		pose_previous[0] = start_x;
+		pose_previous[1] = start_y;
+		pose_previous[2] = start_theta;
 
-        last_checkpoint[0] = 0.225;
-        last_checkpoint[1] = 0.225;
-        last_checkpoint[2] = M_PI / 2;
+        last_checkpoint[0] = start_x;
+        last_checkpoint[1] = start_y;
+        last_checkpoint[2] = start_theta;
 
 		pose_goal[0] = 20;
 		pose_goal[1] = 20;
 		pose_goal[2] = M_PI;
 
-		degrees = 3;
 		angle_threshold = degToRad(degrees);
 
 		distance = 1000;
@@ -102,20 +117,21 @@ public:
 		error_int_angle_translation = 0;
 		error_previous_angle_translation = 0;
 
-		gains_translation = std::vector<double>(3, 0);
-
-		// TRANSLATION+ROTATION
-		// Rotation, these gains are good!
-		gains_translation[0] = 20.0;
-		gains_translation[1] = 0.01;
-		gains_translation[2] = 0;
+		gains_rotation = std::vector<double>(3, 0);
+		gains_rotation[0] = gain_P;
+		gains_rotation[1] = gain_I;
+		gains_rotation[2] = gain_D;
 
 		close_enough_msg.data = false;
 		has_reached_goal_msg.data = false;
 		emergency_break_msg.data = false;
 		
-
 		
+	}
+
+	void batteryCallback(const geometry_msgs::Pose2D::ConstPtr& battery_pos) {
+		ROS_INFO("In callback of battery");
+		battery_stopped = true;
 	}
 
 	void brainStateCallBack(const std_msgs::Int32::ConstPtr& brain_msg) {
@@ -208,9 +224,12 @@ public:
 	void move() {
 
 		bool obstacle_in_the_way = obstacleCheck();
-		if (obstacle_in_the_way) {
-			//ROS_INFO("obstacle in the way");
+		if (obstacle_in_the_way || battery_stopped) {
+			ROS_INFO("obstacle in the way");
 			stop();
+			std_msgs::Bool msg;
+			msg.data = true;
+			pub_emergency_break.publish(msg);
 		}
 
 		else {
@@ -224,7 +243,7 @@ public:
 
 		pub_velocity.publish(velocity_msg);
 		pub_close_enough.publish(close_enough_msg);
-		ROS_INFO("New info? %d", newInfoAboutGoal);
+		// ROS_INFO("New info? %d", newInfoAboutGoal);
 
 		if(newInfoAboutGoal){
 		 	pub_has_reached_goal.publish(has_reached_goal_msg);
@@ -315,9 +334,9 @@ public:
 		error_int_angle_translation = error_int_angle_translation + error_angle;
 		error_previous_angle_translation = error_angle;
 
-		double PW = gains_translation[0] * error_angle;
-		double IW = gains_translation[1] * error_int_angle_translation;
-		double DW = gains_translation[2] * derror_angle;
+		double PW = gains_rotation[0] * error_angle;
+		double IW = gains_rotation[1] * error_int_angle_translation;
+		double DW = gains_rotation[2] * derror_angle;
 
 		double w = PW + IW + DW;
 
@@ -424,6 +443,7 @@ public:
 	}
 
 	void stop() {
+		// TODO: publish to brain!
 		velocity_msg.linear.x = 0;
 		velocity_msg.angular.z = 0;
 		stopped = true;
@@ -482,6 +502,7 @@ private:
 
 	double dt;
 	bool stopped;
+	bool battery_stopped;
 	bool turn_flag;
 	bool point_flag;
 	bool same_point;
@@ -491,19 +512,19 @@ private:
 	bool newInfoAboutGoal;
 	bool previous_hasReachedGoal;
 
-	double degrees;
 	double distance;
 	double desired_angle;
 	double angle_threshold;
 	double distance_threshold;
+
+	int every_lidar_value;
+	double min_distance_to_obstacle;
 
 	std_msgs::Bool close_enough_msg;
 	std_msgs::Bool has_reached_goal_msg;
 	std_msgs::Bool emergency_break_msg;
 	geometry_msgs::Twist velocity_msg;
 
-	int every_lidar_value;
-	double min_distance_to_obstacle;
 	std::vector<double> laser_distances;
 
 	std::vector<double> pose;
@@ -516,18 +537,16 @@ private:
 	double error_int_angle_translation;
 	double error_previous_angle_translation;
 
-	std::vector<double> gains_translation;
+	std::vector<double> gains_rotation;
 
 };
 
 int main(int argc, char** argv) {
 
 	int control_frequency = 125;
-	int check_every_laser = 2;
-	double min_distance_to_obstacles = 0.16;
 
 	ros::init(argc, argv, "path_follower");
-	StraightLines sl(control_frequency, min_distance_to_obstacles, check_every_laser);
+	StraightLines sl(control_frequency);
 	ros::Rate rate(control_frequency);
 
 	while (sl.nh.ok()) {

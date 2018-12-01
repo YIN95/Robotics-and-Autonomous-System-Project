@@ -33,23 +33,35 @@ public: /* ros */
 	ros::Subscriber sub_has_reached_orientation;
 	// ros::Subscriber sub_has_reached_grab;
 	ros::Subscriber sub_emergency_break;
+	ros::Subscriber sub_detection;
 
 	ros::Time current_time;
     ros::Time arrival_time;
 
 
 	StateMachine(){
+
+		nh.getParam("/robot/starting_position/x", start_x);
+        nh.getParam("/robot/starting_position/y", start_y);
+        nh.getParam("/robot/starting_position/theta", start_theta);
+		nh.getParam("/maze/exploration", exploration_file_path);
+		nh.getParam("/statemachine/stop_time", stop_seconds);
+
 		currentState = STATE_READY;
 		hasReachedGoal = false;
 		has_reached_orientation = false;
 		// has_reached_grab = false;
 		open_grippers = false;
 		emergency_break = false;
+
 		print_again = false;
+		moving_back_seconds = 1;
+		object_detected = false;
+
+		coming_from_moving = false;
+		coming_from_rotating = false;
 
 		nextPose = 0;
-		stop_seconds = 2;
-		moving_back_seconds = 1;
 
 		num_points = countObjects();
 		ROS_INFO("num points: %d", num_points);
@@ -61,26 +73,26 @@ public: /* ros */
 		// 0 if there is nothing to grab;
 		// 1 if it is an object pose.
 
-		global_pose[0] = 0.225;
-		global_pose[1] = 0.225;
-		global_pose[2] = M_PI / 2;
+		global_pose[0] = start_x;
+		global_pose[1] = start_y;
+		global_pose[2] = start_theta;
 
-		previous_pose[0] = 0.225;
-		previous_pose[1] = 0.225;
-		previous_pose[2] = M_PI / 2;
+		previous_pose[0] = start_x;
+		previous_pose[1] = start_y;
+		previous_pose[2] = start_theta;
 
 		pub_currentState = nh.advertise<std_msgs::Int32>("/brain_state", 1);
 		pub_globalDesiredPose = nh.advertise<geometry_msgs::Pose2D>("/global_desired_pose", 1);
 		pub_grab = nh.advertise<std_msgs::Int32>("/grab", 1);
 		pub_velocity = nh.advertise<geometry_msgs::Twist>("/motor_controller/velocity", 1);
 
-
 		sub_has_reached_goal = nh.subscribe<std_msgs::Bool>("/has_reached_goal", 1, &StateMachine::hasReachedGoalCallBack, this);
 		sub_has_reached_orientation = nh.subscribe<std_msgs::Bool>("/has_reached_orientation", 1, &StateMachine::hasReachedOrientationCallBack, this);
 		// sub_has_reached_grab = nh.subscribe<std_msgs::Bool>("/has_reached_grab_goal", 1, &StateMachine::hasReachedGrabCallBack, this);
 		sub_emergency_break = nh.subscribe<std_msgs::Bool>("/emergency_break", 1, &StateMachine::emergencyBreakCallBack, this);
-		
-	};
+		sub_detection = nh.subscribe<std_msgs::Bool>("/findObject", 1, &StateMachine::detectionCallBack, this);
+
+	}
 
 	void hasReachedGoalCallBack(const std_msgs::Bool::ConstPtr& hasReachedGoal_msg) {
 		hasReachedGoal = hasReachedGoal_msg->data;
@@ -97,10 +109,11 @@ public: /* ros */
 		ROS_INFO("In emergencyBreak Callback.");
 	}
 
-	// void hasReachedGrabCallBack(const std_msgs::Bool::ConstPtr& hasReachedOGrab_msg) {
-	// 	has_reached_grab = hasReachedOGrab_msg->data;
-	// 	ROS_INFO("In hasReachedGrab Callback.");
-	// }
+	void detectionCallBack(const std_msgs::Bool::ConstPtr& detection_msg) {
+		object_detected = detection_msg->data;
+		ROS_INFO("In detection Callback.");
+	}
+
 
 	void run(){
 		switch(currentState){
@@ -137,7 +150,7 @@ public: /* ros */
 			case STATE_MOVING:
 				ROS_INFO("MOVING");
 				if(hasReachedGoal){
-					currentState = STATE_STOP;
+					currentState = STATE_NEXT_POSE;
 					hasReachedGoal = false;
 					arrival_time = ros::Time::now();
 				}
@@ -145,6 +158,13 @@ public: /* ros */
 					currentState = STATE_MOVING_BACK;
 					emergency_break = false;
 					arrival_time = ros::Time::now();
+				}
+				if(object_detected){
+					arrival_time = ros::Time::now();
+					coming_from_moving = true;
+					ROS_INFO("Stopping from moving");
+					currentState = STATE_STOP;
+					object_detected = false;
 				}
 				if ((!open_grippers) && (fabs(pose_sequence[nextPose-1][3]-1) < 1e-6)){
 						objectPosition();
@@ -155,8 +175,8 @@ public: /* ros */
 
 			case STATE_GO_HOME:	//Go Home
 				ROS_INFO("GO HOME");
-				global_pose[0] = 0.225;
-				global_pose[1] = 0.225;
+				global_pose[0] = start_x;
+				global_pose[1] = start_y;
 				global_pose[2] = 0.0;
 				currentState = STATE_MOVING;
 				break;
@@ -164,9 +184,16 @@ public: /* ros */
 			case STATE_ROTATING:
 				ROS_INFO("ROTATING");
 				if(has_reached_orientation){
-					currentState = STATE_STOP;
+					currentState = STATE_NEXT_POSE;
 					has_reached_orientation = false;
 					arrival_time = ros::Time::now();
+				}
+				if(object_detected){
+					arrival_time = ros::Time::now();
+					coming_from_rotating = true;
+					currentState = STATE_STOP;
+					ROS_INFO("Stopping from rotating");
+					object_detected = false;
 				}
 				if ((!open_grippers) && (fabs(pose_sequence[nextPose-1][3]-1) < 1e-6)){
 						objectPosition();
@@ -179,12 +206,21 @@ public: /* ros */
 				ROS_INFO("STOP");
 
 				current_time = ros::Time::now();
+				velocity_msg.linear.x = 0;
+				velocity_msg.angular.z = 0;
+				pub_velocity.publish(velocity_msg);
 				if ((current_time - arrival_time).toSec() > stop_seconds){
 					if ((open_grippers) && (fabs(pose_sequence[nextPose-1][3]-1) < 1e-6)){
 						currentState = STATE_CLOSE_GRIPPERS;
 					}
 					else{
-						currentState = STATE_NEXT_POSE;
+						if(coming_from_moving){
+							currentState = STATE_MOVING;
+							coming_from_moving = false;
+						}
+						else if(coming_from_rotating){
+							currentState = STATE_ROTATING;
+						}	
 					}
 					
 				}
@@ -214,8 +250,8 @@ public: /* ros */
 				// 	currentState = STATE_STOP;
 				// 	has_reached_grab = false;
 				// }
-        		msg.data = 1;
-        		pub_grab.publish(msg);
+        		grab_msg.data = 1;
+        		pub_grab.publish(grab_msg);
 				currentState = STATE_MOVING;
 				break;
 			
@@ -226,8 +262,8 @@ public: /* ros */
 				// 	currentState = STATE_STOP;
 				// 	has_reached_grab = false;
 				// }
-				msg.data = 0;
-            	pub_grab.publish(msg);
+				grab_msg.data = 0;
+            	pub_grab.publish(grab_msg);
 				currentState = STATE_GO_HOME;
         		
 				break;
@@ -273,7 +309,7 @@ public: /* ros */
 	}
 
 	int countObjects(){
-        std::fstream fin("/home/ras19/catkin_ws/src/gp9_path_planning/scripts/ShortestPath.txt");
+        std::fstream fin(exploration_file_path.c_str());
         int num_points = 0;
 		if (fin){
             double x, y;
@@ -285,29 +321,16 @@ public: /* ros */
     }
 
 	void readExplorePosition(){	// read the position we need to explore for phase 1
-		std::fstream fin("/home/ras19/catkin_ws/src/gp9_path_planning/scripts/ShortestPath.txt");
-		int num_exploration_angles = 12;
+		std::fstream fin(exploration_file_path.c_str());
 		ROS_INFO("In reading file");
 		if (fin){
 			double x, y;
 			unsigned point_count = 0;
 			while(fin>>x>>y){
-				
 				pose_sequence[point_count][0] = x;
 				pose_sequence[point_count][1] = y;
 				pose_sequence[point_count][2] = 0;
 				pose_sequence[point_count][3] = 0;
-
-				// for (int i = 1; i < 4; i++) {
-				// 	double angle = (1 + i) * (M_PI / 2);
-				// 	if (angle > 2 * M_PI) {
-				// 		angle -= 2 * M_PI;
-				// 	}
-				// 	pose_sequence[i][0] = 0.525;
-				// 	pose_sequence[i][1] = 1.70;
-				// 	pose_sequence[i][2] = angle;
-				// 	pose_sequence[i][3] = 0;
-				// }
 
 				ROS_INFO("[Explore Pose] x:%f, y:%f, theta:%f, flag:%f", pose_sequence[point_count][0], pose_sequence[point_count][1], pose_sequence[point_count][2], pose_sequence[point_count][3]);
 				
@@ -326,8 +349,9 @@ private:
 	int stop_seconds;
 	int moving_back_seconds;
 
+	std::string exploration_file_path;
 	geometry_msgs::Pose2D global_desired_pose;
-	std_msgs::Int32 msg;
+	std_msgs::Int32 grab_msg;
 	geometry_msgs::Twist velocity_msg;
 
 	std::vector<double> global_pose;
@@ -337,13 +361,18 @@ private:
 	std::vector< std::vector<double> > obj_pose_sequence;
 	std::vector< std::vector<double> > explore_pose_sequence;
 
-	
+	double start_x, start_y, start_theta;
+
 	bool hasReachedGoal;
 	bool has_reached_orientation;
 	bool emergency_break;
 	bool print_again;
 	// bool has_reached_grab;
 	bool open_grippers;
+	bool object_detected;
+
+	bool coming_from_moving;
+	bool coming_from_rotating;
 };
 
 
