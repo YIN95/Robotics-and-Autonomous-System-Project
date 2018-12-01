@@ -34,7 +34,7 @@ ObjectDetection::ObjectDetection(){
     sub_tensorflow_state = nh.subscribe<std_msgs::Int32>("/classification/state", 1, &ObjectDetection::stateCallback, this);
     sub_classification_shape = nh.subscribe<std_msgs::Int32>("/classification/shape", 1, &ObjectDetection::shapeCallback, this);
     sub_rob_position = nh.subscribe<geometry_msgs::Pose2D>("/pose", 1, &ObjectDetection::robotCallback, this);
-    sub_moving_state = nh.subscribe<std_msgs::Int32>("/state/ismoving", 1, &ObjectDetection::stateMovingCallback, this);
+    sub_moving_state = nh.subscribe<std_msgs::Int32>("/brain_state", 1, &ObjectDetection::stateMovingCallback, this);
 
     pub_object_pose = nh.advertise<geometry_msgs::Pose2D>("/object/pose", 1);
     pub_object_marker = nh.advertise<visualization_msgs::Marker>("/object/marker", 1);
@@ -43,6 +43,7 @@ ObjectDetection::ObjectDetection(){
     pub_speak = nh.advertise<std_msgs::String>("/espeak/string", 30);
     pub_evidence = nh.advertise<ras_msgs::RAS_Evidence>("/evidence", 5);
     pub_findBattery = nh.advertise<geometry_msgs::Pose2D>("/findBattery", 5);
+    pub_findObject = nh.advertise<std_msgs::Int32>("/findObject", 1);
     //pub_classification_target = nh.advertise<geometry_msgs::Pose2D>("/classification/target", 1);
 
     char *buffer;
@@ -210,7 +211,10 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                 // if (color_result > 0 && object_depth >= 0){
 
                 if (color_result > 0){
-
+                    // publish to a topic when detect an object. 
+                    std_msgs::Int32 msg_findobj;
+                    msg_findobj.data = 1;
+                    pub_findObject.publish(msg_findobj);
                     ellipse(ptr->image, center, Size(4, 4), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
                     Point pt1(objects[i].x, objects[i].y);
                     Point pt2(objects[i].x + objects[i].width, objects[i].y + objects[i].height);
@@ -227,7 +231,7 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                     frame_target = cropTarget(center_x, center_y);
 
                     if (tensorflowState == 0){
-                        if (movingState == 0){
+                        if (movingState == 3){ // when movingState == 3, the brain in the State stop. 
                             now_color = color_result;
                             publishClassificationTarget(frame_target);
                             //imshow("target", frame_target);
