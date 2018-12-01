@@ -162,7 +162,7 @@ int main(int argc, char** argv) {
 		ros::spinOnce();
 		if (!rotation.has_stopped()) {
             if(rotation.getBrainState() == 5) {
-                ROS_INFO("Going into rotation.rotate()!");
+                // ROS_INFO("Going into rotation.rotate()!");
                 rotation.rotate();
             }
         

@@ -22,6 +22,7 @@
 #include <string>
 #include <std_msgs/Int32.h>
 #include <std_msgs/String.h>
+#include <std_msgs/Bool.h>
 #include <geometry_msgs/TransformStamped.h>
 #include <ras_msgs/RAS_Evidence.h>
 #include <iostream>

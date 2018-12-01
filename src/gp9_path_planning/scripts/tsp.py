@@ -96,7 +96,7 @@ def visualize(Index, Path):
         (line_xs, line_ys) = zip(*line)
         # ax.add_line(Line2D(line_xs, line_ys, linewidth=1, color='blue'))
         oldIndex = index
-    plt.show()
+    # plt.show()
 
 if __name__ == '__main__':
     path_to_map = '/home/ras19/catkin_ws/src/gp9_path_planning/maps/maze2018.txt'
