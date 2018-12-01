@@ -8,9 +8,10 @@ from geometry_msgs.msg import Pose2D
 from math import pi
 import math
 import numpy as np
+import random
+import itertools
 
 class Pose:
-
     def __init__(self, x, y, theta):
         self.x = x
         self.y = y
@@ -21,17 +22,20 @@ class Collector:
 
     def __init__(self, path_to_write):
         self.subscriber_pose = rospy.Subscriber("/pose", Pose2D, self.callback_pose)
+        self.pub_newtarget_pose = rospy.Publisher('/newtarget_pose', Pose2D, queue_size=1)
+
         self.current_pose = Pose(0.225, 0.225, pi / 2)
         self.sizex = 241
         self.sizey = 241
         self.D = 25
-        self.R = 15
-        self.alpha = 45.0/180
+        self.R = 18
         self.Area = np.zeros((self.sizex, self.sizey))
         self.mapX = 0
         self.mapY = 0
         self.path = path_to_write
         self.index = 0
+        self.numSample = 15
+        self.newTargetPose = Pose2D()
         np.savetxt(path_to_write, self.Area,fmt='%d')
 
     def callback_pose(self, pose):
@@ -64,6 +68,26 @@ class Collector:
         distance = math.sqrt(l1*l1 + l2*l2)
 
         return distance
+    
+    def unExploredPosition(self):
+        all_list = list(itertools.product(range(self.sizex), range(self.sizey)))
+        random_list = random.sample(all_list, self.numSample)
+        unexplored_list = []
+        for i, j in random_list:
+            if (self.Area[i, j] < 1):
+                unexplored_list.append((i, j))
+        min_dis = 999999
+        
+        for i, j in unexplored_list:
+            distance = self.dis(i, j, self.mapX, self.mapY)
+            if distance < min_dis:
+                self.newTargetPose.x = i
+                self.newTargetPose.y = j
+                min_dis = distance
+
+        self.pub_newtarget_pose.publish(self.newTargetPose)
+
+
 if __name__ == '__main__':
     rospy.init_node('detectedPath')
     control_frequency = 10
