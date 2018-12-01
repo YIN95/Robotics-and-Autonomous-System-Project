@@ -131,7 +131,7 @@ public:
 
 	void batteryCallback(const geometry_msgs::Pose2D::ConstPtr& battery_pos) {
 		ROS_INFO("In callback of battery");
-		battery_stopped = true;
+		battery_stopped = true;	//TODO: switch to false again!!!somewhere
 	}
 
 	void brainStateCallBack(const std_msgs::Int32::ConstPtr& brain_msg) {
