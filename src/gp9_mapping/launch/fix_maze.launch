@@ -1,0 +1,6 @@
+<launch>
+
+    <rosparam command="load" file="/home/ras19/catkin_ws/src/params.srv" />
+    <node pkg="gp9_mapping" name="maze_fixer" type="fix_maze.py" />
+
+</launch>

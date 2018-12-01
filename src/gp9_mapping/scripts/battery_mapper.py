@@ -17,8 +17,8 @@ from std_msgs.msg import Bool
 class BatteryMapper:
 
     def __init__(self):
-        self.maze_path = "/home/ras19/catkin_ws/src/gp9_path_planning/maps/maze2018.txt"
-        self.new_path = "/home/ras19/catkin_ws/src/gp9_path_planning/maps/updated_maze.txt"
+        self.maze_path = rospy.get_param("/maze/path")
+        self.new_path = rospy.get_param("/maze/path_updated")
         self._create_new_file()
         self.subscriber_battery = rospy.Subscriber("/findBattery", Pose2D, self.callback_battery)
         self.publisher_battery = rospy.Publisher("/update_map", Bool, queue_size=1)
