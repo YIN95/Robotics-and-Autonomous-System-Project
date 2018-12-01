@@ -48,8 +48,8 @@ class Collector:
             yl = min(max(0, self.mapY-40), self.sizey)
             yr = min(max(0, self.mapY+40), self.sizey)
             
-            visionCenterX = self.mapX + self.D*math.sin(self.current_pose.theta)
-            visionCenterY = self.mapY + self.D*math.cos(self.current_pose.theta)
+            visionCenterX = self.mapX + self.D*math.cos(self.current_pose.theta)
+            visionCenterY = self.mapY + self.D*math.sin(self.current_pose.theta)
             
             for i in range(xl, xr):
                 for j in range(yl, yr):
