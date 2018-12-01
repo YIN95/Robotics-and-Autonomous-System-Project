@@ -273,7 +273,8 @@ public: /* ros */
 		global_pose[1] += distance_y;
 	}
 
-	void objectPosition_trial(int obj_count){
+	void objectPosition_trial(int obj_count){ 
+		//To close the grippers at desired distance from object instead of the object position
 		
 		double dx = obj_pose_sequence[obj_count][0] - global_pose[0];
 		double dy = obj_pose_sequence[obj_count][1] - global_pose[1];
@@ -344,6 +345,7 @@ public: /* ros */
 
 			while(fin>>x>>y>>theta>>xo>>yo){
 				
+				// Robot pose when the object has been detected
 				pose_sequence[obj_count][0] = x;
 				pose_sequence[obj_count][1] = y;
 				pose_sequence[obj_count][2] = theta;
@@ -353,6 +355,7 @@ public: /* ros */
 				pose_sequence[obj_count+1][2] = theta;
 				pose_sequence[obj_count+1][3] = 1;
 
+				// Object pose
 				obj_pose_sequence[obj_count+1][0] = xo;
 				obj_pose_sequence[obj_count+1][1] = yo;
 
