@@ -1,9 +1,9 @@
 /robot/starting_position/x: 0.225
 /robot/starting_position/y: 0.225
-/robot/starting_position/theta: 0
+/robot/starting_position/theta: 1.57
 /robot/radius: 0.16
 
-/statemachine/stop_time: 2
+/statemachine/stop_time: 3
 
 /gains/rotation/P: 20
 /gains/rotation/I: 0.01

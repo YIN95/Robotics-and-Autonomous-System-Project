@@ -27,6 +27,8 @@ ObjectDetection::ObjectDetection(){
     now_color = -1;
     now_shape = -1;
     now_object = -1;
+    current_time = ros::Time::now();
+    arrival_time = ros::Time::now();
 
 	sub_image_rgb = nh.subscribe<sensor_msgs::Image>("/camera/rgb/image_rect_color", 1, &ObjectDetection::imageRGBCallback, this);
 	// sub_image_depth = nh.subscribe<sensor_msgs::Image>("/camera/depth_registered/sw_registered/image_rect", 1, &ObjectDetection::imageDepthCallback, this);
@@ -212,9 +214,13 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
 
                 if (color_result > 0){
                     // publish to a topic when detect an object. 
-                    std_msgs::Bool msg_findobj;
-                    msg_findobj.data = true;
-                    pub_findObject.publish(msg_findobj);
+                    current_time = ros::Time::now();
+                    if ((current_time - arrival_time).toSec() > 10){
+                        std_msgs::Bool msg_findobj;
+                        msg_findobj.data = true;
+                        pub_findObject.publish(msg_findobj);
+                        arrival_time = ros::Time::now();
+                    }
                     ellipse(ptr->image, center, Size(4, 4), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
                     Point pt1(objects[i].x, objects[i].y);
                     Point pt2(objects[i].x + objects[i].width, objects[i].y + objects[i].height);
@@ -236,7 +242,7 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                             publishClassificationTarget(frame_target);
                             //imshow("target", frame_target);
                             //char keyt = (char)waitKey(1);
-                        }
+                        } 
                         
 
                         // listen_obj_map(pose.x, pose.y, color_result);

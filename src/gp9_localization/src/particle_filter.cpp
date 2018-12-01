@@ -340,12 +340,62 @@ public:
         init_flag =  0;
         lidar_bool = false;
 
+        bounds = std::vector<double>(4, 0); //x_min, x_max, y_min, y_max
+
         sub_pose = nh.subscribe<geometry_msgs::Pose2D>("/uncorrected_pose", 1, &ParticleFilter::odometryCallBack, this);
         sub_lidar = nh.subscribe<sensor_msgs::LaserScan>("/scan", 1, &ParticleFilter::lidarCallBack, this);
         pub_weight_pose = nh.advertise<geometry_msgs::Pose2D>("/corrected_pose", 1);
         pub_corrected_pose = nh.advertise<visualization_msgs::Marker>("/visualization_filter", 1);
         pub_object_marker_array = nh.advertise<visualization_msgs::Marker>("/particle/points", 100);
+        getBounds(path);
         initParticles();
+    }
+
+    void getBounds(std::string path){
+        const char* path_to_maze = path.c_str();
+
+        std::string line;
+        std::string past_value;
+        std::ifstream myfile;
+        double x_min = 0;
+        double x_max = 0;
+        double y_min = 0;
+        double y_max = 0;
+        myfile.open(path_to_maze, std::ifstream::in);
+        if (myfile.is_open()) {
+            boost::char_separator<char> sep(" ");
+            int i = 0;
+            while(getline(myfile, line)){
+                boost::tokenizer< boost::char_separator<char> > values(line, sep);
+                BOOST_FOREACH (const std::string& value, values) {
+                    i++;
+                    if (i % 2 == 0){
+                        double x = atof(past_value.c_str());
+                        double y = atof(value.c_str());
+                        if (x < x_min) {
+                            x_min = x;
+                        }
+                        if (x > x_max) {
+                            x_max = x;
+                        }
+                        if (y < y_min) {
+                            y_min = x;
+                        }
+                        if (y > y_max) {
+                            y_max = y;
+                        }
+                    }
+                    past_value = value;
+                }
+            }
+            myfile.close();
+        }
+        else std::cout << "Unable to open file";
+
+        bounds[0] = x_min;
+        bounds[1] = x_max;
+        bounds[2] = y_min;
+        bounds[3] = y_max;
     }
 
     void initParticles() {
@@ -373,19 +423,19 @@ public:
         random_numbers::RandomNumberGenerator gen;
         for(int i = 0; i < n_particles; i++) {
             particles[0][i] += gen.gaussian(dx, std_x);
-            if (particles[0][i] < 0) {
-                particles[0][i] = 0.0001;
+            if (particles[0][i] < bounds[0]) {
+                particles[0][i] = bounds[0] + 0.0001;
             }
-            else if (particles[0][i] > 2.4) {
-                particles[0][i] = 2.3999;
+            else if (particles[0][i] > bounds[1]) {
+                particles[0][i] = bounds[1] - 0.0001;
             }
 
             particles[1][i] += gen.gaussian(dy, std_y);
-            if (particles[1][i] < 0) {
-                particles[1][i] = 0.0001;
+            if (particles[1][i] < bounds[2]) {
+                particles[1][i] = bounds[2] + 0.0001;
             }
-            else if (particles[1][i] > 2.4) {
-                particles[1][i] = 2.3999;
+            else if (particles[1][i] > bounds[3]) {
+                particles[1][i] = bounds[3] - 0.0001;
             }
 
             particles[2][i] += gen.gaussian(dtheta, std_theta);
@@ -634,8 +684,6 @@ private:
     double start_pose[3];
     double last_pose[3];
 
-    double bounds[4];
-
     double lidar_offset;
     int init_flag;
 
@@ -643,6 +691,7 @@ private:
     std::deque<double> z_hat;
 
     bool lidar_bool;
+    std::vector<double> bounds;
 };
 
 int main(int argc, char** argv) {

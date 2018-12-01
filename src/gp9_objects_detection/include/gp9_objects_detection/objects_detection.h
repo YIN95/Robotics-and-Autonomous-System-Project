@@ -122,6 +122,8 @@ public:
     double robot_x;
     double robot_y;
     double robot_theta;
+    ros::Time current_time;
+    ros::Time arrival_time;
 
     
 };
