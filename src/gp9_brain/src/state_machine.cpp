@@ -294,7 +294,7 @@ public: /* ros */
 			while(fin>>x>>y){
 				pose_sequence[point_count][0] = x;
 				pose_sequence[point_count][1] = y;
-				pose_sequence[point_count][2] = 0;
+				pose_sequence[point_count][2] = 1.57;
 
 				ROS_INFO("[Explore Pose] x:%f, y:%f, theta:%f, flag:%f", pose_sequence[point_count][0], pose_sequence[point_count][1], pose_sequence[point_count][2], pose_sequence[point_count][3]);
 				

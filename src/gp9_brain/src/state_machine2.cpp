@@ -230,6 +230,9 @@ public: /* ros */
 				ROS_INFO("OPEN GRIPPERS");
         		msg.data = 1;
         		pub_grab.publish(msg);
+				velocity_msg.linear.x = 0;
+            	velocity_msg.angular.z = 0; // 1.2 is a okay value
+            	pub_velocity.publish(velocity_msg);
 				currentState = STATE_MOVING;
 				if(retrieving_object){
 					currentState = STATE_MOVING_BACK;
@@ -243,6 +246,9 @@ public: /* ros */
 				ROS_INFO("======================================================");
 				msg.data = 0;
             	pub_grab.publish(msg);
+				velocity_msg.linear.x = 0;
+            	velocity_msg.angular.z = 0; // 1.2 is a okay value
+            	pub_velocity.publish(velocity_msg);
 				currentState = STATE_GO_HOME;
 				if(retrieving_object){
 					retrieving_object = false;
@@ -269,15 +275,17 @@ public: /* ros */
 		bool same_point = (same_x && same_y && same_angle);
 		ROS_INFO("print_again %d", print_again);
 		if((!same_point)||(print_again)){
-			ROS_INFO("PUBLISH point %f %f %f", global_pose[0], global_pose[1], global_pose[2]);
-			global_desired_pose.x = global_pose[0];
-			global_desired_pose.y = global_pose[1];
-			global_desired_pose.theta = global_pose[2];
-			pub_globalDesiredPose.publish(global_desired_pose);
-			previous_pose[0] = global_pose[0];
-			previous_pose[1] = global_pose[1];
-			previous_pose[2] = global_pose[2];
-			print_again = false;
+			if((global_pose[0] != 0) && (global_pose[1] != 0)){
+				ROS_INFO("PUBLISH point %f %f %f", global_pose[0], global_pose[1], global_pose[2]);
+				global_desired_pose.x = global_pose[0];
+				global_desired_pose.y = global_pose[1];
+				global_desired_pose.theta = global_pose[2];
+				pub_globalDesiredPose.publish(global_desired_pose);
+				previous_pose[0] = global_pose[0];
+				previous_pose[1] = global_pose[1];
+				previous_pose[2] = global_pose[2];
+				print_again = false;
+			}
 			
 		}
 		//ROS_INFO("Has Reached Goal? %d", hasReachedGoal);
@@ -324,8 +332,8 @@ public: /* ros */
         std::fstream fin("/home/ras19/catkin_ws/src/transforms/src/objposition.txt");
         int num_points = 0;
 		if (fin){
-            double x, y, theta;
-            while(fin>>x>>y>>theta) {
+            double x, y, theta, xo, yo;
+            while(fin>>x>>y>>theta>>xo>>yo) {
                 num_points++;
             }
         }

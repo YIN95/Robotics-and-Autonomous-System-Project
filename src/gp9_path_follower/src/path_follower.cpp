@@ -243,7 +243,7 @@ public:
 
 		pub_velocity.publish(velocity_msg);
 		pub_close_enough.publish(close_enough_msg);
-		ROS_INFO("New info? %d", newInfoAboutGoal);
+		//ROS_INFO("New info? %d", newInfoAboutGoal);
 
 		if(newInfoAboutGoal){
 		 	pub_has_reached_goal.publish(has_reached_goal_msg);
