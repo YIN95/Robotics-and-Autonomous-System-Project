@@ -6,8 +6,8 @@ from matplotlib.lines import Line2D
 
 
 def initpara():
-    alpha = 0.99
-    t = (1,600)
+    alpha = 0.98
+    t = (1,100)
     markovlen = 1000
  
     return alpha,t,markovlen
@@ -65,7 +65,7 @@ def tsp(path_to_map, robot_radius, grid):
             for i in range(num-1):
                 valuenew += distmat[solutionnew[i]][solutionnew[i+1]]
             valuenew += distmat[solutionnew[0]][solutionnew[num-1]]
-            print (valuenew)
+            
             if valuenew<valuecurrent:       
                 valuecurrent = valuenew
                 solutioncurrent = solutionnew.copy()
@@ -79,6 +79,7 @@ def tsp(path_to_map, robot_radius, grid):
                     solutioncurrent = solutionnew.copy()
                 else:
                     solutionnew = solutioncurrent.copy()
+        print (valuebest)    
         t = alpha*t
         result.append(valuebest)
     print(valuebest)
@@ -102,7 +103,7 @@ def visualize(Index, Path):
 if __name__ == '__main__':
     path_to_map = '/home/ras19/catkin_ws/src/gp9_path_planning/maps/maze2018.txt'
     robot_radius = 0.16
-    grid = [2.41, 2.41, 6, 6]
+    grid = [2.41, 2.41, 6, 12]
     A, ShortestIndex, ShortestPath = tsp(path_to_map, robot_radius, grid)
     print("shortest path index:")
     print(ShortestIndex)

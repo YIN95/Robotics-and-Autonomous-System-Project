@@ -808,8 +808,12 @@ bool ObjectDetection::check_pre_object_by_position(int temp, double x, double y)
 
 int ObjectDetection::getTrueDepth(int depth){
     double TD;
-    int height = 120;
-    TD = sqrt(depth*depth - height*height);
+    int height = 125;
+    // TD = sqrt(depth*depth - height*height);
+    TD = sin(65.0/180)*depth;
+    if(TD == 0){
+        TD = sqrt(depth*depth - height*height);
+    }
     TD = std::max(int(TD), 0);
     return int(TD);
 }
