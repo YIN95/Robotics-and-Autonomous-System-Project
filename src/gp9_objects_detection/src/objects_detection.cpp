@@ -9,7 +9,7 @@ int main(int argc, char** argv)
 	ros::init(argc, argv, "object_detection");
 	ObjectDetection objectDetection;
 
-	ros::Rate rate(1);
+	ros::Rate rate(4);
 	
 	while (objectDetection.nh.ok()) {
         
@@ -116,9 +116,7 @@ bool ObjectDetection::detectBarrier(bool detect){
     int i, j, temp;
     int height = 999;
     geometry_msgs::Pose2D pose_tobattery;
-    pose_tobattery.x = robot_x;
-    pose_tobattery.y = robot_y;
-    pose_tobattery.theta = robot_theta;
+    
     for (i=0; i<640; i++){
         for (j=0; j<480; j++){
             temp = getDepth_onePoint(i, j);
@@ -127,14 +125,17 @@ bool ObjectDetection::detectBarrier(bool detect){
             }
         }
     }
-    // ROS_INFO("|||||MinHeight: %d", height);
+    pose_tobattery.x = robot_x + height*cos(robot_theta)*0.001;
+    pose_tobattery.y = robot_y + height*sin(robot_theta)*0.001;
+    pose_tobattery.theta = robot_theta;
+    ROS_INFO("|||||MinHeight: %d", height);
     if (detect){
-        if (height < 110){
-            ROS_INFO("[WARNING] Obstacle or Wall !!!!!");
+        if ((height < 135)){
+            ROS_INFO("[WARNING] Obstacle");
             std_msgs::String msg;
-            msg.data = "Obstacle or Wall";
+            msg.data = "battery";
             pub_speak.publish(msg);
-            String result = "I see a battery";
+            String result = "battery";
             Point org(50, 30);
             putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 255, 0 ), 4, 8, 0);
             ROS_INFO("BATTERY");
@@ -143,12 +144,26 @@ bool ObjectDetection::detectBarrier(bool detect){
         }
     }
     else{
-        if (height < 89){
-            ROS_INFO("[WARNING] Obstacle or Wall !!!!!");
+        if (height < 70){
+            ROS_INFO("[WARNING] Obstacle or Wall !!!!!!");
             std_msgs::String msg;
-            msg.data = "Obstacle or Wall";
+            msg.data = "battery or wall";
             pub_speak.publish(msg);
-            String result = "I see a battery";
+            String result = "Obstacle";
+            Point org(50, 30);
+            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 255, 0 ), 4, 8, 0);
+            ROS_INFO("BATTERY");
+            pub_findBattery.publish(pose_tobattery);
+            return true;
+        }
+        if ((height > 866)){
+            pose_tobattery.x = robot_x;
+            pose_tobattery.y = robot_y;
+            ROS_INFO("[WARNING] Obstacle");
+            std_msgs::String msg;
+            msg.data = "battery";
+            pub_speak.publish(msg);
+            String result = "battery";
             Point org(50, 30);
             putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 255, 0 ), 4, 8, 0);
             ROS_INFO("BATTERY");
@@ -162,7 +177,7 @@ bool ObjectDetection::detectBarrier(bool detect){
 void ObjectDetection::imageDepthCallback(const sensor_msgs::ImageConstPtr &msg){
     try{
         cv_depth_ptr = cv_bridge::toCvCopy(msg);
-        // detectBarrier();
+        //detectBarrier();
         // , sensor_msgs::image_encodings::mono8
     }
     catch (...){
@@ -190,15 +205,22 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
         cascade.detectMultiScale(origin_frame_masked, objects, 1.1, 3, 0|CASCADE_SCALE_IMAGE, Size(77, 77), Size(240, 240));
         detect_size = std::min(int(objects.size()), detect_size);
 
-        cascade_battery.detectMultiScale(frame_gray, objects_battery, 1.1, 3, 0|CASCADE_SCALE_IMAGE, Size(280, 280), Size(600, 600));
+        cascade_battery.detectMultiScale(frame_gray, objects_battery, 1.1, 3, 0|CASCADE_SCALE_IMAGE, Size(240, 240), Size(450, 450));
         bool barreryFlag;
-        for (int i=0; i<int(objects_battery.size()); i++){
-            // Point pt1(objects_battery[i].x, objects_battery[i].y);
-            // Point pt2(objects_battery[i].x + objects_battery[i].width, objects_battery[i].y + objects_battery[i].height);
-            // rectangle(ptr->image, pt1, pt2, Scalar( 255, 255, 0 ), 4, 8, 0 );
-            barreryFlag = detectBarrier(true);
+        if (int(objects_battery.size()) > 0){
+            for (int i=0; i<int(objects_battery.size()); i++){
+                Point pt1(objects_battery[i].x, objects_battery[i].y);
+                Point pt2(objects_battery[i].x + objects_battery[i].width, objects_battery[i].y + objects_battery[i].height);
+                //rectangle(ptr->image, pt1, pt2, Scalar( 255, 255, 0 ), 4, 8, 0 );
+                //barreryFlag = detectBarrier(true);
+            }
         }
+        else{
+            barreryFlag = detectBarrier(false);
+        }
+        
 
+        
         if (only_detect_one && objects.size()>0 && (!detectBarrier(false)) && (!barreryFlag)){
             int i;
             for (i=0; i<detect_size; i++){
@@ -211,7 +233,7 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                 object_depth = getTrueDepth(object_depth);
                 ROS_INFO("DEPTH: %d", object_depth);
                 // if (color_result > 0 && object_depth >= 0){
-
+                barreryFlag = detectBarrier(true);
                 if (color_result > 0){
                     // publish to a topic when detect an object. 
                     current_time = ros::Time::now();
@@ -550,14 +572,14 @@ int ObjectDetection::colorClassifier(int h, int s, int v, int b, int g, int r){
             ROS_INFO("COLOR_GREEN");
             return obj.COLOR_GREEN;
         }
-        else if (87 <= h && h <= 128 && 130 <= s && s <= 255 && 0 <= v && v <= 255){
+        else if (87 <= h && h <= 128 && 40 <= s && s <= 255 && 0 <= v && v <= 255){
             if (b>101){
                 ROS_INFO("COLOR_LIGHT_BLUE");
                 return obj.COLOR_LIGHT_BLUE;
             }
             
         }
-        else if (87 <= h && h <= 128 && 100 <= s && s <= 255 && 0 <= v && v <= 255){
+        else if (87 <= h && h <= 128 && 40 <= s && s <= 255 && 0 <= v && v <= 255){
             if (b<100){
                 ROS_INFO("COLOR_BLUE");
                 return obj.COLOR_BLUE;
