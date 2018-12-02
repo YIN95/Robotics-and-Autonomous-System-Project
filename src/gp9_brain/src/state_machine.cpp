@@ -136,6 +136,22 @@ public: /* ros */
 					}
 					nextPose += 1;
 				}
+				else if(nextPose = num_points){
+					ROS_INFO("Taking home position");
+					global_pose[0] = start_x;
+					global_pose[1] = start_y;
+					global_pose[2] = M_PI/2;
+
+					bool same_x = fabs(previous_pose[0] - global_pose[0]) < 1e-6;
+					bool same_y = fabs(previous_pose[1] - global_pose[1]) < 1e-6;
+					if (same_x && same_y){
+						currentState = STATE_ROTATING;
+					}
+					else{
+						currentState = STATE_MOVING;
+					}
+					nextPose += 1;
+				}
 				else{
 					ROS_INFO("EXPLORATION DONE.");
 					currentState = STATE_END;
