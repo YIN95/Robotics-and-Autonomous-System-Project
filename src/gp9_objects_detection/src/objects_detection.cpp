@@ -29,6 +29,8 @@ ObjectDetection::ObjectDetection(){
     now_object = -1;
     current_time = ros::Time::now();
     arrival_time = ros::Time::now();
+    current_time2 = ros::Time::now();
+    arrival_time2 = ros::Time::now();
 
 	sub_image_rgb = nh.subscribe<sensor_msgs::Image>("/camera/rgb/image_rect_color", 1, &ObjectDetection::imageRGBCallback, this);
 	// sub_image_depth = nh.subscribe<sensor_msgs::Image>("/camera/depth_registered/sw_registered/image_rect", 1, &ObjectDetection::imageDepthCallback, this);
@@ -131,44 +133,62 @@ bool ObjectDetection::detectBarrier(bool detect){
     ROS_INFO("|||||MinHeight: %d", height);
     if (detect){
         if ((height < 100)){
-            ROS_INFO("[WARNING] Obstacle");
-            std_msgs::String msg;
-            msg.data = "battery";
-            pub_speak.publish(msg);
-            String result = "battery";
-            Point org(50, 30);
-            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 255, 0 ), 4, 8, 0);
-            ROS_INFO("BATTERY");
-            pub_findBattery.publish(pose_tobattery);
-            return true;
+            current_time2 = ros::Time::now();
+            if ((current_time2 - arrival_time2).toSec() > 10){
+                ROS_INFO("[WARNING] Obstacle");
+                std_msgs::String msg;
+                msg.data = "battery";
+                pub_speak.publish(msg);
+                String result = "battery";
+                Point org(50, 30);
+                putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 255, 0 ), 4, 8, 0);
+                ROS_INFO("BATTERY");
+                pub_findBattery.publish(pose_tobattery);
+                return true;
+
+
+                arrival_time2 = ros::Time::now();
+            }
+            
         }
     }
     else{
         if (height < 70){
-            ROS_INFO("[WARNING] Obstacle or Wall !!!!!!");
-            std_msgs::String msg;
-            msg.data = "obstacle";
-            pub_speak.publish(msg);
-            String result = "Obstacle";
-            Point org(50, 30);
-            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 255, 0 ), 4, 8, 0);
-            ROS_INFO("BATTERY");
-            pub_findBattery.publish(pose_tobattery);
-            return true;
+            if ((current_time2 - arrival_time2).toSec() > 10){
+                ROS_INFO("[WARNING] Obstacle or Wall !!!!!!");
+                std_msgs::String msg;
+                msg.data = "obstacle";
+                pub_speak.publish(msg);
+                String result = "Obstacle";
+                Point org(50, 30);
+                putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 255, 0 ), 4, 8, 0);
+                ROS_INFO("BATTERY");
+                pub_findBattery.publish(pose_tobattery);
+                return true;
+
+                
+                arrival_time2 = ros::Time::now();
+            }
+            
         }
         if ((height == 999)){
-            pose_tobattery.x = robot_x;
-            pose_tobattery.y = robot_y;
-            ROS_INFO("[WARNING] Obstacle");
-            std_msgs::String msg;
-            msg.data = "battery";
-            pub_speak.publish(msg);
-            String result = "battery";
-            Point org(50, 30);
-            putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 255, 0 ), 4, 8, 0);
-            ROS_INFO("BATTERY");
-            pub_findBattery.publish(pose_tobattery);
-            return true;
+            if ((current_time2 - arrival_time2).toSec() > 10){
+                pose_tobattery.x = robot_x;
+                pose_tobattery.y = robot_y;
+                ROS_INFO("[WARNING] Obstacle");
+                std_msgs::String msg;
+                msg.data = "battery";
+                pub_speak.publish(msg);
+                String result = "battery";
+                Point org(50, 30);
+                putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 255, 0 ), 4, 8, 0);
+                ROS_INFO("BATTERY");
+                pub_findBattery.publish(pose_tobattery);
+                return true;
+
+                arrival_time2 = ros::Time::now();
+            }
+           
         }
     }
     return false;
@@ -809,11 +829,13 @@ bool ObjectDetection::check_pre_object_by_position(int temp, double x, double y)
 int ObjectDetection::getTrueDepth(int depth){
     double TD;
     int height = 125;
-    // TD = sqrt(depth*depth - height*height);
-    TD = sin(65.0/180)*depth;
+    TD = sqrt(depth*depth - height*height);
+    // TD = depth;
     if(TD == 0){
-        TD = sqrt(depth*depth - height*height);
+
+        TD = std::min(sin(65/180)*depth ,sqrt(depth*depth - height*height));
     }
+    ROS_INFO("TTTTTTTTTTTTTTTTTTT, %f", TD+105);
     TD = std::max(int(TD), 0);
     return int(TD);
 }
