@@ -88,7 +88,7 @@ public: /* ros */
 		sub_has_reached_goal = nh.subscribe<std_msgs::Bool>("/has_reached_goal", 1, &StateMachine::hasReachedGoalCallBack, this);
 		sub_has_reached_orientation = nh.subscribe<std_msgs::Bool>("/has_reached_orientation", 1, &StateMachine::hasReachedOrientationCallBack, this);
 		sub_emergency_break = nh.subscribe<std_msgs::Bool>("/emergency_break", 1, &StateMachine::emergencyBreakCallBack, this);
-		sub_emergency_break_bt = nh.subscribe<geometry_msgs::Pose2D>("/findBattery", 1, &StateMachine::emergencyBreakCallBack_bt, this);
+		// sub_emergency_break_bt = nh.subscribe<geometry_msgs::Pose2D>("/findBattery", 1, &StateMachine::emergencyBreakCallBack_bt, this);
 		sub_detection = nh.subscribe<std_msgs::Bool>("/findObject", 1, &StateMachine::detectionCallBack, this);
 
 	}

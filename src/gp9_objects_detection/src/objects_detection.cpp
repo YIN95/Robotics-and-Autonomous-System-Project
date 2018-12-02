@@ -177,8 +177,8 @@ bool ObjectDetection::detectBarrier(bool detect){
         if ((height == 999)){
             current_time2 = ros::Time::now();
             if ((current_time2 - arrival_time2).toSec() > 10){
-                pose_tobattery.x = robot_x;
-                pose_tobattery.y = robot_y;
+                pose_tobattery.x = robot_x + 0.15*cos(robot_theta);
+                pose_tobattery.y = robot_y + 0.15*sin(robot_theta);
                 ROS_INFO("[WARNING] Obstacle");
                 std_msgs::String msg;
                 msg.data = "battery";
