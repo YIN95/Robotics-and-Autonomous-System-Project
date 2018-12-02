@@ -8,6 +8,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <time.h>
 
 #define STATE_READY -1
 #define STATE_NEXT_POSE 0
@@ -228,8 +229,18 @@ public: /* ros */
 				}
 				else{
 					velocity_msg.linear.x = -0.2;
-            		velocity_msg.angular.z = -0.3; // 1.2 is a okay value
-            		pub_velocity.publish(velocity_msg);
+					std::srand(std::time(0));
+					double flag = std::rand()%100/(double)101;
+					if (flag>0.3){
+						velocity_msg.angular.z = -0.3; // 1.2 is a okay value
+						velocity_msg.angular.z = -0.3;
+						pub_velocity.publish(velocity_msg);
+					}
+					else{
+						velocity_msg.angular.z = -0.3; // 1.2 is a okay value
+						velocity_msg.angular.z = 0.3;
+						pub_velocity.publish(velocity_msg);
+					}            		
 				}
 				break;
 
