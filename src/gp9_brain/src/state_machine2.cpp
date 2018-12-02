@@ -18,6 +18,7 @@
 #define STATE_ROTATING 5
 #define STATE_CLOSE_GRIPPERS 6
 #define STATE_MOVING_BACK 7
+#define STATE_END 8
 
 class StateMachine{
 
@@ -32,7 +33,6 @@ public: /* ros */
 	ros::Subscriber sub_has_reached_goal;
 	ros::Subscriber sub_has_reached_orientation;
 	ros::Subscriber sub_emergency_break;
-	// ros::Subscriber sub_has_reached_grab;
 
 	ros::Time current_time;
     ros::Time arrival_time;
@@ -42,8 +42,9 @@ public: /* ros */
 		currentState = STATE_READY;
 		hasReachedGoal = false;
 		has_reached_orientation = false;
-		// has_reached_grab = false;
 		open_grippers = false;
+		retrieving_object = false;
+		go_back_to_release = false;
 		emergency_break = false;
 		print_again = false;
 
@@ -53,6 +54,7 @@ public: /* ros */
 		desired_distance_from_object = 0.12;
 
         num_objects = countObjects();
+		ROS_INFO("num of objects %d", num_objects);
 
 
 		global_pose = std::vector<double>(3, 0);
@@ -79,7 +81,6 @@ public: /* ros */
 
 		sub_has_reached_goal = nh.subscribe<std_msgs::Bool>("/has_reached_goal", 1, &StateMachine::hasReachedGoalCallBack, this);
 		sub_has_reached_orientation = nh.subscribe<std_msgs::Bool>("/has_reached_orientation", 1, &StateMachine::hasReachedOrientationCallBack, this);
-		// sub_has_reached_grab = nh.subscribe<std_msgs::Bool>("/has_reached_grab_goal", 1, &StateMachine::hasReachedGrabCallBack, this);
 		sub_emergency_break = nh.subscribe<std_msgs::Bool>("/emergency_break", 1, &StateMachine::emergencyBreakCallBack, this);
 		
 	};
@@ -99,11 +100,6 @@ public: /* ros */
 		ROS_INFO("In emergencyBreak Callback.");
 	}
 
-	// void hasReachedGrabCallBack(const std_msgs::Bool::ConstPtr& hasReachedOGrab_msg) {
-	// 	has_reached_grab = hasReachedOGrab_msg->data;
-	// 	ROS_INFO("In hasReachedGrab Callback.");
-	// }
-
 	
 
 	void run(){
@@ -111,8 +107,6 @@ public: /* ros */
 			case STATE_READY: //Needed to give time to the other nodes to listen to the topics
                 msg.data = 0;
             	pub_grab.publish(msg);
-				// readExplorePosition();  // for phase 1
-				//readObjectPosition();   // for phase 2
 				readObjectPosition_trial();
 				currentState = STATE_NEXT_POSE;
 				break;
@@ -124,6 +118,7 @@ public: /* ros */
 					global_pose[0] = pose_sequence[nextPose][0];
 					global_pose[1] = pose_sequence[nextPose][1];
 					global_pose[2] = pose_sequence[nextPose][2];
+					global_pose[3] = pose_sequence[nextPose][3];
 					
 					bool same_x = fabs(previous_pose[0] - global_pose[0]) < 1e-6;
 					bool same_y = fabs(previous_pose[1] - global_pose[1]) < 1e-6;
@@ -134,11 +129,12 @@ public: /* ros */
 						currentState = STATE_MOVING;
 					}
 					open_grippers = false;
+					retrieving_object = false;
 					nextPose += 1;
 				}
 				else{
-					ROS_INFO("Taking a new position");
-					currentState = STATE_GO_HOME;
+					ROS_INFO("RETRIEVING OBJECTS DONE.");
+					currentState = STATE_END;
 				}
 				break;
 
@@ -148,17 +144,19 @@ public: /* ros */
 					currentState = STATE_STOP;
 					hasReachedGoal = false;
 					arrival_time = ros::Time::now();
+					if ((!open_grippers) && (fabs(pose_sequence[nextPose-1][3]-1) < 1e-6)){
+						if(retrieving_object){
+							break;
+						}
+						objectPosition_trial(nextPose-1);
+						open_grippers = true;
+						currentState = STATE_OPEN_GRIPPERS;
+					}
 				}
 				if(emergency_break){
 					currentState = STATE_MOVING_BACK;
 					emergency_break = false;
 					arrival_time = ros::Time::now();
-				}
-				if ((!open_grippers) && (fabs(pose_sequence[nextPose-1][3]-1) < 1e-6)){
-						//objectPosition();
-						objectPosition_trial(nextPose-1);
-						open_grippers = true;
-						currentState = STATE_OPEN_GRIPPERS;
 				}
 				break;
 
@@ -167,6 +165,8 @@ public: /* ros */
 				global_pose[0] = 0.225;
 				global_pose[1] = 0.225;
 				global_pose[2] = 0.0;
+				open_grippers = false;
+				retrieving_object = true;
 				currentState = STATE_MOVING;
 				break;
 
@@ -176,13 +176,13 @@ public: /* ros */
 					currentState = STATE_STOP;
 					has_reached_orientation = false;
 					arrival_time = ros::Time::now();
-				}
-				if ((!open_grippers) && (fabs(pose_sequence[nextPose-1][3]-1) < 1e-6)){
-						//objectPosition();
+					if ((!open_grippers) && (fabs(pose_sequence[nextPose-1][3]-1) < 1e-6)){
 						objectPosition_trial(nextPose-1);
 						open_grippers = true;
 						currentState = STATE_OPEN_GRIPPERS;
+					}
 				}
+				
 				break;
 
 			case STATE_STOP:	//Stop
@@ -195,6 +195,9 @@ public: /* ros */
 					}
 					else{
 						currentState = STATE_NEXT_POSE;
+					}
+					if(retrieving_object){
+						currentState = STATE_OPEN_GRIPPERS;
 					}
 					
 				}
@@ -210,10 +213,15 @@ public: /* ros */
             		velocity_msg.angular.z = 0; // 1.2 is a okay value
             		pub_velocity.publish(velocity_msg);
 					currentState = STATE_MOVING;
+					if(go_back_to_release){
+						currentState = STATE_CLOSE_GRIPPERS;
+						go_back_to_release = false;
+						print_again = true;
+					}
 				}
 				else{
 					velocity_msg.linear.x = -0.2;
-            		velocity_msg.angular.z = 0.2; // 1.2 is a okay value
+            		velocity_msg.angular.z = -0.2; // 1.2 is a okay value
             		pub_velocity.publish(velocity_msg);
 				}
 				break;
@@ -223,6 +231,11 @@ public: /* ros */
         		msg.data = 1;
         		pub_grab.publish(msg);
 				currentState = STATE_MOVING;
+				if(retrieving_object){
+					currentState = STATE_MOVING_BACK;
+					go_back_to_release = true;
+					arrival_time = ros::Time::now();
+				}
 				break;
 			
 			case STATE_CLOSE_GRIPPERS:
@@ -231,7 +244,19 @@ public: /* ros */
 				msg.data = 0;
             	pub_grab.publish(msg);
 				currentState = STATE_GO_HOME;
+				if(retrieving_object){
+					retrieving_object = false;
+					currentState = STATE_NEXT_POSE;
+				}
         		
+				break;
+
+			case STATE_END:	//Stop
+				ROS_INFO("END");
+
+				velocity_msg.linear.x = 0;
+				velocity_msg.angular.z = 0;
+				pub_velocity.publish(velocity_msg);
 				break;
 		}
 		
@@ -244,7 +269,7 @@ public: /* ros */
 		bool same_point = (same_x && same_y && same_angle);
 		ROS_INFO("print_again %d", print_again);
 		if((!same_point)||(print_again)){
-			ROS_INFO("PUBLISH");
+			ROS_INFO("PUBLISH point %f %f %f", global_pose[0], global_pose[1], global_pose[2]);
 			global_desired_pose.x = global_pose[0];
 			global_desired_pose.y = global_pose[1];
 			global_desired_pose.theta = global_pose[2];
@@ -391,8 +416,9 @@ private:
 	
 	bool hasReachedGoal;
 	bool has_reached_orientation;
-	// bool has_reached_grab;
 	bool open_grippers;
+	bool retrieving_object;
+	bool go_back_to_release;
 	bool emergency_break;
 	bool print_again;
 

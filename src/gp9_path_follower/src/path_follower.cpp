@@ -243,7 +243,7 @@ public:
 
 		pub_velocity.publish(velocity_msg);
 		pub_close_enough.publish(close_enough_msg);
-		// ROS_INFO("New info? %d", newInfoAboutGoal);
+		ROS_INFO("New info? %d", newInfoAboutGoal);
 
 		if(newInfoAboutGoal){
 		 	pub_has_reached_goal.publish(has_reached_goal_msg);
@@ -422,7 +422,7 @@ public:
 
 	void hasReachedGoal() {
 		double dist_to_goal = sqrt(pow(pose_goal[0] - pose[0], 2) + pow(pose_goal[1] - pose[1], 2));
-		bool close_enough_to_goal = dist_to_goal < distance_threshold;
+		// bool close_enough_to_goal = dist_to_goal < distance_threshold;
 
 		if((pose_goal[0] == pose_desired[0]) && (pose_goal[1] == pose_desired[1]))
 		// if (close_enough_to_goal)

@@ -18,6 +18,7 @@
 #define STATE_ROTATING 5
 #define STATE_CLOSE_GRIPPERS 6
 #define STATE_MOVING_BACK 7
+#define STATE_END 8
 
 class StateMachine{
 
@@ -136,8 +137,8 @@ public: /* ros */
 					nextPose += 1;
 				}
 				else{
-					ROS_INFO("Taking a new position");
-					currentState = STATE_GO_HOME;
+					ROS_INFO("EXPLORATION DONE.");
+					currentState = STATE_END;
 				}
 				break;
 
@@ -222,6 +223,14 @@ public: /* ros */
             		velocity_msg.angular.z = -0.2; // 1.2 is a okay value
             		pub_velocity.publish(velocity_msg);
 				}
+				break;
+
+			case STATE_END:	//Stop
+				ROS_INFO("END");
+
+				velocity_msg.linear.x = 0;
+				velocity_msg.angular.z = 0;
+				pub_velocity.publish(velocity_msg);
 				break;
 		}
 		
