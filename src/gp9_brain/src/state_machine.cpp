@@ -91,7 +91,7 @@ public: /* ros */
 		// sub_emergency_break_bt = nh.subscribe<geometry_msgs::Pose2D>("/findBattery", 1, &StateMachine::emergencyBreakCallBack_bt, this);
 		sub_detection = nh.subscribe<std_msgs::Bool>("/findObject", 1, &StateMachine::detectionCallBack, this);
 
-	}
+	} 
 
 	void hasReachedGoalCallBack(const std_msgs::Bool::ConstPtr& hasReachedGoal_msg) {
 		hasReachedGoal = hasReachedGoal_msg->data;
@@ -228,7 +228,7 @@ public: /* ros */
 				}
 				else{
 					velocity_msg.linear.x = -0.2;
-            		velocity_msg.angular.z = -0.2; // 1.2 is a okay value
+            		velocity_msg.angular.z = -0.3; // 1.2 is a okay value
             		pub_velocity.publish(velocity_msg);
 				}
 				break;
