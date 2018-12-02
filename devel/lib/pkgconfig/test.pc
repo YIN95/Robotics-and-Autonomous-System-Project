@@ -1,8 +1,8 @@
-prefix=/home/ras29/catkin_ws/devel
+prefix=/home/ras19/catkin_ws/devel
 
 Name: test
 Description: Description of test
 Version: 0.0.0
 Cflags: 
-Libs: -L/home/ras29/catkin_ws/devel/lib 
+Libs: -L/home/ras19/catkin_ws/devel/lib 
 Requires: 
