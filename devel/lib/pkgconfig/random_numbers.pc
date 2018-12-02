@@ -1,8 +1,8 @@
-prefix=/home/ras29/catkin_ws/devel
+prefix=/home/ras19/catkin_ws/devel
 
 Name: random_numbers
 Description: Description of random_numbers
 Version: 0.3.2
-Cflags: -I/home/ras29/catkin_ws/src/random_numbers/include
-Libs: -L/home/ras29/catkin_ws/devel/lib -lrandom_numbers
+Cflags: -I/home/ras19/catkin_ws/src/random_numbers/include
+Libs: -L/home/ras19/catkin_ws/devel/lib -lrandom_numbers
 Requires: 

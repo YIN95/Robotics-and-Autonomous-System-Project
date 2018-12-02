@@ -67,14 +67,14 @@ set(ras_lab1_distance_sensor_CONFIG_INCLUDED TRUE)
 
 # set variables for source/devel/install prefixes
 if("TRUE" STREQUAL "TRUE")
-  set(ras_lab1_distance_sensor_SOURCE_PREFIX /home/ras29/catkin_ws/src/ras_lab1/ras_lab1_distance_sensor)
-  set(ras_lab1_distance_sensor_DEVEL_PREFIX /home/ras29/catkin_ws/devel)
+  set(ras_lab1_distance_sensor_SOURCE_PREFIX /home/ras19/catkin_ws/src/ras_lab1/ras_lab1_distance_sensor)
+  set(ras_lab1_distance_sensor_DEVEL_PREFIX /home/ras19/catkin_ws/devel)
   set(ras_lab1_distance_sensor_INSTALL_PREFIX "")
   set(ras_lab1_distance_sensor_PREFIX ${ras_lab1_distance_sensor_DEVEL_PREFIX})
 else()
   set(ras_lab1_distance_sensor_SOURCE_PREFIX "")
   set(ras_lab1_distance_sensor_DEVEL_PREFIX "")
-  set(ras_lab1_distance_sensor_INSTALL_PREFIX /home/ras29/catkin_ws/install)
+  set(ras_lab1_distance_sensor_INSTALL_PREFIX /home/ras19/catkin_ws/install)
   set(ras_lab1_distance_sensor_PREFIX ${ras_lab1_distance_sensor_INSTALL_PREFIX})
 endif()
 
@@ -91,9 +91,9 @@ endif()
 # flag project as catkin-based to distinguish if a find_package()-ed project is a catkin project
 set(ras_lab1_distance_sensor_FOUND_CATKIN_PROJECT TRUE)
 
-if(NOT "/home/ras29/catkin_ws/src/ras_lab1/ras_lab1_distance_sensor/include;/usr/include/eigen3;/opt/ros/kinetic/include " STREQUAL " ")
+if(NOT "/home/ras19/catkin_ws/src/ras_lab1/ras_lab1_distance_sensor/include;/usr/include/eigen3;/opt/ros/kinetic/include " STREQUAL " ")
   set(ras_lab1_distance_sensor_INCLUDE_DIRS "")
-  set(_include_dirs "/home/ras29/catkin_ws/src/ras_lab1/ras_lab1_distance_sensor/include;/usr/include/eigen3;/opt/ros/kinetic/include")
+  set(_include_dirs "/home/ras19/catkin_ws/src/ras_lab1/ras_lab1_distance_sensor/include;/usr/include/eigen3;/opt/ros/kinetic/include")
   if(NOT " " STREQUAL " ")
     set(_report "Check the issue tracker '' and consider creating a ticket if the problem has not been reported yet.")
   elseif(NOT "http://wiki.ros.org/ras_lab1_distance_sensor " STREQUAL " ")
@@ -110,7 +110,7 @@ if(NOT "/home/ras29/catkin_ws/src/ras_lab1/ras_lab1_distance_sensor/include;/usr
         message(FATAL_ERROR "Project 'ras_lab1_distance_sensor' specifies '${idir}' as an include dir, which is not found.  It does not exist in '${include}'.  ${_report}")
       endif()
     else()
-      message(FATAL_ERROR "Project 'ras_lab1_distance_sensor' specifies '${idir}' as an include dir, which is not found.  It does neither exist as an absolute directory nor in '/home/ras29/catkin_ws/src/ras_lab1/ras_lab1_distance_sensor/${idir}'.  ${_report}")
+      message(FATAL_ERROR "Project 'ras_lab1_distance_sensor' specifies '${idir}' as an include dir, which is not found.  It does neither exist as an absolute directory nor in '/home/ras19/catkin_ws/src/ras_lab1/ras_lab1_distance_sensor/${idir}'.  ${_report}")
     endif()
     _list_append_unique(ras_lab1_distance_sensor_INCLUDE_DIRS ${include})
   endforeach()
@@ -129,7 +129,7 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
-    foreach(path /home/ras29/catkin_ws/devel/lib;/home/ras29/catkin_ws/devel/lib;/opt/ros/kinetic/lib)
+    foreach(path /home/ras19/catkin_ws/devel/lib;/home/ras19/catkin_ws/devel/lib;/opt/ros/kinetic/lib)
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
