@@ -8,7 +8,7 @@ from matplotlib.lines import Line2D
 def initpara():
     alpha = 0.99
     t = (1,600)
-    markovlen = 3000
+    markovlen = 1000
  
     return alpha,t,markovlen
 
@@ -65,7 +65,7 @@ def tsp(path_to_map, robot_radius, grid):
             for i in range(num-1):
                 valuenew += distmat[solutionnew[i]][solutionnew[i+1]]
             valuenew += distmat[solutionnew[0]][solutionnew[num-1]]
-        # print (valuenew)
+            print (valuenew)
             if valuenew<valuecurrent:       
                 valuecurrent = valuenew
                 solutioncurrent = solutionnew.copy()
@@ -81,11 +81,12 @@ def tsp(path_to_map, robot_radius, grid):
                     solutionnew = solutioncurrent.copy()
         t = alpha*t
         result.append(valuebest)
+    print(valuebest)
     ShortestPath = []
-    for index in solutionnew:
+    for index in solutionbest:
         ShortestPath.append(list(A[index]))
         
-    return A, solutionnew, ShortestPath
+    return A, solutionbest, ShortestPath
 
 def visualize(Index, Path):
     figure, ax = plt.subplots()
