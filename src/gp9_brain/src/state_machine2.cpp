@@ -216,7 +216,7 @@ public: /* ros */
 					if(go_back_to_release){
 						currentState = STATE_CLOSE_GRIPPERS;
 						go_back_to_release = false;
-						print_again = true;
+						print_again = false;
 					}
 				}
 				else{
