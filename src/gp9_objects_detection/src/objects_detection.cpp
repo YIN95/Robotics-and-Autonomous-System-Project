@@ -130,7 +130,7 @@ bool ObjectDetection::detectBarrier(bool detect){
     pose_tobattery.theta = robot_theta;
     ROS_INFO("|||||MinHeight: %d", height);
     if (detect){
-        if ((height < 135)){
+        if ((height < 100)){
             ROS_INFO("[WARNING] Obstacle");
             std_msgs::String msg;
             msg.data = "battery";
@@ -147,7 +147,7 @@ bool ObjectDetection::detectBarrier(bool detect){
         if (height < 70){
             ROS_INFO("[WARNING] Obstacle or Wall !!!!!!");
             std_msgs::String msg;
-            msg.data = "battery or wall";
+            msg.data = "obstacle";
             pub_speak.publish(msg);
             String result = "Obstacle";
             Point org(50, 30);
@@ -156,7 +156,7 @@ bool ObjectDetection::detectBarrier(bool detect){
             pub_findBattery.publish(pose_tobattery);
             return true;
         }
-        if ((height > 866)){
+        if ((height == 999)){
             pose_tobattery.x = robot_x;
             pose_tobattery.y = robot_y;
             ROS_INFO("[WARNING] Obstacle");
