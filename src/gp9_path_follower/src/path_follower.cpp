@@ -138,6 +138,7 @@ public:
 		brain_state = brain_msg->data;
 		if (brain_state == 7){ //The brain has solved the emergency break
 			stopped = false;
+			battery_stopped = false;
 		}
 	}
 

@@ -46,7 +46,7 @@ ObjectDetection::ObjectDetection(){
     pose_pub = nh.advertise<geometry_msgs::Pose2D>("/global_pose/object", 1);
     pub_speak = nh.advertise<std_msgs::String>("/espeak/string", 30);
     pub_evidence = nh.advertise<ras_msgs::RAS_Evidence>("/evidence", 5);
-    pub_findBattery = nh.advertise<geometry_msgs::Pose2D>("/findBattery_not", 5);
+    pub_findBattery = nh.advertise<geometry_msgs::Pose2D>("/findBattery", 5);
     pub_findObject = nh.advertise<std_msgs::Bool>("/findObject", 1);
     //pub_classification_target = nh.advertise<geometry_msgs::Pose2D>("/classification/target", 1);
 
@@ -144,16 +144,18 @@ bool ObjectDetection::detectBarrier(bool detect){
                 putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 255, 0 ), 4, 8, 0);
                 ROS_INFO("BATTERY");
                 pub_findBattery.publish(pose_tobattery);
+                arrival_time2 = ros::Time::now();
                 return true;
 
 
-                arrival_time2 = ros::Time::now();
+                
             }
             
         }
     }
     else{
         if (height < 70){
+            current_time2 = ros::Time::now();
             if ((current_time2 - arrival_time2).toSec() > 10){
                 ROS_INFO("[WARNING] Obstacle or Wall !!!!!!");
                 std_msgs::String msg;
@@ -164,14 +166,16 @@ bool ObjectDetection::detectBarrier(bool detect){
                 putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 255, 0 ), 4, 8, 0);
                 ROS_INFO("BATTERY");
                 pub_findBattery.publish(pose_tobattery);
+                arrival_time2 = ros::Time::now();
+                
                 return true;
 
                 
-                arrival_time2 = ros::Time::now();
             }
             
         }
         if ((height == 999)){
+            current_time2 = ros::Time::now();
             if ((current_time2 - arrival_time2).toSec() > 10){
                 pose_tobattery.x = robot_x;
                 pose_tobattery.y = robot_y;
@@ -184,12 +188,15 @@ bool ObjectDetection::detectBarrier(bool detect){
                 putText(cv_rgb_ptr->image, result, org, 1, 2.5, Scalar( 255, 255, 0 ), 4, 8, 0);
                 ROS_INFO("BATTERY");
                 pub_findBattery.publish(pose_tobattery);
+                arrival_time2 = ros::Time::now();
+
                 return true;
 
-                arrival_time2 = ros::Time::now();
             }
            
         }
+        // double xxx = (current_time2 - arrival_time2).toSec();
+        // ROS_INFO("current time: %f", xxx);
     }
     return false;
 }
