@@ -49,6 +49,9 @@ public:
 
     void brainStateCallBack(const std_msgs::Int32::ConstPtr& brain_msg) {
 		brain_state = brain_msg->data;
+        if (brain_state == 7){ //The brain has solved the emergency break
+			stopped = false;
+		}
 	}
 
 	void poseCallBack(const geometry_msgs::Pose2D::ConstPtr& pose_msg) {
@@ -86,14 +89,14 @@ public:
 		double sign = error_angle / fabs(error_angle);
 
         if (fabs(error_angle) > angle_threshold) {
-            ROS_INFO("Giving signal to motor");
+            ROS_INFO("Giving signal to motor - ROTATION NODE");
             velocity_msg.linear.x = 0;
             velocity_msg.angular.z = sign * 1.2; // 1.2 is a okay value
             pub_velocity.publish(velocity_msg);
         }
 
         else {
-            ROS_INFO("stopping, i.e. close enough");
+            ROS_INFO("stopping, i.e. close enough  - GRAB NODE");
             stop();
         }
 

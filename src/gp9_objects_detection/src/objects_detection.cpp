@@ -44,7 +44,7 @@ ObjectDetection::ObjectDetection(){
     pose_pub = nh.advertise<geometry_msgs::Pose2D>("/global_pose/object", 1);
     pub_speak = nh.advertise<std_msgs::String>("/espeak/string", 30);
     pub_evidence = nh.advertise<ras_msgs::RAS_Evidence>("/evidence", 5);
-    pub_findBattery = nh.advertise<geometry_msgs::Pose2D>("/findBattery", 5);
+    pub_findBattery = nh.advertise<geometry_msgs::Pose2D>("/findBattery_not", 5);
     pub_findObject = nh.advertise<std_msgs::Bool>("/findObject", 1);
     //pub_classification_target = nh.advertise<geometry_msgs::Pose2D>("/classification/target", 1);
 

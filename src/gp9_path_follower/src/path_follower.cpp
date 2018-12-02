@@ -124,17 +124,21 @@ public:
 
 		close_enough_msg.data = false;
 		has_reached_goal_msg.data = false;
+		emergency_break_msg.data = false;
 		
 		
 	}
 
 	void batteryCallback(const geometry_msgs::Pose2D::ConstPtr& battery_pos) {
 		ROS_INFO("In callback of battery");
-		battery_stopped = true;
+		battery_stopped = true;	//TODO: switch to false again!!!somewhere
 	}
 
 	void brainStateCallBack(const std_msgs::Int32::ConstPtr& brain_msg) {
 		brain_state = brain_msg->data;
+		if (brain_state == 7){ //The brain has solved the emergency break
+			stopped = false;
+		}
 	}
 
 	void lidarCallBack(const sensor_msgs::LaserScan::ConstPtr& lidar_msg) {
@@ -239,7 +243,7 @@ public:
 
 		pub_velocity.publish(velocity_msg);
 		pub_close_enough.publish(close_enough_msg);
-		// ROS_INFO("New info? %d", newInfoAboutGoal);
+		//ROS_INFO("New info? %d", newInfoAboutGoal);
 
 		if(newInfoAboutGoal){
 		 	pub_has_reached_goal.publish(has_reached_goal_msg);
@@ -418,7 +422,7 @@ public:
 
 	void hasReachedGoal() {
 		double dist_to_goal = sqrt(pow(pose_goal[0] - pose[0], 2) + pow(pose_goal[1] - pose[1], 2));
-		bool close_enough_to_goal = dist_to_goal < distance_threshold;
+		// bool close_enough_to_goal = dist_to_goal < distance_threshold;
 
 		if((pose_goal[0] == pose_desired[0]) && (pose_goal[1] == pose_desired[1]))
 		// if (close_enough_to_goal)
@@ -443,6 +447,8 @@ public:
 		velocity_msg.linear.x = 0;
 		velocity_msg.angular.z = 0;
 		stopped = true;
+		emergency_break_msg.data = true;
+		pub_emergency_break.publish(emergency_break_msg);
         ROS_INFO("Has Stopped");
 	}
 
@@ -516,6 +522,7 @@ private:
 
 	std_msgs::Bool close_enough_msg;
 	std_msgs::Bool has_reached_goal_msg;
+	std_msgs::Bool emergency_break_msg;
 	geometry_msgs::Twist velocity_msg;
 
 	std::vector<double> laser_distances;
