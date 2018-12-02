@@ -7,8 +7,8 @@ from matplotlib.lines import Line2D
 
 def initpara():
     alpha = 0.99
-    t = (1,300)
-    markovlen = 5000
+    t = (1,600)
+    markovlen = 3000
  
     return alpha,t,markovlen
 
