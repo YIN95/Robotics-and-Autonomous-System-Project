@@ -395,7 +395,9 @@ class Mapper{
             Segment segment;
             std::deque<Segment> newWalls;
             int numWalls_ = segments.size();
-            for (int i = 0; i < numWalls_; i++)
+            std::cout<<"Num Walls : "<<numWalls_<<std::endl;
+            for (int i = 0; i < numWalls_; i++){
+                std::cout<<"Inside : "<<std::endl;
                 segment = Segment(segments[i]);
 
                 segment.print();
@@ -403,6 +405,8 @@ class Mapper{
                     
                 wall.print();
                 newWalls.push_back(wall);
+            }
+                
 
             return newWalls;
         }
@@ -410,8 +414,10 @@ class Mapper{
 
         Segment getWall(Segment &segment, double neighborDistanceThreshold, int numNeighborsThreshold) {
             std::deque<Point> points = segment.getInliers();
+            std::cout<<"Number of inliers : "<<points.size()<<std::endl;
 
             std::deque<Point> clusteredPoints = findCluster(points, neighborDistanceThreshold, numNeighborsThreshold);
+            std::cout<<"Number of clustered points : "<<clusteredPoints.size()<<std::endl;
 
             Segment wall = Segment(RANSAC(clusteredPoints));
             return wall;
@@ -423,8 +429,9 @@ class Mapper{
             std::deque<Point> pointsInCluster;
             for (int i = 0; i < numPoints; i++) {
                 Point point = Point(points[i]);
-                int numNeighbors = point.numberOfNeighbors(points, neighborDistanceThreshold) - 1; // remove point itself as neighbor
-                if (numNeighbors > numNeighborsThreshold) pointsInCluster.push_back(point);
+                int numNeighbors = point.numberOfNeighbors(points, neighborDistanceThreshold); // remove point itself as neighbor
+                std::cout<<"Number of Neighbors : "<<numNeighbors<<std::endl;
+                if (numNeighbors >= numNeighborsThreshold) pointsInCluster.push_back(point);
             }
 
             return pointsInCluster;
@@ -466,10 +473,12 @@ int main(int argc, char** argv) {
      std::cout << "Number of segments : " << sg << std::endl;
     for(int i = 0; i < sg; i++){
         segm[i].print();
-        segm[i].printInliers();
+        // segm[i].printInliers();
         std::cout << "==============================================================" << std::endl;
 
     }
+
+    //IF SEGMENT (0,0) -> NOT ENOUGH POINTS
 
 	// while (sl.nh.ok()) {
 	// 	ros::spinOnce();
