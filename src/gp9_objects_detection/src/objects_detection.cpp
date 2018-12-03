@@ -263,8 +263,11 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                 barreryFlag = detectBarrier(true);
                 if (color_result > 0){
                     // publish to a topic when detect an object. 
+                    
                     current_time = ros::Time::now();
                     if ((current_time - arrival_time).toSec() > 10){
+
+
                         std_msgs::Bool msg_findobj;
                         msg_findobj.data = true;
                         pub_findObject.publish(msg_findobj);
@@ -304,6 +307,11 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                     
                     if ((now_see > 0)){
                         showCresult();
+
+                        std_msgs::String msg;
+                        msg.data = "I see an object";
+                        pub_speak.publish(msg);
+                        
                         bool is_new_object = check_pre_object(now_object);
                         bool is_new_object_p = check_pre_object_by_position(now_object, pose.x, pose.y);
                         if (is_new_object_p && (now_object>0) && (now_object<30)){

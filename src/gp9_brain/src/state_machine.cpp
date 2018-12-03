@@ -210,6 +210,9 @@ public: /* ros */
 					currentState = STATE_MOVING;
 				}
 				if(home == true){
+					std_msgs::String msg;
+					msg.data = "Start";
+					pub_speak.publish(msg);
 					home = false;
 					global_pose[0] = start_x;
 					global_pose[1] = start_y;
