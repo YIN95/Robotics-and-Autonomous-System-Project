@@ -195,6 +195,7 @@ public: /* ros */
 					std_msgs::Bool msg_timeover;
 					msg_timeover.data = true;
 					pub_timeover.publish(msg_timeover);
+					currentState = STATE_END;
 				}
 				break;
 
