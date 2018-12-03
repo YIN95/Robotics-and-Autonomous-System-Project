@@ -378,7 +378,7 @@ public: /* ros */
 				pose_sequence[point_count][2] = 1.57;
 				pose_sequence[point_count][3] = 0;
 
-				ROS_INFO("[Explore Pose] x:%f, y:%f, theta:%f, flag:%f", pose_sequence[point_count][0], pose_sequence[point_count][1], pose_sequence[point_count][2], pose_sequence[point_count][3]);
+				// ROS_INFO("[Explore Pose] x:%f, y:%f, theta:%f, flag:%f", pose_sequence[point_count][0], pose_sequence[point_count][1], pose_sequence[point_count][2], pose_sequence[point_count][3]);
 				
 				point_count += 1;
 			}
@@ -386,7 +386,7 @@ public: /* ros */
 		
 	}
 
-
+ 
 private:
 	int currentState;
 
