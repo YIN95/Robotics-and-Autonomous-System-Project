@@ -103,7 +103,7 @@ def visualize(Index, Path):
 if __name__ == '__main__':
     path_to_map = '/home/ras19/catkin_ws/src/gp9_path_planning/maps/maze2018.txt'
     robot_radius = 0.16
-    grid = [2.41, 2.41, 6, 6]
+    grid = [2.41, 2.41, 5, 5]
     A, ShortestIndex, ShortestPath = tsp(path_to_map, robot_radius, grid)
     print("shortest path index:")
     print(ShortestIndex)

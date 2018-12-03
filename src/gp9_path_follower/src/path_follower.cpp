@@ -342,8 +342,8 @@ public:
 		double w = PW + IW + DW;
 
 		double v;
-		double v_max = 0.35;
-		double v_min = 0.2;
+		double v_max = 0.45;
+		double v_min = 0.25;
 		double slow_dist = 0.15;
 
 		double dx = last_checkpoint[0] - pose[0];
