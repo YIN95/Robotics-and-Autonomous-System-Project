@@ -1,6 +1,10 @@
 /robot/starting_position/x: 0.225
 /robot/starting_position/y: 0.225
 /robot/starting_position/theta: 1.57
+/robot/gohome_position/x: 0.225
+/robot/gohome_position/y: 0.6
+/robot/gohome_position/theta: -1.57
+
 /robot/radius: 0.16
 
 /statemachine/stop_time: 3

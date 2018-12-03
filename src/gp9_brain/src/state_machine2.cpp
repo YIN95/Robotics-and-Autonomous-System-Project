@@ -3,6 +3,7 @@
 #include <vector>
 #include <std_msgs/Int32.h>
 #include <std_msgs/Bool.h>
+#include <std_msgs/String.h>
 #include <geometry_msgs/Pose2D.h>
 #include <geometry_msgs/Twist.h>
 #include <iostream>
@@ -29,6 +30,7 @@ public: /* ros */
 	ros::Publisher pub_globalDesiredPose;
 	ros::Publisher pub_grab;
 	ros::Publisher pub_velocity;
+	ros::Publisher pub_speak;
 
 	ros::Subscriber sub_has_reached_goal;
 	ros::Subscriber sub_has_reached_orientation;
@@ -36,7 +38,8 @@ public: /* ros */
 
 	ros::Time current_time;
     ros::Time arrival_time;
-
+	
+	bool start = true;
 
 	StateMachine(){
 		currentState = STATE_READY;
@@ -78,6 +81,7 @@ public: /* ros */
 		pub_globalDesiredPose = nh.advertise<geometry_msgs::Pose2D>("/global_desired_pose", 1);
 		pub_grab = nh.advertise<std_msgs::Int32>("/grab", 1);
 		pub_velocity = nh.advertise<geometry_msgs::Twist>("/motor_controller/velocity", 1);
+		pub_speak = nh.advertise<std_msgs::String>("/espeak/string", 30);
 
 		sub_has_reached_goal = nh.subscribe<std_msgs::Bool>("/has_reached_goal", 1, &StateMachine::hasReachedGoalCallBack, this);
 		sub_has_reached_orientation = nh.subscribe<std_msgs::Bool>("/has_reached_orientation", 1, &StateMachine::hasReachedOrientationCallBack, this);
@@ -112,6 +116,13 @@ public: /* ros */
 				break;
 
 			case STATE_NEXT_POSE: //Take A Pose
+
+				if(start){
+					std_msgs::String msg;
+					msg.data = "Start";
+					pub_speak.publish(msg);
+					start=false;
+				}
 				ROS_INFO("NEXT POSE");
 				if(nextPose < num_objects){
 					ROS_INFO("Taking a new position");
@@ -398,6 +409,7 @@ public: /* ros */
 			}
 			
 		}
+		
 
 	}
 

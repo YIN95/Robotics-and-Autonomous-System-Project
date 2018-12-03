@@ -2,6 +2,7 @@
 #include <math.h>
 #include <vector>
 #include <std_msgs/Int32.h>
+#include <std_msgs/String.h>
 #include <std_msgs/Bool.h>
 #include <geometry_msgs/Pose2D.h>
 #include <geometry_msgs/Twist.h>
@@ -29,6 +30,7 @@ public: /* ros */
 	ros::Publisher pub_currentState;
 	ros::Publisher pub_globalDesiredPose;
 	ros::Publisher pub_velocity;
+	ros::Publisher pub_speak;
 
 	ros::Subscriber sub_has_reached_goal;
 	ros::Subscriber sub_has_reached_orientation;
@@ -40,11 +42,19 @@ public: /* ros */
 	ros::Time current_time;
     ros::Time arrival_time;
 
+	bool start = true;
+	bool home = false;
+
 
 	StateMachine(){
 
 		nh.getParam("/robot/starting_position/x", start_x);
         nh.getParam("/robot/starting_position/y", start_y);
+		nh.getParam("/robot/gohome_position/x", gohome_x);
+        nh.getParam("/robot/gohome_position/y", gohome_y);
+        nh.getParam("/robot/gohome_position/theta", gohome_theta);
+
+
         nh.getParam("/robot/starting_position/theta", start_theta);
 		nh.getParam("/maze/exploration", exploration_file_path);
 		nh.getParam("/statemachine/stop_time", stop_seconds);
@@ -85,6 +95,7 @@ public: /* ros */
 		pub_currentState = nh.advertise<std_msgs::Int32>("/brain_state", 1);
 		pub_globalDesiredPose = nh.advertise<geometry_msgs::Pose2D>("/global_desired_pose", 1);
 		pub_velocity = nh.advertise<geometry_msgs::Twist>("/motor_controller/velocity", 1);
+		pub_speak = nh.advertise<std_msgs::String>("/espeak/string", 30);
 
 		sub_has_reached_goal = nh.subscribe<std_msgs::Bool>("/has_reached_goal", 1, &StateMachine::hasReachedGoalCallBack, this);
 		sub_has_reached_orientation = nh.subscribe<std_msgs::Bool>("/has_reached_orientation", 1, &StateMachine::hasReachedOrientationCallBack, this);
@@ -123,12 +134,22 @@ public: /* ros */
 	void run(){
 		switch(currentState){
 			case STATE_READY: //Needed to give time to the other nodes to listen to the topics
+				
 				readExplorePosition();  // for phase 1
 				currentState = STATE_NEXT_POSE;
+				
 				break;
 
 			case STATE_NEXT_POSE: //Take A Pose
 				ROS_INFO("NEXT POSE");
+
+				if (start){
+					std_msgs::String msg;
+					msg.data = "Start";
+					pub_speak.publish(msg);
+					start = false;
+				}
+
 				if(nextPose < num_points){
 					ROS_INFO("Taking a new position");
 					global_pose[0] = pose_sequence[nextPose][0];
@@ -321,6 +342,7 @@ public: /* ros */
 				point_count += 1;
 			}
 		}
+		
 	}
 
 
@@ -346,6 +368,7 @@ private:
 	std::vector< std::vector<double> > explore_pose_sequence;
 
 	double start_x, start_y, start_theta;
+	double gohome_x, gohome_y, gohome_theta;
 
 	bool hasReachedGoal;
 	bool has_reached_orientation;
