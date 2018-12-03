@@ -1,4 +1,9 @@
 #include <ros/ros.h>
+#include <std_msgs/Int32.h>
+#include <geometry_msgs/Pose2D.h>
+#include <std_msgs/Bool.h>
+#include <geometry_msgs/Twist.h>
+#include <sensor_msgs/LaserScan.h>
 #include <deque>
 #include <fstream>
 #include <vector>
@@ -190,16 +195,121 @@ class Segment{
 
 
 class Measurements{
+
     public:
+        ros::NodeHandle nh;
+	    ros::Subscriber sub_odom;
+	    ros::Subscriber sub_lidar;
+        ros::Subscriber sub_estimatedSpeed;
+	    ros::Subscriber sub_brain;
+        ros::Subscriber sub_emergencyBreak;
+
+        ros::Time previousWriteTimePose;
+        ros::Time previousWriteTimeLidar;
 
         Measurements(int numAngles_, double rangeThreshold_) {
+
+            secondsBetweenWrites = 2;
+            previousWriteTimePose = ros::Time::now();
+            previousWriteTimeLidar = ros::Time::now();
+
+            turning = false;;
+            standingStill = false;
+
+            brainState = -10;
+
+            sub_odom = nh.subscribe<geometry_msgs::Pose2D>("/pose", 1, &Measurements::poseCallBack, this);
+		    sub_lidar = nh.subscribe<sensor_msgs::LaserScan>("/scan", 1, &Measurements::lidarCallBack, this);
+            sub_estimatedSpeed = nh.subscribe<geometry_msgs::Twist>("/velocity_estimate", 1, &Measurements::motorSpeedCallback, this);
+		    sub_brain = nh.subscribe<std_msgs::Int32>("/brain_state", 1, &Measurements::brainStateCallBack, this);
+            sub_emergencyBreak = nh.subscribe<std_msgs::Bool>("/emergency_break", 1, &Measurements::emergencyBreakCallBack, this);
+		
+
             numAngles = numAngles_;
             rangeThreshold = rangeThreshold_;
             pathToMap = "/home/ras29/catkin_ws/src/gp9_map_representation/maps/maze_Trial.txt";
             pathToMeasurements = "/home/ras29/catkin_ws/src/gp9_mapping/measurements/updatetd_measuraments.txt";
             readMap();
-            readMeasurements();
-            fillInterestingPoints();
+            // readMeasurements();
+        }
+
+        void brainStateCallBack(const std_msgs::Int32::ConstPtr& brain_msg) {
+		    brainState = brain_msg->data;
+	    }
+
+	    void lidarCallBack(const sensor_msgs::LaserScan::ConstPtr& lidar_msg) {
+            ros::Time currentTime;
+            currentTime = ros::Time::now();
+
+            if((currentTime - previousWriteTimeLidar).toSec() > secondsBetweenWrites){
+                if(!turning){
+                    std::vector<double> ranges(numAngles, 0);
+                    int index = 0;
+                    for (int deg = 0; deg < 360; deg += 360/numAngles){
+                        double value = lidar_msg->ranges[deg];
+                        ranges[index] = value;
+                        index ++;
+                    }
+
+                    measurements.push_back(ranges);
+                    previousWriteTimeLidar = ros::Time::now();
+
+                }
+            }
+
+            if(standingStill){
+                std::vector<double> ranges(numAngles, 0);
+                int index = 0;
+                for (int deg = 0; deg < 360; deg += 360/numAngles){
+                    double value = lidar_msg->ranges[deg];
+                    ranges[index] = value;
+                    index ++;
+                }
+                measurements.push_back(ranges);
+                previousWriteTimeLidar = ros::Time::now();
+            }
+	    }
+
+	    void poseCallBack(const geometry_msgs::Pose2D::ConstPtr& pose_msg) {
+            ros::Time currentTime;
+            currentTime = ros::Time::now();
+
+            if((currentTime - previousWriteTimePose).toSec() > secondsBetweenWrites){
+                if(!turning){
+
+                    double x = pose_msg->x;
+	    	        double y = pose_msg->y;
+	    	        double theta = pose_msg->theta;
+
+                    Pose pose = Pose(x, y, theta);
+                    poses.push_back(pose);
+
+                    previousWriteTimePose = ros::Time::now();
+                }
+            }
+
+            if(standingStill){
+
+                double x = pose_msg->x;
+	    	    double y = pose_msg->y;
+	            double theta = pose_msg->theta;
+                Pose pose = Pose(x, y, theta);
+                poses.push_back(pose);
+                previousWriteTimePose = ros::Time::now();
+            }
+		    
+	    }
+
+        void emergencyBreakCallBack(const std_msgs::Bool::ConstPtr& emergencyBreak_msg) {
+		    emergencyBreak = emergencyBreak_msg->data;
+	    }
+
+        void motorSpeedCallback(const geometry_msgs::Twist::ConstPtr &msg){
+            estimatedV = msg->linear.x;
+            estimatedW = msg->angular.z;
+
+            turning = (abs(estimatedW) > 1);
+            standingStill = ((abs(estimatedW) < 1e-6) && (abs(estimatedV) < 1e-6));
         }
 
         void readMap(){
@@ -274,13 +384,21 @@ class Measurements{
         }
 
         void fillInterestingPoints(){
+
+            std::deque<std::vector<double> > currentMeasurements;
+            std::deque<Pose> currentPoses;
+            currentMeasurements = measurements;
+            currentPoses = poses;
+            measurements.clear();
+            poses.clear();
+
             std::deque<Point> measurementPositions;
             double dAngle = (3 * M_PI - M_PI) / numAngles;
 
-            int numMeasurements = measurements.size();
+            int numMeasurements = currentMeasurements.size();
             for (int i = 0; i < numMeasurements; i++) {
-                Pose pose = poses[i];
-                std::vector<double> measures = measurements[i];
+                Pose pose = currentPoses[i];
+                std::vector<double> measures = currentMeasurements[i];
                 for (int j = 0; j < numAngles; j++) {
                     double deltaAngle = M_PI + j*dAngle;
                     double range = measures[j];
@@ -309,7 +427,17 @@ class Measurements{
             }
         }
 
+        bool getEmergencyBreak(){
+            return emergencyBreak;
+        }
+
+        int getBrainState(){
+            return brainState;
+        }
+
         std::deque<Point> getInterestingPoints() {
+            fillInterestingPoints(); 
+            //TODO: Create a new istance of this in the main, not here (or in the mapper) + CHANGE THE DEFINITION OF THE FUNCTION TO RETUNR A DEQUE
             return interestingPoints;
         }
 
@@ -324,6 +452,16 @@ class Measurements{
         std::deque<Segment> walls;
         std::deque<std::vector<double> > measurements;
         std::deque<Point> interestingPoints;
+
+        int secondsBetweenWrites;
+        bool turning;
+        bool standingStill;
+        bool emergencyBreak;
+
+        int brainState;
+
+        double estimatedV;
+        double estimatedW;
 
         double minX, maxX, minY, maxY;
 
@@ -374,7 +512,6 @@ class Mapper{
                 if (numInliers < numInliersThreshold) break;
                 wallCounter++;
                 segments.push_back(segment);
-                std::cout<<std::endl;
                 int numRemainingPoints = remainingPoints.size();
                 std::deque<Point> outliers;
 
@@ -395,15 +532,9 @@ class Mapper{
             Segment segment;
             std::deque<Segment> newWalls;
             int numWalls_ = segments.size();
-            std::cout<<"Num Walls : "<<numWalls_<<std::endl;
             for (int i = 0; i < numWalls_; i++){
-                std::cout<<"Inside : "<<std::endl;
                 segment = Segment(segments[i]);
-
-                segment.print();
                 Segment wall = Segment(getWall(segment, neighborDistanceThreshold, numNeighborsThreshold));
-                    
-                wall.print();
                 newWalls.push_back(wall);
             }
                 
@@ -414,10 +545,8 @@ class Mapper{
 
         Segment getWall(Segment &segment, double neighborDistanceThreshold, int numNeighborsThreshold) {
             std::deque<Point> points = segment.getInliers();
-            std::cout<<"Number of inliers : "<<points.size()<<std::endl;
 
             std::deque<Point> clusteredPoints = findCluster(points, neighborDistanceThreshold, numNeighborsThreshold);
-            std::cout<<"Number of clustered points : "<<clusteredPoints.size()<<std::endl;
 
             Segment wall = Segment(RANSAC(clusteredPoints));
             return wall;
@@ -430,7 +559,6 @@ class Mapper{
             for (int i = 0; i < numPoints; i++) {
                 Point point = Point(points[i]);
                 int numNeighbors = point.numberOfNeighbors(points, neighborDistanceThreshold); // remove point itself as neighbor
-                std::cout<<"Number of Neighbors : "<<numNeighbors<<std::endl;
                 if (numNeighbors >= numNeighborsThreshold) pointsInCluster.push_back(point);
             }
 
@@ -444,24 +572,46 @@ class Mapper{
 
 };
 
+void writeNewWalls(std::deque<Segment> &newWalls){
+    std::fstream myfile;
+    int numNewWalls = newWalls.size();
+    myfile.open ("/home/ras29/catkin_ws/src/gp9_mapping/maze/maze_from_remap.txt", std::fstream::trunc); //std::fstream::app to append
+    if (myfile.is_open())
+    {
+        for(int i = 0; i < numNewWalls; i ++){
+            double x1 = newWalls[i].getP1().getX();
+            double y1 = newWalls[i].getP1().getY();
+            double x2 = newWalls[i].getP2().getX();
+            double y2 = newWalls[i].getP2().getY();
+            myfile << x1 << " " << y1 << " " << x2 << " " << y2 <<'\n';
+        }
+        myfile.close();
+    }
+}
+
 
 int main(int argc, char** argv) {
 
     ros::init(argc, argv, "mapper");
-    ros::NodeHandle nh;
     int control_frequency = 10;
 	ros::Rate rate(control_frequency);
 
+    ros::Time previousMapTime;
+    previousMapTime = ros::Time::now();
 
-     int numAngles = 20;
-     double rangeThreshold = 0.15;
-     double inlierDistanceThreshold = 0.03;
-     int numInliersThreshold = 15;
-     double neighborDistanceThreshold = 0.05;
-     int numNeighborsThreshold = 1;
+    int secondsBetweenRemapping = 120;
 
-     Measurements meas = Measurements(numAngles, rangeThreshold);
-     std::deque<Point> ip = meas.getInterestingPoints();
+    int numAngles = 20;
+    double rangeThreshold = 0.15;
+    double inlierDistanceThreshold = 0.04;
+    int numInliersThreshold = 15;
+    double neighborDistanceThreshold = 0.05;
+    int numNeighborsThreshold = 1;
+
+    Measurements meas = Measurements(numAngles, rangeThreshold); //NodeHandle
+
+
+    std::deque<Point> ip = meas.getInterestingPoints();
 
      int n = ip.size();
      std::cout << "Number of interesting points : " << n << std::endl;
@@ -478,13 +628,33 @@ int main(int argc, char** argv) {
 
     }
 
-    //IF SEGMENT (0,0) -> NOT ENOUGH POINTS
+	while (meas.nh.ok()) {
+        ros::Time currentMapTime;
+        currentMapTime = ros::Time::now();
 
-	// while (sl.nh.ok()) {
-	// 	ros::spinOnce();
-	// 	rate.sleep();
+        bool emergencyBreak = meas.getEmergencyBreak();
+        if(emergencyBreak){
+            std::deque<Point> interestingPoints = meas.getInterestingPoints();
+            Mapper mapper = Mapper(inlierDistanceThreshold, numInliersThreshold);
+            std::deque<Segment> segm = mapper.sequentialRANSAC(interestingPoints, neighborDistanceThreshold, numNeighborsThreshold);
+            emergencyBreak = false;
+            writeNewWalls(segm);
+            previousMapTime = ros::Time::now();
+
+        }
+
+        if((currentMapTime - previousMapTime).toSec() > secondsBetweenRemapping){
+            std::deque<Point> interestingPoints = meas.getInterestingPoints();
+            Mapper mapper = Mapper(inlierDistanceThreshold, numInliersThreshold);
+            std::deque<Segment> segm = mapper.sequentialRANSAC(interestingPoints, neighborDistanceThreshold, numNeighborsThreshold);
+            writeNewWalls(segm);
+            previousMapTime = ros::Time::now();
+        }
+
+		ros::spinOnce();
+		rate.sleep();
 		
-	// }
+	}
 
 	return 0;
 }
