@@ -1090,8 +1090,14 @@ int ObjectDetection::check_now_object(){
             // light blue
             case 6 :
                 if ((now_shape >= 0) &&(now_shape <999)){
-                    now_object = obj.Blue_Triangle;
-                    ROS_INFO("I SEE BLUE TRIANGLE");
+                    if (now_shape == obj.SHAPE_CUBE){
+                        now_object = obj.Blue_Cube;
+                        ROS_INFO("I SEE BLUE CUBE");
+                    }
+                    else{
+                        now_object = obj.Blue_Triangle;
+                        ROS_INFO("I SEE BLUE TRIANGLE");
+                    }
                 }
                 
          
@@ -1100,8 +1106,15 @@ int ObjectDetection::check_now_object(){
             // blue
             case 7 :
                 if ((now_shape >= 0) &&(now_shape <999)){
-                    now_object = obj.Blue_Cube;
-                    ROS_INFO("I SEE BLUE CUBE");
+                    if (now_shape == obj.SHAPE_CUBE){
+                        now_object = obj.Blue_Cube;
+                        ROS_INFO("I SEE BLUE CUBE");
+                    }
+                    else{
+                        now_object = obj.Blue_Triangle;
+                        ROS_INFO("I SEE BLUE TRIANGLE");
+                    }
+                    
                 }
                 
          
