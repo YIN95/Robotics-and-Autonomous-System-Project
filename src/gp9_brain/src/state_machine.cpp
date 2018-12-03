@@ -175,9 +175,16 @@ public: /* ros */
 			case STATE_MOVING:
 				ROS_INFO("MOVING");
 				if(hasReachedGoal){
-					currentState = STATE_NEXT_POSE;
-					hasReachedGoal = false;
-					arrival_time = ros::Time::now();
+					if(home == false){
+						currentState = STATE_NEXT_POSE;
+						hasReachedGoal = false;
+						arrival_time = ros::Time::now();
+					}
+					if(home == true){
+						currentState = STATE_GO_HOME;
+						hasReachedGoal = false;
+						arrival_time = ros::Time::now();
+					}
 				}
 				if(emergency_break){
 					currentState = STATE_MOVING_BACK;
@@ -195,10 +202,21 @@ public: /* ros */
 
 			case STATE_GO_HOME:	//Go Home
 				ROS_INFO("GO HOME");
-				global_pose[0] = start_x;
-				global_pose[1] = start_y;
-				global_pose[2] = M_PI/2;
-				currentState = STATE_MOVING;
+				if(home == false){
+					home = true;
+					global_pose[0] = gohome_x;
+					global_pose[1] = gohome_y;
+					global_pose[2] = gohome_theta;
+					currentState = STATE_MOVING;
+				}
+				if(home == true){
+					home = false;
+					global_pose[0] = start_x;
+					global_pose[1] = start_y;
+					global_pose[2] = start_theta;
+					currentState = STATE_MOVING;
+				}
+				
 				break;
 
 			case STATE_ROTATING:

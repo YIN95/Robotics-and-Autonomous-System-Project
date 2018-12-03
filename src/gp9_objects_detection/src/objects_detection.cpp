@@ -336,7 +336,7 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
         imshow("RESULT", cv_rgb_ptr->image);
         // char keyr = (char)waitKey(1);
         
-        // imshow("image_hsv", origin_frame_masked);
+        imshow("image_hsv", origin_frame_masked);
         cv::waitKey(3);
        
     }

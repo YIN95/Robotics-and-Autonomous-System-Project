@@ -40,8 +40,18 @@ public: /* ros */
     ros::Time arrival_time;
 	
 	bool start = true;
+	bool home = false;
 
 	StateMachine(){
+		nh.getParam("/robot/starting_position/x", start_x);
+        nh.getParam("/robot/starting_position/y", start_y);
+		nh.getParam("/robot/gohome_position/x", gohome_x);
+        nh.getParam("/robot/gohome_position/y", gohome_y);
+        nh.getParam("/robot/gohome_position/theta", gohome_theta);
+
+
+        nh.getParam("/robot/starting_position/theta", start_theta);
+
 		currentState = STATE_READY;
 		hasReachedGoal = false;
 		has_reached_orientation = false;
@@ -68,13 +78,13 @@ public: /* ros */
 		// 0 if there is nothing to grab;
 		// 1 if it is an object pose;
 
-		global_pose[0] = 0.225;
-		global_pose[1] = 0.225;
-		global_pose[2] = M_PI / 2;
+		global_pose[0] = start_x;
+		global_pose[1] = start_y;
+		global_pose[2] = start_theta;
 
-		previous_pose[0] = 0.225;
-		previous_pose[1] = 0.225;
-		previous_pose[2] = M_PI / 2;
+		previous_pose[0] = start_x;
+		previous_pose[1] = start_y;
+		previous_pose[2] = start_theta;
 
 
 		pub_currentState = nh.advertise<std_msgs::Int32>("/brain_state", 1);
@@ -173,12 +183,28 @@ public: /* ros */
 
 			case STATE_GO_HOME:	//Go Home
 				ROS_INFO("GO HOME");
-				global_pose[0] = 0.225;
-				global_pose[1] = 0.225;
-				global_pose[2] = 0.0;
-				open_grippers = false;
-				retrieving_object = true;
-				currentState = STATE_MOVING;
+				// global_pose[0] = 0.225;
+				// global_pose[1] = 0.225;
+				// global_pose[2] = 1.57;
+				// open_grippers = false;
+				// retrieving_object = true;
+				// currentState = STATE_MOVING;
+				if(home == false){
+					home = true;
+					global_pose[0] = gohome_x;
+					global_pose[1] = gohome_y;
+					global_pose[2] = gohome_theta;
+					currentState = STATE_MOVING;
+				}
+				if(home == true){
+					home = false;
+					global_pose[0] = start_x;
+					global_pose[1] = start_y;
+					global_pose[2] = start_theta;
+					open_grippers = false;
+					retrieving_object = true;
+					currentState = STATE_MOVING;
+				}
 				break;
 
 			case STATE_ROTATING:
@@ -205,7 +231,12 @@ public: /* ros */
 						currentState = STATE_CLOSE_GRIPPERS;
 					}
 					else{
-						currentState = STATE_NEXT_POSE;
+						if(home == false){
+							currentState = STATE_NEXT_POSE;
+						}
+						if(home == true){
+							currentState = STATE_GO_HOME;
+						}
 					}
 					if(retrieving_object){
 						currentState = STATE_OPEN_GRIPPERS;
@@ -433,6 +464,8 @@ private:
 	std::vector< std::vector<double> > pose_sequence;
 	std::vector< std::vector<double> > obj_pose_sequence;
 
+	double start_x, start_y, start_theta;
+	double gohome_x, gohome_y, gohome_theta;
 	
 	bool hasReachedGoal;
 	bool has_reached_orientation;
