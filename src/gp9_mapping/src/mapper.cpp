@@ -223,14 +223,9 @@ class Measurements{
             sub_estimatedSpeed = nh.subscribe<geometry_msgs::Twist>("/velocity_estimate", 1, &Measurements::motorSpeedCallback, this);
 		    sub_brain = nh.subscribe<std_msgs::Int32>("/brain_state", 1, &Measurements::brainStateCallBack, this);
             sub_emergencyBreak = nh.subscribe<std_msgs::Bool>("/emergency_break", 1, &Measurements::emergencyBreakCallBack, this);
-		
 
             numAngles = numAngles_;
             rangeThreshold = rangeThreshold_;
-            pathToMap = "/home/ras29/catkin_ws/src/gp9_map_representation/maps/maze_Trial.txt";
-            pathToMeasurements = "/home/ras29/catkin_ws/src/gp9_mapping/measurements/updatetd_measuraments.txt";
-            readMap();
-            // readMeasurements();
         }
 
         void brainStateCallBack(const std_msgs::Int32::ConstPtr& brain_msg) {
@@ -312,7 +307,7 @@ class Measurements{
             standingStill = ((abs(estimatedW) < 1e-6) && (abs(estimatedV) < 1e-6));
         }
 
-        void readMap(){
+        void readMap(std::string pathToMap){
             std::fstream fin(pathToMap.c_str());
             if (fin){
                 double x1, y1, x2, y2;
@@ -383,8 +378,9 @@ class Measurements{
             int numberOfPoses = poses.size();
         }
 
-        void fillInterestingPoints(){
+        std::deque<Point> getInterestingPoints(){
 
+            std::deque<Point> interestingPoints;
             std::deque<std::vector<double> > currentMeasurements;
             std::deque<Pose> currentPoses;
             currentMeasurements = measurements;
@@ -425,6 +421,7 @@ class Measurements{
                     }
                 }
             }
+            return interestingPoints;
         }
 
         bool getEmergencyBreak(){
@@ -433,12 +430,6 @@ class Measurements{
 
         int getBrainState(){
             return brainState;
-        }
-
-        std::deque<Point> getInterestingPoints() {
-            fillInterestingPoints(); 
-            //TODO: Create a new istance of this in the main, not here (or in the mapper) + CHANGE THE DEFINITION OF THE FUNCTION TO RETUNR A DEQUE
-            return interestingPoints;
         }
 
     private:
@@ -451,7 +442,6 @@ class Measurements{
         std::deque<Pose> poses;
         std::deque<Segment> walls;
         std::deque<std::vector<double> > measurements;
-        std::deque<Point> interestingPoints;
 
         int secondsBetweenWrites;
         bool turning;
@@ -572,10 +562,12 @@ class Mapper{
 
 };
 
-void writeNewWalls(std::deque<Segment> &newWalls){
+void writeNewWalls(std::deque<Segment> &newWalls, std::string pathToUpdatedMap){
+    
+    const char* pathToMaze = pathToUpdatedMap.c_str();
     std::fstream myfile;
     int numNewWalls = newWalls.size();
-    myfile.open ("/home/ras29/catkin_ws/src/gp9_mapping/maze/maze_from_remap.txt", std::fstream::trunc); //std::fstream::app to append
+    myfile.open (pathToMaze, std::fstream::app); //std::fstream::trunc to delete and rewrite
     if (myfile.is_open())
     {
         for(int i = 0; i < numNewWalls; i ++){
@@ -597,7 +589,9 @@ int main(int argc, char** argv) {
 	ros::Rate rate(control_frequency);
 
     ros::Time previousMapTime;
-    previousMapTime = ros::Time::now();
+    previousMapTime = ros::Time::now(); 
+
+    ros::Publisher pub_updateMap;
 
     int secondsBetweenRemapping = 120;
 
@@ -609,36 +603,35 @@ int main(int argc, char** argv) {
     int numNeighborsThreshold = 1;
 
     Measurements meas = Measurements(numAngles, rangeThreshold); //NodeHandle
+    pub_updateMap = meas.nh.advertise<std_msgs::Bool>("/update_map", 1);
 
+    std::string pathToMap;
+    std::string pathToUpdatedMap;
 
-    std::deque<Point> ip = meas.getInterestingPoints();
-
-     int n = ip.size();
-     std::cout << "Number of interesting points : " << n << std::endl;
-
-     Mapper mapper = Mapper(inlierDistanceThreshold, numInliersThreshold);
-     std::deque<Segment> segm = mapper.sequentialRANSAC(ip, neighborDistanceThreshold, numNeighborsThreshold);
-
-     int sg = segm.size();
-     std::cout << "Number of segments : " << sg << std::endl;
-    for(int i = 0; i < sg; i++){
-        segm[i].print();
-        // segm[i].printInliers();
-        std::cout << "==============================================================" << std::endl;
-
-    }
+    meas.nh.getParam("/maze/path", pathToMap);
+    meas.nh.getParam("/maze/path_updated", pathToUpdatedMap);
 
 	while (meas.nh.ok()) {
         ros::Time currentMapTime;
         currentMapTime = ros::Time::now();
 
+        meas.readMap(pathToMap);
+
         bool emergencyBreak = meas.getEmergencyBreak();
         if(emergencyBreak){
             std::deque<Point> interestingPoints = meas.getInterestingPoints();
             Mapper mapper = Mapper(inlierDistanceThreshold, numInliersThreshold);
-            std::deque<Segment> segm = mapper.sequentialRANSAC(interestingPoints, neighborDistanceThreshold, numNeighborsThreshold);
+            std::deque<Segment> newWalls = mapper.sequentialRANSAC(interestingPoints, neighborDistanceThreshold, numNeighborsThreshold);
             emergencyBreak = false;
-            writeNewWalls(segm);
+            int numNewWalls = newWalls.size();
+            if(numNewWalls > 0){
+                writeNewWalls(newWalls, pathToMap);
+                std_msgs::Bool updateMap;
+                updateMap.data = true;
+                pub_updateMap.publish(updateMap);
+                pathToMap = pathToUpdatedMap;
+
+            }
             previousMapTime = ros::Time::now();
 
         }
@@ -646,11 +639,17 @@ int main(int argc, char** argv) {
         if((currentMapTime - previousMapTime).toSec() > secondsBetweenRemapping){
             std::deque<Point> interestingPoints = meas.getInterestingPoints();
             Mapper mapper = Mapper(inlierDistanceThreshold, numInliersThreshold);
-            std::deque<Segment> segm = mapper.sequentialRANSAC(interestingPoints, neighborDistanceThreshold, numNeighborsThreshold);
-            writeNewWalls(segm);
+            std::deque<Segment> newWalls = mapper.sequentialRANSAC(interestingPoints, neighborDistanceThreshold, numNeighborsThreshold);
+            int numNewWalls = newWalls.size();
+            if(numNewWalls > 0){
+                writeNewWalls(newWalls, pathToMap);
+                std_msgs::Bool updateMap;
+                updateMap.data = true;
+                pub_updateMap.publish(updateMap);
+                pathToMap = pathToUpdatedMap;
+            }
             previousMapTime = ros::Time::now();
         }
-
 		ros::spinOnce();
 		rate.sleep();
 		
