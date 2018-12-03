@@ -40,9 +40,6 @@ class PathPublisher:
         self.pub_global_desired_pose = rospy.Publisher('/global_desired_pose', 
                                                     Pose2D, queue_size=1)
         self.pub_path = rospy.Publisher('/path', PathList, queue_size=1)
-
-        self.pub_global_desired_pose_actual = rospy.Publisher('/global_desired_pose', 
-                                                    Pose2D, queue_size=1)
         self.position = Vertex(start_x, start_y)
         self.desired_position = Vertex(start_x, start_y)
         self.desired_angle = 0
@@ -91,10 +88,6 @@ class PathPublisher:
         rospy.loginfo("vertex")
 
         #self.graph.plot_path(path)
-
-        if (vertex_path[-1] - self.desired_position).norm() > 1e-6:
-            pose.theta = self.desired_angle
-            #self.pub_global_desired_pose_actual.publish(pose)
 
         if (vertex_path[-1] - self.desired_position).norm() > 1e-6:
             pose.theta = self.desired_angle

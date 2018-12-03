@@ -51,9 +51,8 @@ public: /* ros */
 		nh.getParam("/robot/gohome_position/x", gohome_x);
         nh.getParam("/robot/gohome_position/y", gohome_y);
         nh.getParam("/robot/gohome_position/theta", gohome_theta);
-
-
         nh.getParam("/robot/starting_position/theta", start_theta);
+		nh.getParam("/statemachine/stop_time", stop_seconds);
 
 		currentState = STATE_READY;
 		hasReachedGoal = false;
@@ -124,7 +123,7 @@ public: /* ros */
 			case STATE_READY: //Needed to give time to the other nodes to listen to the topics
                 msg.data = 0;
             	pub_grab.publish(msg);
-				readObjectPosition_trial();
+				readObjectPosition();
 				currentState = STATE_NEXT_POSE;
 				break;
 
@@ -173,7 +172,7 @@ public: /* ros */
 						if(retrieving_object){
 							break;
 						}
-						objectPosition_trial(nextPose-1);
+						objectPosition(nextPose-1);
 						open_grippers = true;
 						currentState = STATE_OPEN_GRIPPERS;
 					}
@@ -235,7 +234,7 @@ public: /* ros */
 					has_reached_orientation = false;
 					arrival_time = ros::Time::now();
 					if ((!open_grippers) && (fabs(pose_sequence[nextPose-1][3]-1) < 1e-6)){
-						objectPosition_trial(nextPose-1);
+						objectPosition(nextPose-1);
 						open_grippers = true;
 						currentState = STATE_OPEN_GRIPPERS;
 					}
@@ -360,16 +359,7 @@ public: /* ros */
 		return currentState;
 	}
 
-	void objectPosition(){
-		double distance_x;
-		double distance_y;
-		distance_x = 0.4 * cos(global_pose[2]);
-		distance_y = 0.4 * sin(global_pose[2]);
-		global_pose[0] += distance_x;
-		global_pose[1] += distance_y;
-	}
-
-	void objectPosition_trial(int obj_count){ 
+	void objectPosition(int obj_count){ 
 		//To close the grippers at desired distance from object instead of the object position
 		
 		double dx = obj_pose_sequence[obj_count][0] - global_pose[0];
@@ -390,7 +380,6 @@ public: /* ros */
 
 	}
 
-
     int countObjects(){
         std::fstream fin("/home/ras19/catkin_ws/src/transforms/src/objposition.txt");
         int num_points = 0;
@@ -404,34 +393,6 @@ public: /* ros */
     }
 
 	void readObjectPosition(){	// read the position of the object we detected in phase 1
-		std::fstream fin("/home/ras19/catkin_ws/src/transforms/src/objposition.txt");
-
-		if (fin){
-
-            double x, y, theta, xo, yo;
-			unsigned obj_count = 0;
-
-			while(fin>>x>>y>>theta>>xo>>yo){
-				
-				pose_sequence[obj_count][0] = x;
-				pose_sequence[obj_count][1] = y;
-				pose_sequence[obj_count][2] = theta;
-				pose_sequence[obj_count][3] = 0;
-                pose_sequence[obj_count+1][0] = x;
-				pose_sequence[obj_count+1][1] = y;
-				pose_sequence[obj_count+1][2] = theta;
-				pose_sequence[obj_count+1][3] = 1;
-
-				// ROS_INFO("[Object Pose] x:%f, y:%f, theta:%f, flag:%f", pose_sequence[obj_count][0], pose_sequence[obj_count][1], pose_sequence[obj_count][2], pose_sequence[obj_count][3]);
-                // ROS_INFO("counter: %d", obj_count);
-                obj_count += 2;
-			}
-			
-		}
-
-	}
-
-	void readObjectPosition_trial(){	// read the position of the object we detected in phase 1
 		std::fstream fin("/home/ras19/catkin_ws/src/transforms/src/objposition.txt");
 
 		if (fin){

@@ -96,7 +96,7 @@ public:
         }
 
         else {
-            ROS_INFO("stopping, i.e. close enough  - GRAB NODE");
+            ROS_INFO("stopping, i.e. close enough  - ROTATION NODE");
             stop();
         }
 

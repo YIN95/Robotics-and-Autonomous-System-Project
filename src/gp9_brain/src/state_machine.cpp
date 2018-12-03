@@ -32,6 +32,7 @@ public: /* ros */
 	ros::Publisher pub_velocity;
 	ros::Publisher pub_speak;
 	ros::Publisher pub_timeover;
+	ros::Publisher pub_updateMap;
 
 	ros::Subscriber sub_has_reached_goal;
 	ros::Subscriber sub_has_reached_orientation;
@@ -101,6 +102,7 @@ public: /* ros */
 		pub_globalDesiredPose = nh.advertise<geometry_msgs::Pose2D>("/global_desired_pose", 1);
 		pub_velocity = nh.advertise<geometry_msgs::Twist>("/motor_controller/velocity", 1);
 		pub_speak = nh.advertise<std_msgs::String>("/espeak/string", 30);
+		pub_updateMap = nh.advertise<std_msgs::Bool>("/update_map", 1);
 
 		sub_has_reached_goal = nh.subscribe<std_msgs::Bool>("/has_reached_goal", 1, &StateMachine::hasReachedGoalCallBack, this);
 		sub_has_reached_orientation = nh.subscribe<std_msgs::Bool>("/has_reached_orientation", 1, &StateMachine::hasReachedOrientationCallBack, this);
@@ -127,6 +129,10 @@ public: /* ros */
 
 	void emergencyBreakCallBack_bt(const geometry_msgs::Pose2D::ConstPtr& emergencyBreak_msg) {
 		emergency_break = true;
+		std_msgs::Bool updateMap;
+		updateMap.data = true;
+		pub_updateMap.publish(updateMap);
+		print_again = true;
 		ROS_INFO("In emergencyBreak Callback. battery ");
 	}
 
@@ -162,6 +168,22 @@ public: /* ros */
 					global_pose[1] = pose_sequence[nextPose][1];
 					global_pose[2] = pose_sequence[nextPose][2];
 					
+					bool same_x = fabs(previous_pose[0] - global_pose[0]) < 1e-6;
+					bool same_y = fabs(previous_pose[1] - global_pose[1]) < 1e-6;
+					if (same_x && same_y){
+						currentState = STATE_ROTATING;
+					}
+					else{
+						currentState = STATE_MOVING;
+					}
+					nextPose += 1;
+				}
+				else if(nextPose = num_points){
+					ROS_INFO("Taking home position");
+					global_pose[0] = start_x;
+					global_pose[1] = start_y;
+					global_pose[2] = M_PI/2;
+
 					bool same_x = fabs(previous_pose[0] - global_pose[0]) < 1e-6;
 					bool same_y = fabs(previous_pose[1] - global_pose[1]) < 1e-6;
 					if (same_x && same_y){
@@ -378,7 +400,7 @@ public: /* ros */
 				pose_sequence[point_count][2] = 1.57;
 				pose_sequence[point_count][3] = 0;
 
-				// ROS_INFO("[Explore Pose] x:%f, y:%f, theta:%f, flag:%f", pose_sequence[point_count][0], pose_sequence[point_count][1], pose_sequence[point_count][2], pose_sequence[point_count][3]);
+				ROS_INFO("[Explore Pose] x:%f, y:%f, theta:%f, flag:%f", pose_sequence[point_count][0], pose_sequence[point_count][1], pose_sequence[point_count][2], pose_sequence[point_count][3]);
 				
 				point_count += 1;
 			}
