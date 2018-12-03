@@ -6,5 +6,7 @@
     <!-- <node pkg="gp9_path_follower" name="grab" type="grab" output="screen"/> -->
     <node pkg="gp9_path_follower" name="execute_path" type="execute_path.py"/>
     <node pkg="gp9_path_planning" name="path_publisher" type="path_publisher.py" output="screen"/>
+    <node pkg="gp9_mapping" name="mapper" type="mapper" output="screen"/>
+    <node pkg="gp9_mapping" name="battery_mapper" type="battery_mapper.py" output="screen"/>
 
 </launch>

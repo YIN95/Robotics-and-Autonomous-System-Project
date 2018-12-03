@@ -107,7 +107,7 @@ public: /* ros */
 		sub_has_reached_goal = nh.subscribe<std_msgs::Bool>("/has_reached_goal", 1, &StateMachine::hasReachedGoalCallBack, this);
 		sub_has_reached_orientation = nh.subscribe<std_msgs::Bool>("/has_reached_orientation", 1, &StateMachine::hasReachedOrientationCallBack, this);
 		sub_emergency_break = nh.subscribe<std_msgs::Bool>("/emergency_break", 1, &StateMachine::emergencyBreakCallBack, this);
-		// sub_emergency_break_bt = nh.subscribe<geometry_msgs::Pose2D>("/findBattery", 1, &StateMachine::emergencyBreakCallBack_bt, this);
+		sub_emergency_break_bt = nh.subscribe<geometry_msgs::Pose2D>("/findBattery", 1, &StateMachine::emergencyBreakCallBack_bt, this);
 		sub_detection = nh.subscribe<std_msgs::Bool>("/findObject", 1, &StateMachine::detectionCallBack, this);
 
 	} 
@@ -128,7 +128,7 @@ public: /* ros */
 	}
 
 	void emergencyBreakCallBack_bt(const geometry_msgs::Pose2D::ConstPtr& emergencyBreak_msg) {
-		emergency_break = true;
+		// emergency_break = true;
 		std_msgs::Bool updateMap;
 		updateMap.data = true;
 		pub_updateMap.publish(updateMap);
@@ -167,6 +167,7 @@ public: /* ros */
 					global_pose[0] = pose_sequence[nextPose][0];
 					global_pose[1] = pose_sequence[nextPose][1];
 					global_pose[2] = pose_sequence[nextPose][2];
+					ROS_INFO("Global Desired Pose: \t%f, \t%f, \t%f", global_pose[0], global_pose[1], global_pose[2]);
 					
 					bool same_x = fabs(previous_pose[0] - global_pose[0]) < 1e-6;
 					bool same_y = fabs(previous_pose[1] - global_pose[1]) < 1e-6;
@@ -312,16 +313,14 @@ public: /* ros */
 					currentState = STATE_MOVING;
 				}
 				else{
-					velocity_msg.linear.x = -0.2;
+					velocity_msg.linear.x = -0.3;
 					std::srand(std::time(0));
 					double flag = std::rand()%100/(double)101;
 					if (flag>0.3){
-						velocity_msg.angular.z = -0.3; // 1.2 is a okay value
 						velocity_msg.angular.z = -0.3;
 						pub_velocity.publish(velocity_msg);
 					}
 					else{
-						velocity_msg.angular.z = -0.3; // 1.2 is a okay value
 						velocity_msg.angular.z = 0.3;
 						pub_velocity.publish(velocity_msg);
 					}            		

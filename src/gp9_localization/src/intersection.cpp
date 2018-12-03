@@ -148,7 +148,7 @@ public:
 
     Intersections() {
 
-        const char* path_to_maze = "/home/ras19/catkin_ws/src/gp9_localization/src/maze.txt";
+        const char* path_to_maze = "/home/ras19/catkin_ws/src/gp9_path_planning/maps/maze2018.txt";
         
         std::string line;
         std::string past_value;

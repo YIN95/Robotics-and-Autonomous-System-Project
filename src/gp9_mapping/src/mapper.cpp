@@ -7,6 +7,7 @@
 #include <deque>
 #include <fstream>
 #include <vector>
+#include <time.h>
 
 struct Pose{
 
@@ -575,7 +576,7 @@ void writeNewWalls(std::deque<Segment> &newWalls, std::string pathToUpdatedMap){
             double y1 = newWalls[i].getP1().getY();
             double x2 = newWalls[i].getP2().getX();
             double y2 = newWalls[i].getP2().getY();
-            myfile << x1 << " " << y1 << " " << x2 << " " << y2 <<'\n';
+            myfile << "\n" << x1 << " " << y1 << " " << x2 << " " << y2;
         }
         myfile.close();
     }
@@ -585,24 +586,29 @@ void writeNewWalls(std::deque<Segment> &newWalls, std::string pathToUpdatedMap){
 int main(int argc, char** argv) {
 
     ros::init(argc, argv, "mapper");
+
     int control_frequency = 10;
-	ros::Rate rate(control_frequency);
+	
+
+    int numAngles = 20;
+    double rangeThreshold = 0.15;
+    Measurements meas = Measurements(numAngles, rangeThreshold); //NodeHandle
+    ros::Rate rate(control_frequency);
 
     ros::Time previousMapTime;
     previousMapTime = ros::Time::now(); 
 
     ros::Publisher pub_updateMap;
 
-    int secondsBetweenRemapping = 120;
+    int secondsBetweenRemapping = 60;
 
-    int numAngles = 20;
-    double rangeThreshold = 0.15;
+
     double inlierDistanceThreshold = 0.04;
     int numInliersThreshold = 15;
     double neighborDistanceThreshold = 0.05;
     int numNeighborsThreshold = 1;
 
-    Measurements meas = Measurements(numAngles, rangeThreshold); //NodeHandle
+    
     pub_updateMap = meas.nh.advertise<std_msgs::Bool>("/update_map", 1);
 
     std::string pathToMap;
@@ -612,13 +618,15 @@ int main(int argc, char** argv) {
     meas.nh.getParam("/maze/path_updated", pathToUpdatedMap);
 
 	while (meas.nh.ok()) {
-        ros::Time currentMapTime;
-        currentMapTime = ros::Time::now();
 
         meas.readMap(pathToMap);
 
+        ros::Time currentMapTime;
+        currentMapTime = ros::Time::now();
+
         bool emergencyBreak = meas.getEmergencyBreak();
         if(emergencyBreak){
+            ROS_INFO("Emergency Break - Replanning");
             std::deque<Point> interestingPoints = meas.getInterestingPoints();
             Mapper mapper = Mapper(inlierDistanceThreshold, numInliersThreshold);
             std::deque<Segment> newWalls = mapper.sequentialRANSAC(interestingPoints, neighborDistanceThreshold, numNeighborsThreshold);
@@ -642,6 +650,7 @@ int main(int argc, char** argv) {
             std::deque<Segment> newWalls = mapper.sequentialRANSAC(interestingPoints, neighborDistanceThreshold, numNeighborsThreshold);
             int numNewWalls = newWalls.size();
             if(numNewWalls > 0){
+                ROS_INFO("Some Walls");
                 writeNewWalls(newWalls, pathToMap);
                 std_msgs::Bool updateMap;
                 updateMap.data = true;

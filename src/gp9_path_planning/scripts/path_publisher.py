@@ -61,16 +61,6 @@ class PathPublisher:
         """
 
         rospy.loginfo("Rebuilding the visibility graph")
-        self.graph = build_graph(self.path_to_updated_maze, self.robot_radius)
-        rospy.loginfo("Done building new graph")
-    
-    def _update_map_callback(self, _):
-        """
-        What comes in the _ is not important (it's a Bool.data = True),
-        just that we receive it means that we should update the map.
-        """
-
-        rospy.loginfo("Rebuilding the visibility graph")
         self.graph = build_graph(self.path_to_updated_map, self.robot_radius)
         rospy.loginfo("Done building new graph")
     
@@ -80,8 +70,8 @@ class PathPublisher:
         # remove the first element in shortest path since its the starting position
         vertex_path = self.graph.shortest_path(self.position, self.desired_position)[1:]
         path = []
-        pose = Pose2D()
         for vertex in vertex_path:
+            pose = Pose2D()
             pose.x = vertex.x
             pose.y = vertex.y
             path.append(pose)
@@ -113,12 +103,18 @@ if __name__ == '__main__':
 
     pb = PathPublisher()
 
+    # while not rospy.is_shutdown():
+
+    #     if pb.new_position:
+    #         try:
+    #             pb.publish_path()
+    #         except ValueError:
+    #             rospy.loginfo("not working, put logic here")
+
+    #     rate.sleep()
     while not rospy.is_shutdown():
 
         if pb.new_position:
-            try:
-                pb.publish_path()
-            except ValueError:
-                rospy.loginfo("not working, put logic here")
+            pb.publish_path()
 
         rate.sleep()

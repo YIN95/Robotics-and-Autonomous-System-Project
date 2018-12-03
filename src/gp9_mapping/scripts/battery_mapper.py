@@ -22,8 +22,8 @@ class BatteryMapper:
         self._create_new_file()
         self.subscriber_battery = rospy.Subscriber("/findBattery", Pose2D, self.callback_battery)
         self.publisher_battery = rospy.Publisher("/update_map", Bool, queue_size=1)
-        self.dx = -0.01
-        self.dy = -0.01
+        self.dx = 0.03
+        self.dy = 0.03
         self.batteries = []
         self.battery_expansion = 0.10
 
@@ -41,13 +41,15 @@ class BatteryMapper:
         battery_already_detected = self._is_detected(battery)
         
         if not battery_already_detected:
+            
 
             x2 = x1 + self.dx
             y2 = y1 + self.dy
+            x1 = x1 - self.dx
+            y1 = y1 - self.dy
             battery_line = (x1, y1, x2, y2)
             self._add_battery(battery_line)
             line_to_write = "\n%.2f %.2f %.2f %.2f" % battery_line
-
             rospy.loginfo("writing battery position to file!")
             with open(self.new_path, 'a') as f:
                 f.write(line_to_write)
