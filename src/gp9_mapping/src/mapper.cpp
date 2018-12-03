@@ -70,7 +70,7 @@ class Point{
         }
 
         double dist(Point &other) {
-            return sqrt(pow((other.x - x), 2) + pow((other.y - y), 2));;
+            return sqrt(pow((other.x - x), 2) + pow((other.y - y), 2));
         }
 
         double cross(Point &other) {
@@ -95,6 +95,7 @@ class Point{
         }
 
         int numberOfNeighbors(std::deque<Point> &points, double distanceThreshold) {
+
             int neighborCounter = 0;
             std::deque<Point>::iterator pointIterator = points.begin();
             while (pointIterator != points.end()) {
@@ -120,7 +121,7 @@ class Segment{
             p2 = Point();
         }
 
-        Segment(Point p1_, Point p2_) {
+        Segment(Point &p1_, Point &p2_) {
             p1 = p1_;
             p2 = p2_;
         }
@@ -206,7 +207,7 @@ class Measurements{
             if (fin){
                 double x1, y1, x2, y2;
                 while(fin>>x1>>y1>>x2>>y2){
-                    Point p1 = Point(x1, x2);
+                    Point p1 = Point(x1, y1);
                     Point p2 = Point(x2, y2);
                     Segment wall = Segment(p1, p2);
                     walls.push_back(wall);
@@ -236,7 +237,12 @@ class Measurements{
                 int count = 0;
                 while(fin>>next_value){
                     double value = atof(next_value.c_str());
-                    if(((indexOfValue % 363) == 0) || ((indexOfValue % 363) == 1) || ((indexOfValue % 363) == 2)){
+                    if((indexOfValue % 363) == 0){
+                        pose[indexOfValue % 363] = value;
+                        count = 0;
+                        indexOfValue = 0;
+                    }
+                    else if(((indexOfValue % 363) == 1) || ((indexOfValue % 363) == 2)){
                         pose[indexOfValue % 363] = value;
                     }
                     else if((indexOfValue % 363) == 3){
@@ -247,13 +253,14 @@ class Measurements{
                         Pose pose = Pose(x, y, theta);
                         poses.push_back(pose);
                         ranges[0] = value;
+                        count ++;
                     }
                     else if((indexOfValue % 363) == 362){
                         measurements.push_back(ranges);
                     }
                     else{
                         if(indicesToUse[(indexOfValue - 3) % 360]) {
-                                ranges[count % numAngles] = value;
+                                ranges[count] = value;
                                 count ++;
                             }
                     }
@@ -264,8 +271,6 @@ class Measurements{
             }
             int numberOfMeasuraments = measurements.size();
             int numberOfPoses = poses.size();
-            std::cout << "numberOfMeasuraments : " << numberOfMeasuraments << std::endl;
-            std::cout << "numberOfPoses : " << numberOfMeasuraments << std::endl;
         }
 
         void fillInterestingPoints(){
@@ -276,40 +281,29 @@ class Measurements{
             for (int i = 0; i < numMeasurements; i++) {
                 Pose pose = poses[i];
                 std::vector<double> measures = measurements[i];
-                
-                // for (int t = 0; t < numAngles; t++){
-                //     std::cout << measurements[i][t] << std::endl;
-                // }
-
-                // std::cout << "==============" << std::endl;
-
-                // for (int t = 0; t < numAngles; t++){
-                //     std::cout << measures[t] << std::endl;
-                // }
-
-                // std::cout << std::endl;
-
                 for (int j = 0; j < numAngles; j++) {
                     double deltaAngle = M_PI + j*dAngle;
                     double range = measures[j];
 
-                    if (range > 100) break;
+                    if (range < 100){
 
-                    double x = pose.x + range * cos(pose.theta + deltaAngle);
-                    double y = pose.y + range * sin(pose.theta + deltaAngle);         
-                    Point point = Point(x, y);
-                    double minDistance = 100;
-                    for (int k = 0; k < numWalls; k++) {
-                        Segment wall = Segment(walls[k]);
-                        double distance = wall.distanceFromSegment(point);
-                        if (distance < minDistance) minDistance = distance;
-                    }
-
-                    measurementPositions.push_back(point);
-                    if(minDistance > rangeThreshold){
-                        if ((point.getX() > minX) && (point.getX() < maxX) && (point.getY() > minY) && (point.getY() < maxY)){
-                            interestingPoints.push_back(point);
+                        double x = pose.x + range * cos(pose.theta + deltaAngle);
+                        double y = pose.y + range * sin(pose.theta + deltaAngle);         
+                        Point point = Point(x, y);
+                        double minDistance = 100;
+                        for (int k = 0; k < numWalls; k++) {
+                            Segment wall = Segment(walls[k]);
+                            double distance = wall.distanceFromSegment(point);
+                            if (distance < minDistance) minDistance = distance;
                         }
+                        measurementPositions.push_back(point);
+                        
+                        if(minDistance > rangeThreshold){
+                            if ((point.getX() > minX) && (point.getX() < maxX) && (point.getY() > minY) && (point.getY() < maxY)){
+                                interestingPoints.push_back(point);
+                            }
+                        }
+                
                     }
                 }
             }
@@ -346,7 +340,6 @@ class Mapper{
 
         Segment RANSAC(std::deque<Point> &points) {
             int numPoints = points.size();
-            // std::cout << "Number of points : " << numPoints << std::endl;
             int bestNumInliers = 0;
             Segment bestSegment = Segment();
             for (int i = 0; i < numPoints; i++) {
@@ -358,24 +351,13 @@ class Mapper{
                     Segment segment = Segment(p1, p2);
                     segment.findInliers(points, inlierDistanceThreshold);
                     int numInliers = segment.getInliers().size();
-                    // segment.print();
-                    // std::cout << "Inliers : " << numInliers << " ";
                     if (numInliers > bestNumInliers) {
-                        // std::cout << "Choosing the best segment" << std::endl;
-                        // segment.print();
-                        // Point p1 = bestSegment.getP1();
-                        // p1.print();
-                        // Point p2 = bestSegment.getP2();
-                        // p2.print();
                         bestSegment = Segment(segment);
                         bestNumInliers = numInliers;
                     }
                 }
             }
             int numInliers = bestSegment.getInliers().size();
-            std::cout << "RAN: Num Inliers "<<numInliers<<std::endl;
-            // std::cout << "Best segment" << std::endl;
-            // bestSegment.print();
             return bestSegment;
         }
 
@@ -387,18 +369,11 @@ class Mapper{
             while (true) {
                 
                 Segment segment = Segment(RANSAC(remainingPoints));
-                segment.print();
                 std::deque<Point> segmentInliers = segment.getInliers();
                 int numInliers = segmentInliers.size();
                 if (numInliers < numInliersThreshold) break;
                 wallCounter++;
                 segments.push_back(segment);
-                int leng = segments.size();
-                for(int i = 0; i < leng; i++){
-                    std::cout << "Inside sequential Ransac"<<std::endl;
-                    segments[i].print();
-                    segments[i].printInliers();
-                }
                 std::cout<<std::endl;
                 int numRemainingPoints = remainingPoints.size();
                 std::deque<Point> outliers;
@@ -419,25 +394,31 @@ class Mapper{
 
             Segment segment;
             std::deque<Segment> newWalls;
-            int numWalls = segments.size();
-            for (int i = 0; i < numWalls; i++)
+            int numWalls_ = segments.size();
+            for (int i = 0; i < numWalls_; i++)
                 segment = Segment(segments[i]);
+
                 segment.print();
                 Segment wall = Segment(getWall(segment, neighborDistanceThreshold, numNeighborsThreshold));
+                    
+                wall.print();
                 newWalls.push_back(wall);
 
             return newWalls;
         }
 
 
-        Segment getWall(Segment segment, double neighborDistanceThreshold, int numNeighborsThreshold) {
+        Segment getWall(Segment &segment, double neighborDistanceThreshold, int numNeighborsThreshold) {
             std::deque<Point> points = segment.getInliers();
+
             std::deque<Point> clusteredPoints = findCluster(points, neighborDistanceThreshold, numNeighborsThreshold);
+
             Segment wall = Segment(RANSAC(clusteredPoints));
             return wall;
         }
 
         std::deque<Point> findCluster(std::deque<Point> &points, double neighborDistanceThreshold, int numNeighborsThreshold) {
+            
             int numPoints = points.size();
             std::deque<Point> pointsInCluster;
             for (int i = 0; i < numPoints; i++) {
@@ -445,6 +426,7 @@ class Mapper{
                 int numNeighbors = point.numberOfNeighbors(points, neighborDistanceThreshold) - 1; // remove point itself as neighbor
                 if (numNeighbors > numNeighborsThreshold) pointsInCluster.push_back(point);
             }
+
             return pointsInCluster;
         }
 
@@ -475,13 +457,10 @@ int main(int argc, char** argv) {
      std::deque<Point> ip = meas.getInterestingPoints();
 
      int n = ip.size();
-    //  for(int i = 0; i < n; i++){
-    //      ip[i].print();
-    //  }
-    //  std::cout << "Number of interesting points : " << n << std::endl;
+     std::cout << "Number of interesting points : " << n << std::endl;
 
      Mapper mapper = Mapper(inlierDistanceThreshold, numInliersThreshold);
-     std::deque<Segment> segm = mapper.sequentialRANSAC(ip, 0.05, 1);
+     std::deque<Segment> segm = mapper.sequentialRANSAC(ip, neighborDistanceThreshold, numNeighborsThreshold);
 
      int sg = segm.size();
      std::cout << "Number of segments : " << sg << std::endl;
@@ -491,41 +470,6 @@ int main(int argc, char** argv) {
         std::cout << "==============================================================" << std::endl;
 
     }
- 
-    //  for (int i = 0; i < n; i++) {
-    //      Point p = ip[i];
-    //      p.print();
-    //  }
-
-
-    // Pose pose = Pose(1, 2, 3);
-    // pose.print();
-
-
-
-    // Segment s = Segment(Point(0, 0), Point(2, 0));
-
-    // Point p1 = Point(2, 0.5);
-    // Point p2 = Point(3, 1);
-    // Point p3 = Point(1, 1);
-    // Point p4 = Point(4, 4);
-
-    // std::deque<Point> dq;
-    // dq.push_back(p1);
-    // dq.push_back(p2);
-    // dq.push_back(p3);
-    // dq.push_back(p4);
-
-    // double threshold = 2;
-    // s.findInliers(dq, threshold);
-    // s.printInliers();
-
-
-    // Point p5 = Point(5, 0.5);
-    // double d = s.distanceFromSegment(p1);
-
-    // ROS_INFO("distance: %f", d);
-
 
 	// while (sl.nh.ok()) {
 	// 	ros::spinOnce();
