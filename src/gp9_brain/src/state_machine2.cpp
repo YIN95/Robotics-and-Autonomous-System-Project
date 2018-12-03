@@ -31,6 +31,7 @@ public: /* ros */
 	ros::Publisher pub_grab;
 	ros::Publisher pub_velocity;
 	ros::Publisher pub_speak;
+	ros::Publisher pub_timeover;
 
 	ros::Subscriber sub_has_reached_goal;
 	ros::Subscriber sub_has_reached_orientation;
@@ -38,9 +39,11 @@ public: /* ros */
 
 	ros::Time current_time;
     ros::Time arrival_time;
-	
+	ros::Time start_time;
+
 	bool start = true;
 	bool home = false;
+	bool timeover = false;
 
 	StateMachine(){
 		nh.getParam("/robot/starting_position/x", start_x);
@@ -86,7 +89,7 @@ public: /* ros */
 		previous_pose[1] = start_y;
 		previous_pose[2] = start_theta;
 
-
+		pub_timeover = nh.advertise<std_msgs::Bool>("/timeover", 1);
 		pub_currentState = nh.advertise<std_msgs::Int32>("/brain_state", 1);
 		pub_globalDesiredPose = nh.advertise<geometry_msgs::Pose2D>("/global_desired_pose", 1);
 		pub_grab = nh.advertise<std_msgs::Int32>("/grab", 1);
@@ -132,6 +135,7 @@ public: /* ros */
 					msg.data = "Start";
 					pub_speak.publish(msg);
 					start=false;
+					start_time = ros::Time::now();
 				}
 				ROS_INFO("NEXT POSE");
 				if(nextPose < num_objects){
@@ -178,6 +182,19 @@ public: /* ros */
 					currentState = STATE_MOVING_BACK;
 					emergency_break = false;
 					arrival_time = ros::Time::now();
+				}
+
+				current_time = ros::Time::now();
+	
+				if ((current_time - start_time).toSec() > 180){
+					timeover = true;
+					std_msgs::String msg;
+					msg.data = "time over";
+					pub_speak.publish(msg);
+
+					std_msgs::Bool msg_timeover;
+					msg_timeover.data = true;
+					pub_timeover.publish(msg_timeover);
 				}
 				break;
 
@@ -498,7 +515,9 @@ int main(int argc, char** argv)
 		st.pub_currentState.publish(currentState_msg);
 		st.publishNewPose();
 		st.run();
-
+		if(st.timeover){
+			break;
+		}
 		rate.sleep();
 	}
 	return 0;
