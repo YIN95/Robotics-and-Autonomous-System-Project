@@ -70,7 +70,7 @@ public: /* ros */
 		emergency_break = false;
 
 		print_again = false;
-		moving_back_seconds = 1;
+		moving_back_seconds = 2;
 		object_detected = false;
 
 		coming_from_moving = false;
@@ -190,7 +190,7 @@ public: /* ros */
 					}
 					nextPose += 1;
 				}
-				else if(nextPose = num_points){
+				else if(nextPose == num_points){
 					ROS_INFO("Taking home position");
 					global_pose[0] = start_x;
 					global_pose[1] = start_y;
@@ -329,15 +329,15 @@ public: /* ros */
 					
 				}
 				else{
-					velocity_msg.linear.x = -0.3;
+					velocity_msg.linear.x = -0.2;
 					std::srand(std::time(0));
 					double flag = std::rand()%100/(double)101;
-					if (flag>0.3){
-						velocity_msg.angular.z = -0.3;
+					if (flag>0.2){
+						velocity_msg.angular.z = -0.2;
 						pub_velocity.publish(velocity_msg);
 					}
 					else{
-						velocity_msg.angular.z = 0.3;
+						velocity_msg.angular.z = 0.2;
 						pub_velocity.publish(velocity_msg);
 					}            		
 				}

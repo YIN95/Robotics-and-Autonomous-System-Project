@@ -66,7 +66,7 @@ public: /* ros */
 		nextPose = 0;
 		stop_seconds = 2;
 		moving_back_seconds = 1;
-		desired_distance_from_object = 0.12;
+		desired_distance_from_object = 0;
 
         num_objects = countObjects();
 		ROS_INFO("num of objects %d", num_objects);

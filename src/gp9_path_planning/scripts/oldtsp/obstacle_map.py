@@ -110,7 +110,7 @@ class ObstacleMap:
         with open(path_to_maze) as f:
             for line in f:
                 point_list = line.split()
-                if line[0] == '#':
+                if point_list[0] == '#':
                     continue
                 start_point = np.array(point_list[0:2], dtype=float)
                 end_point = np.array(point_list[2:4], dtype=float)
@@ -216,18 +216,14 @@ class ObstacleMap:
                              'k')
 
 
-#if __name__ == '__main__':
+if __name__ == '__main__':
 
-#    r = 0.1
+    r = 0.1
 
-#    obstacle_map = ObstacleMap(r)
-#    #obstacle_map.construct_obstacle_map('../maps/maze.txt')
-#    obstacle_map.construct_obstacle_map('/home/ras19/catkin_ws/src/gp9_path_planning/maps/updated_maze.txt')
-#    obstacle_map.plot_map([-0.5, 3, -0.5, 6])
-
-
-
-
+    obstacle_map = ObstacleMap(r)
+    #obstacle_map.construct_obstacle_map('../maps/maze.txt')
+    obstacle_map.construct_obstacle_map('/home/ras19/catkin_ws/src/gp9_path_planning/maps/maze2018.txt')
+    obstacle_map.plot_map([-0.5, 3, -0.5, 6])
 
 
 

@@ -28,12 +28,14 @@ class BatteryMapper:
         self.battery_expansion = 0.10
 
     def _create_new_file(self):
+        pass
+        '''
         with open(self.maze_path) as f:
             with open(self.new_path, 'w+') as f_new:
                 lines = f.readlines()
                 for line in lines:
                     f_new.write(line)
-
+        '''
     def callback_battery(self, battery):
         x1 = battery.x
         y1 = battery.y
@@ -78,7 +80,7 @@ class BatteryMapper:
 
 if __name__ == '__main__':
     rospy.init_node('battery_mapper')
-    control_frequency = 10
+    control_frequency = 125
     rate = rospy.Rate(control_frequency)
 
     mapper = BatteryMapper()

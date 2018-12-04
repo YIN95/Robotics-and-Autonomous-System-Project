@@ -4,7 +4,6 @@ from __future__ import division
 from __future__ import print_function
 
 import rospy
-import time
 
 from std_msgs.msg import Bool
 from geometry_msgs.msg import Pose2D
@@ -25,16 +24,12 @@ def build_graph(path_to_map, robot_radius):
 class PathPublisher:
 
     def __init__(self):
-        
-        self.path = rospy.get_param("/maze/path")
-        self.robot_radius = rospy.get_param("/robot/radius")
-        self.path_to_updated_map = rospy.get_param("/maze/path_updated")
+
         start_x = rospy.get_param("robot/starting_position/x")
         start_y = rospy.get_param("robot/starting_position/y")
-
-        self.graph = build_graph(self.path, self.robot_radius)
-        #self.graph = build_graph(self.path_to_updated_map, self.robot_radius)
-
+        self.path_to_maze = rospy.get_param("/maze/path")
+        self.path_to_updated_maze = rospy.get_param("/maze/path_updated")
+        self.robot_radius = rospy.get_param("/robot/radius")
 
         self.sub_pose = rospy.Subscriber('/pose', Pose2D, self._pose_callback)
         self.sub_update_map = rospy.Subscriber('/update_map', Bool, self._update_map_callback)
@@ -43,15 +38,10 @@ class PathPublisher:
         self.pub_global_desired_pose = rospy.Publisher('/global_desired_pose', 
                                                     Pose2D, queue_size=1)
         self.pub_path = rospy.Publisher('/path', PathList, queue_size=1)
-        self.pub_remap_done = rospy.Publisher('/remap', Bool, queue_size=1)
-        self.pub_has_reached_goal = rospy.Publisher('/has_reached_goal', Bool, queue_size=1)
-
         self.position = Vertex(start_x, start_y)
         self.desired_position = Vertex(start_x, start_y)
         self.desired_angle = 0
-
-        self.seconds_between_failes = 0.1
-        self.previous_fail_time = rospy.get_rostime()
+        self.graph = build_graph(self.path_to_maze, self.robot_radius)
 
         self.new_position = False
 
@@ -70,16 +60,10 @@ class PathPublisher:
         """
 
         rospy.loginfo("Rebuilding the visibility graph")
-        # self.graph = build_graph(self.path, self.robot_radius)
-        self.graph = build_graph(self.path_to_updated_map, self.robot_radius)
+        self.graph = build_graph(self.path_to_updated_maze, self.robot_radius)
         rospy.loginfo("Done building new graph")
-        # remap_done = Bool()
-        remap_done = True
-        self.pub_remap_done.publish(remap_done)
     
     def _find_path(self):
-        self.new_position = False
-        rospy.loginfo("_find_path")
 
         # remove the first element in shortest path since its the starting position
         vertex_path = self.graph.shortest_path(self.position, self.desired_position)[1:]
@@ -89,35 +73,20 @@ class PathPublisher:
             pose.x = vertex.x
             pose.y = vertex.y
             path.append(pose)
-        rospy.loginfo("vertex")
 
-        #self.graph.plot_path(path)
-        try:
-            if (vertex_path[-1] - self.desired_position).norm() > 1e-6:
-                pose.theta = self.desired_angle
-                self.pub_global_desired_pose.publish(pose)
-        except IndexError:
-                rospy.loginfo("Index Out Of Range")
-                self.pub_has_reached_goal.publish(True)
+        if (vertex_path[-1] - self.desired_position).norm() > 1e-6:
+            pose.theta = self.desired_angle
+            self.pub_global_desired_pose.publish(pose)
 
-        rospy.loginfo("after check goal")
+        self.new_position = False
         path_list = PathList()
         path_list.list = path
-        rospy.loginfo("end of find path")
+
         return path_list
 
     def publish_path(self):
-        try:
-            path = self._find_path()
-            rospy.loginfo("publish path")
-            self.pub_path.publish(path)
-        except KeyError:
-            #self.path_not_possible = true;
-            if (rospy.get_rostime() - self.previous_fail_time).to_sec() > self.seconds_between_failes:
-                rospy.loginfo("path not possible")
-                self.pub_has_reached_goal.publish(True)
-                self.previous_fail_time = rospy.get_rostime()
-            
+        path = self._find_path()
+        self.pub_path.publish(path)
 
 
 if __name__ == '__main__':
@@ -127,22 +96,9 @@ if __name__ == '__main__':
 
     pb = PathPublisher()
 
-    # while not rospy.is_shutdown():
-
-    #     if pb.new_position:
-    #         try:
-    #             pb.publish_path()
-    #         except ValueError:
-    #             rospy.loginfo("not working, put logic here")
-
-    #     rate.sleep()
     while not rospy.is_shutdown():
-
 
         if pb.new_position:
             pb.publish_path()
-            
-
-
 
         rate.sleep()
