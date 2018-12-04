@@ -38,8 +38,8 @@ public: /* ros */
 	ros::Subscriber sub_has_reached_orientation;
 	ros::Subscriber sub_emergency_break;
 	ros::Subscriber sub_emergency_break_bt;
-
 	ros::Subscriber sub_detection;
+	ros::Subscriber sub_remap;
 
 	ros::Time current_time;
     ros::Time arrival_time;
@@ -78,6 +78,7 @@ public: /* ros */
 
 		nextPose = 0;
 		num_points = countObjects();
+		remap_done = false;
 		
 		ROS_INFO("num points: %d", num_points);
 
@@ -109,6 +110,7 @@ public: /* ros */
 		sub_emergency_break = nh.subscribe<std_msgs::Bool>("/emergency_break", 1, &StateMachine::emergencyBreakCallBack, this);
 		sub_emergency_break_bt = nh.subscribe<geometry_msgs::Pose2D>("/findBattery", 1, &StateMachine::emergencyBreakCallBack_bt, this);
 		sub_detection = nh.subscribe<std_msgs::Bool>("/findObject", 1, &StateMachine::detectionCallBack, this);
+		sub_remap = nh.subscribe<std_msgs::Bool>("/remap", 1, &StateMachine::remapCallBack, this);
 
 	} 
 
@@ -132,13 +134,18 @@ public: /* ros */
 		std_msgs::Bool updateMap;
 		updateMap.data = true;
 		pub_updateMap.publish(updateMap);
-		print_again = true;
+		// print_again = true;
 		ROS_INFO("In emergencyBreak Callback. battery ");
 	}
 
 	void detectionCallBack(const std_msgs::Bool::ConstPtr& detection_msg) {
 		object_detected = detection_msg->data;
 		ROS_INFO("In detection Callback.");
+	}
+
+	void remapCallBack(const std_msgs::Bool::ConstPtr& remap_msg) {
+		remap_done = remap_msg->data;
+		ROS_INFO("In remap Callback.");
 	}
 
 
@@ -306,11 +313,16 @@ public: /* ros */
 
 				current_time = ros::Time::now();
 				if ((current_time - arrival_time).toSec() > moving_back_seconds){
-					print_again = true;
+					
 					velocity_msg.linear.x = 0;
             		velocity_msg.angular.z = 0; // 1.2 is a okay value
             		pub_velocity.publish(velocity_msg);
-					currentState = STATE_MOVING;
+					if(remap_done){
+						currentState = STATE_MOVING;
+						remap_done = false;
+						print_again = true;
+					}
+					
 				}
 				else{
 					velocity_msg.linear.x = -0.3;
@@ -439,6 +451,7 @@ private:
 	// bool has_reached_grab;
 	bool open_grippers;
 	bool object_detected;
+	bool remap_done;
 
 	bool coming_from_moving;
 	bool coming_from_rotating;

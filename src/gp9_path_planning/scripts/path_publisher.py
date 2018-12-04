@@ -40,6 +40,7 @@ class PathPublisher:
         self.pub_global_desired_pose = rospy.Publisher('/global_desired_pose', 
                                                     Pose2D, queue_size=1)
         self.pub_path = rospy.Publisher('/path', PathList, queue_size=1)
+        self.pub_remap_done = rospy.Publisher('/remap', Bool, queue_size=1)
         self.position = Vertex(start_x, start_y)
         self.desired_position = Vertex(start_x, start_y)
         self.desired_angle = 0
@@ -63,6 +64,9 @@ class PathPublisher:
         rospy.loginfo("Rebuilding the visibility graph")
         self.graph = build_graph(self.path_to_updated_map, self.robot_radius)
         rospy.loginfo("Done building new graph")
+        # remap_done = Bool()
+        remap_done = True
+        self.pub_remap_done.publish(remap_done)
     
     def _find_path(self):
         rospy.loginfo("_find_path")

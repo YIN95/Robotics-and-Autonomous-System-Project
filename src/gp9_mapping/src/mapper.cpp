@@ -576,7 +576,7 @@ void writeNewWalls(std::deque<Segment> &newWalls, std::string pathToUpdatedMap){
             double y1 = newWalls[i].getP1().getY();
             double x2 = newWalls[i].getP2().getX();
             double y2 = newWalls[i].getP2().getY();
-            myfile << "\n" << x1 << " " << y1 << " " << x2 << " " << y2;
+            myfile << x1 << " " << y1 << " " << x2 << " " << y2;
         }
         myfile.close();
     }
@@ -644,21 +644,21 @@ int main(int argc, char** argv) {
 
         }
 
-        if((currentMapTime - previousMapTime).toSec() > secondsBetweenRemapping){
-            std::deque<Point> interestingPoints = meas.getInterestingPoints();
-            Mapper mapper = Mapper(inlierDistanceThreshold, numInliersThreshold);
-            std::deque<Segment> newWalls = mapper.sequentialRANSAC(interestingPoints, neighborDistanceThreshold, numNeighborsThreshold);
-            int numNewWalls = newWalls.size();
-            if(numNewWalls > 0){
-                ROS_INFO("Some Walls");
-                writeNewWalls(newWalls, pathToMap);
-                std_msgs::Bool updateMap;
-                updateMap.data = true;
-                pub_updateMap.publish(updateMap);
-                pathToMap = pathToUpdatedMap;
-            }
-            previousMapTime = ros::Time::now();
-        }
+        // if((currentMapTime - previousMapTime).toSec() > secondsBetweenRemapping){
+        //     std::deque<Point> interestingPoints = meas.getInterestingPoints();
+        //     Mapper mapper = Mapper(inlierDistanceThreshold, numInliersThreshold);
+        //     std::deque<Segment> newWalls = mapper.sequentialRANSAC(interestingPoints, neighborDistanceThreshold, numNeighborsThreshold);
+        //     int numNewWalls = newWalls.size();
+        //     if(numNewWalls > 0){
+        //         ROS_INFO("Some Walls");
+        //         writeNewWalls(newWalls, pathToMap);
+        //         std_msgs::Bool updateMap;
+        //         updateMap.data = true;
+        //         pub_updateMap.publish(updateMap);
+        //         pathToMap = pathToUpdatedMap;
+        //     }
+        //     previousMapTime = ros::Time::now();
+        // }
 		ros::spinOnce();
 		rate.sleep();
 		
