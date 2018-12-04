@@ -22,8 +22,8 @@ class BatteryMapper:
         self._create_new_file()
         self.subscriber_battery = rospy.Subscriber("/findBattery", Pose2D, self.callback_battery)
         self.publisher_battery = rospy.Publisher("/update_map", Bool, queue_size=1)
-        self.dx = -0.01
-        self.dy = -0.01
+        self.dx = -0.10
+        self.dy = -0.10
         self.batteries = []
         self.battery_expansion = 0.10
 

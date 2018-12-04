@@ -71,7 +71,7 @@ class PathPublisher:
 
         rospy.loginfo("Rebuilding the visibility graph")
         # self.graph = build_graph(self.path, self.robot_radius)
-        self.graph = build_graph(self.path_to_updated_map, self.robot_radius)
+        self.graph = build_graph(self.path_to_updated_map, self.robot_radius)   
         rospy.loginfo("Done building new graph")
         # remap_done = Bool()
         remap_done = True
@@ -80,7 +80,7 @@ class PathPublisher:
     def _find_path(self):
         self.new_position = False
         rospy.loginfo("_find_path")
-
+        vertex_path = []
         # remove the first element in shortest path since its the starting position
         vertex_path = self.graph.shortest_path(self.position, self.desired_position)[1:]
         path = []
@@ -89,6 +89,8 @@ class PathPublisher:
             pose.x = vertex.x
             pose.y = vertex.y
             path.append(pose)
+            rospy.loginfo("vertex computed")
+            print(vertex.__repr__())
         rospy.loginfo("vertex")
 
         #self.graph.plot_path(path)
@@ -115,6 +117,9 @@ class PathPublisher:
             #self.path_not_possible = true;
             if (rospy.get_rostime() - self.previous_fail_time).to_sec() > self.seconds_between_failes:
                 rospy.loginfo("path not possible")
+                path = []
+                self.pub_path.publish(path)
+                #self.publish_path()
                 self.pub_has_reached_goal.publish(True)
                 self.previous_fail_time = rospy.get_rostime()
             

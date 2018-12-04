@@ -127,8 +127,8 @@ bool ObjectDetection::detectBarrier(bool detect){
             }
         }
     }
-    pose_tobattery.x = robot_x + 0.25*cos(robot_theta);
-    pose_tobattery.y = robot_y + 0.25*sin(robot_theta);
+    pose_tobattery.x = robot_x + 0.5*cos(robot_theta);
+    pose_tobattery.y = robot_y + 0.5*sin(robot_theta);
     pose_tobattery.theta = robot_theta;
     ROS_INFO("|||||MinHeight: %d", height);
     if (detect){
@@ -177,8 +177,8 @@ bool ObjectDetection::detectBarrier(bool detect){
         if ((height == 999)){
             current_time2 = ros::Time::now();
             if ((current_time2 - arrival_time2).toSec() > 10){
-                pose_tobattery.x = robot_x + 0.25*cos(robot_theta);
-                pose_tobattery.y = robot_y + 0.25*sin(robot_theta);
+                pose_tobattery.x = robot_x + 0.4*cos(robot_theta);
+                pose_tobattery.y = robot_y + 0.4*sin(robot_theta);
                 ROS_INFO("[WARNING] Obstacle");
                 std_msgs::String msg;
                 msg.data = "battery";
@@ -342,10 +342,10 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
         //     }
         // }
         
-        imshow("RESULT", cv_rgb_ptr->image);
+        // imshow("RESULT", cv_rgb_ptr->image);
         // char keyr = (char)waitKey(1);
         
-        imshow("image_hsv", origin_frame_masked);
+        // imshow("image_hsv", origin_frame_masked);
         cv::waitKey(3);
        
     }
