@@ -108,7 +108,7 @@ public: /* ros */
 		sub_has_reached_goal = nh.subscribe<std_msgs::Bool>("/has_reached_goal", 1, &StateMachine::hasReachedGoalCallBack, this);
 		sub_has_reached_orientation = nh.subscribe<std_msgs::Bool>("/has_reached_orientation", 1, &StateMachine::hasReachedOrientationCallBack, this);
 		sub_emergency_break = nh.subscribe<std_msgs::Bool>("/emergency_break", 1, &StateMachine::emergencyBreakCallBack, this);
-		sub_emergency_break_bt = nh.subscribe<geometry_msgs::Pose2D>("/findBattery", 1, &StateMachine::emergencyBreakCallBack_bt, this);
+		// sub_emergency_break_bt = nh.subscribe<geometry_msgs::Pose2D>("/findBattery", 1, &StateMachine::emergencyBreakCallBack_bt, this);
 		sub_detection = nh.subscribe<std_msgs::Bool>("/findObject", 1, &StateMachine::detectionCallBack, this);
 		sub_remap = nh.subscribe<std_msgs::Bool>("/remap", 1, &StateMachine::remapCallBack, this);
 
@@ -126,15 +126,18 @@ public: /* ros */
 
 	void emergencyBreakCallBack(const std_msgs::Bool::ConstPtr& emergencyBreak_msg) {
 		emergency_break = emergencyBreak_msg->data;
-		remap_done = true;
+		// remap_done = false;
+		std_msgs::Bool updateMap;
+		updateMap.data = true;
+		pub_updateMap.publish(updateMap);
 		ROS_INFO("In emergencyBreak Callback.");
 	}
 
 	void emergencyBreakCallBack_bt(const geometry_msgs::Pose2D::ConstPtr& emergencyBreak_msg) {
 		// emergency_break = true;
-		std_msgs::Bool updateMap;
-		updateMap.data = true;
-		pub_updateMap.publish(updateMap);
+		// std_msgs::Bool updateMap;
+		// updateMap.data = true;
+		// pub_updateMap.publish(updateMap);
 		// print_again = true;
 		ROS_INFO("In emergencyBreak Callback. battery ");
 	}

@@ -379,7 +379,7 @@ public:
 
 	bool obstacleCheck() {
 		double lidar_dist;
-		for (int deg = 135; deg < 225; deg += every_lidar_value) {
+		for (int deg = 138; deg < 222; deg += every_lidar_value) {
 			lidar_dist = laser_distances[deg];
 			if (lidar_dist < min_distance_to_obstacle) {
 				return true;

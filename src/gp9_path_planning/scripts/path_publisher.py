@@ -70,6 +70,7 @@ class PathPublisher:
         """
 
         rospy.loginfo("Rebuilding the visibility graph")
+        # self.graph = build_graph(self.path, self.robot_radius)
         self.graph = build_graph(self.path_to_updated_map, self.robot_radius)
         rospy.loginfo("Done building new graph")
         # remap_done = Bool()

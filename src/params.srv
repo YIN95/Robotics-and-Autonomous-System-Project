@@ -18,7 +18,7 @@
 
 /maze/to_flip: 0
 /maze/path: /home/ras19/catkin_ws/src/gp9_path_planning/maps/maze_fixed.txt
-/maze/unfixed/path: /home/ras19/catkin_ws/src/gp9_path_planning/maps/newmap.txt
+/maze/unfixed/path: /home/ras19/catkin_ws/src/gp9_path_planning/maps/maze2018.txt
 /maze/path_updated: /home/ras19/catkin_ws/src/gp9_path_planning/maps/updated_maze.txt
 /maze/exploration: /home/ras19/catkin_ws/src/gp9_path_planning/scripts/ShortestPath.txt
 /maze/sizeX: 241
