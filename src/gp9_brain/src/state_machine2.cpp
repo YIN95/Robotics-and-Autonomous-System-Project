@@ -40,6 +40,7 @@ public: /* ros */
 
 	ros::Time current_time;
     ros::Time arrival_time;
+	ros::Time start_time;
 	
 	bool start = true;
 	bool home = false;
@@ -145,6 +146,7 @@ public: /* ros */
 					msg.data = "Start";
 					pub_speak.publish(msg);
 					start=false;
+					start_time = ros::Time::now();
 				}
 				ROS_INFO("NEXT POSE");
 				if(nextPose < num_objects){
@@ -192,6 +194,16 @@ public: /* ros */
 					emergency_break = false;
 					arrival_time = ros::Time::now();
 				}
+				if(object_detected){
+					arrival_time = ros::Time::now();
+					coming_from_moving = true;
+					ROS_INFO("Stopping from moving");
+					currentState = STATE_STOP;
+					object_detected = false;
+				}
+				if ((current_time - start_time).toSec() > 190){
+					currentState = STATE_END;
+				}
 				break;
 
 			case STATE_GO_HOME:	//Go Home
@@ -235,6 +247,13 @@ public: /* ros */
 						currentState = STATE_OPEN_GRIPPERS;
 					}
 				}
+				if(object_detected){
+					arrival_time = ros::Time::now();
+					coming_from_rotating = true;
+					currentState = STATE_STOP;
+					ROS_INFO("Stopping from rotating");
+					object_detected = false;
+				}
 				
 				break;
 
@@ -253,6 +272,14 @@ public: /* ros */
 						if(home == true){
 							currentState = STATE_GO_HOME;
 						}
+					}
+					if(coming_from_moving){
+						currentState = STATE_MOVING;
+						coming_from_moving = false;
+					}
+					else if(coming_from_rotating){
+						currentState = STATE_ROTATING;
+						coming_from_rotating = false;
 					}
 					if(retrieving_object){
 						currentState = STATE_OPEN_GRIPPERS;
@@ -279,8 +306,18 @@ public: /* ros */
 				}
 				else{
 					velocity_msg.linear.x = -0.2;
-            		velocity_msg.angular.z = -0.2; // 1.2 is a okay value
-            		pub_velocity.publish(velocity_msg);
+					std::srand(std::time(0));
+					double flag = std::rand()%100/(double)101;
+					if (flag>0.3){
+						velocity_msg.angular.z = -0.3; // 1.2 is a okay value
+						velocity_msg.angular.z = -0.3;
+						pub_velocity.publish(velocity_msg);
+					}
+					else{
+						velocity_msg.angular.z = -0.3; // 1.2 is a okay value
+						velocity_msg.angular.z = 0.3;
+						pub_velocity.publish(velocity_msg);
+					}            		
 				}
 				break;
 
@@ -490,6 +527,10 @@ private:
 	bool go_back_to_release;
 	bool emergency_break;
 	bool print_again;
+	bool object_detected;
+
+	bool coming_from_moving;
+	bool coming_from_rotating;
 
 };
 
