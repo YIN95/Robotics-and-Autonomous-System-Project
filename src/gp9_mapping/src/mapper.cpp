@@ -600,7 +600,7 @@ int main(int argc, char** argv) {
 
     ros::Publisher pub_updateMap;
 
-    int secondsBetweenRemapping = 60;
+    int secondsBetweenRemapping = 30;
 
 
     double inlierDistanceThreshold = 0.04;

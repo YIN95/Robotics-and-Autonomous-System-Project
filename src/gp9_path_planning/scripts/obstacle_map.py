@@ -222,7 +222,7 @@ if __name__ == '__main__':
 
     obstacle_map = ObstacleMap(r)
     #obstacle_map.construct_obstacle_map('../maps/maze.txt')
-    obstacle_map.construct_obstacle_map('/home/ras19/catkin_ws/src/gp9_path_planning/maps/maze2018.txt')
+    obstacle_map.construct_obstacle_map('/home/ras19/catkin_ws/src/gp9_path_planning/maps/updated_maze.txt')
     obstacle_map.plot_map([-0.5, 3, -0.5, 6])
 
 

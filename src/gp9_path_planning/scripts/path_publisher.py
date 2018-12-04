@@ -4,6 +4,7 @@ from __future__ import division
 from __future__ import print_function
 
 import rospy
+import time
 
 from std_msgs.msg import Bool
 from geometry_msgs.msg import Pose2D
@@ -31,7 +32,9 @@ class PathPublisher:
         start_x = rospy.get_param("robot/starting_position/x")
         start_y = rospy.get_param("robot/starting_position/y")
 
-        self.graph = build_graph(self.path, self.robot_radius)
+        # self.graph = build_graph(self.path, self.robot_radius)
+        self.graph = build_graph(self.path_to_updated_map, self.robot_radius)
+
 
         self.sub_pose = rospy.Subscriber('/pose', Pose2D, self._pose_callback)
         self.sub_update_map = rospy.Subscriber('/update_map', Bool, self._update_map_callback)
@@ -41,9 +44,14 @@ class PathPublisher:
                                                     Pose2D, queue_size=1)
         self.pub_path = rospy.Publisher('/path', PathList, queue_size=1)
         self.pub_remap_done = rospy.Publisher('/remap', Bool, queue_size=1)
+        self.pub_has_reached_goal = rospy.Publisher('/has_reached_goal', Bool, queue_size=1)
+
         self.position = Vertex(start_x, start_y)
         self.desired_position = Vertex(start_x, start_y)
         self.desired_angle = 0
+
+        self.seconds_between_failes = 1
+        self.previous_fail_time = rospy.get_rostime()
 
         self.new_position = False
 
@@ -95,9 +103,16 @@ class PathPublisher:
         return path_list
 
     def publish_path(self):
-        path = self._find_path()
-        rospy.loginfo("publish path")
-        self.pub_path.publish(path)
+        try:
+            path = self._find_path()
+            rospy.loginfo("publish path")
+            self.pub_path.publish(path)
+        except KeyError:
+            if (rospy.get_rostime() - self.previous_fail_time).to_sec() > self.seconds_between_failes:
+                rospy.loginfo("path not possible")
+                self.pub_has_reached_goal.publish(True)
+                self.previous_fail_time = rospy.get_rostime()
+            
 
 
 if __name__ == '__main__':
@@ -120,5 +135,6 @@ if __name__ == '__main__':
 
         if pb.new_position:
             pb.publish_path()
+
 
         rate.sleep()

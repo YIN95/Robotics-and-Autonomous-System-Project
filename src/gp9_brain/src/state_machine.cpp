@@ -126,6 +126,7 @@ public: /* ros */
 
 	void emergencyBreakCallBack(const std_msgs::Bool::ConstPtr& emergencyBreak_msg) {
 		emergency_break = emergencyBreak_msg->data;
+		remap_done = true;
 		ROS_INFO("In emergencyBreak Callback.");
 	}
 
