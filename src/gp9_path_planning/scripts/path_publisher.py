@@ -35,7 +35,6 @@ class PathPublisher:
         self.graph = build_graph(self.path, self.robot_radius)
         #self.graph = build_graph(self.path_to_updated_map, self.robot_radius)
 
-
         self.sub_pose = rospy.Subscriber('/pose', Pose2D, self._pose_callback)
         self.sub_update_map = rospy.Subscriber('/update_map', Bool, self._update_map_callback)
         self.sub_global_desired_pose = rospy.Subscriber('/global_desired_pose', Pose2D,
@@ -49,6 +48,7 @@ class PathPublisher:
         self.position = Vertex(start_x, start_y)
         self.desired_position = Vertex(start_x, start_y)
         self.desired_angle = 0
+        self.remap_done = False
 
         self.seconds_between_failes = 0.1
         self.previous_fail_time = rospy.get_rostime()
@@ -68,14 +68,13 @@ class PathPublisher:
         What comes in the _ is not important (it's a Bool.data = True),
         just that we receive it means that we should update the map.
         """
-
         rospy.loginfo("Rebuilding the visibility graph")
         # self.graph = build_graph(self.path, self.robot_radius)
         self.graph = build_graph(self.path_to_updated_map, self.robot_radius)   
         rospy.loginfo("Done building new graph")
         # remap_done = Bool()
-        remap_done = True
-        self.pub_remap_done.publish(remap_done)
+        self.remap_done = True
+        self.pub_remap_done.publish(self.remap_done)
     
     def _find_path(self):
         self.new_position = False
@@ -144,8 +143,9 @@ if __name__ == '__main__':
     while not rospy.is_shutdown():
 
 
-        if pb.new_position:
+        if pb.new_position or pb.remap_done:
             pb.publish_path()
+            pb.remap_done = False
             
 
 
