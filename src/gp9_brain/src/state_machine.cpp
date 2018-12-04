@@ -41,6 +41,7 @@ public: /* ros */
 
 	ros::Time current_time;
     ros::Time arrival_time;
+	ros::Time start_time;
 
 	bool start = true;
 	bool home = false;
@@ -148,6 +149,7 @@ public: /* ros */
 					msg.data = "Start";
 					pub_speak.publish(msg);
 					start = false;
+					start_time = ros::Time::now();
 				}
 
 				if(nextPose < num_points){
@@ -197,6 +199,10 @@ public: /* ros */
 					ROS_INFO("Stopping from moving");
 					currentState = STATE_STOP;
 					object_detected = false;
+				}
+				current_time = ros::Time::now();
+				if ((current_time - start_time).toSec() > 310){
+					currentState = STATE_END;
 				}
 				break;
 

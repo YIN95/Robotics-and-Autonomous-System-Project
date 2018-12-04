@@ -41,7 +41,8 @@ class PathPublisher:
         self.position = Vertex(start_x, start_y)
         self.desired_position = Vertex(start_x, start_y)
         self.desired_angle = 0
-        self.graph = build_graph(self.path_to_maze, self.robot_radius)
+        # self.graph = build_graph(self.path_to_maze, self.robot_radius)
+        self.graph = build_graph(self.path_to_updated_maze, self.robot_radius)
 
         self.new_position = False
 

@@ -308,15 +308,17 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                     if ((now_see > 0)){
                         showCresult();
 
-                        std_msgs::String msg;
-                        msg.data = "I see an object";
-                        pub_speak.publish(msg);
+                        
                         
                         bool is_new_object = check_pre_object(now_object);
                         bool is_new_object_p = check_pre_object_by_position(now_object, pose.x, pose.y);
                         if (is_new_object_p && (now_object>0) && (now_object<30)){
                         // if (is_new_object && (object_depth >= 50) && (object_depth <=650)){
                             //frame_target = cropTarget(pose.x, pose.y);
+                            std_msgs::String msg;
+                            msg.data = "I see an object";
+                            pub_speak.publish(msg);
+                            
                             speakResult();
                             evidence_frame = frame_target;
                             listen_obj_map(pose.x, pose.y, now_object);
@@ -341,10 +343,10 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
         //     }
         // }
         
-        imshow("RESULT", cv_rgb_ptr->image);
+        // imshow("RESULT", cv_rgb_ptr->image);
         // char keyr = (char)waitKey(1);
         
-        imshow("image_hsv", origin_frame_masked);
+        // imshow("image_hsv", origin_frame_masked);
         cv::waitKey(3);
        
     }

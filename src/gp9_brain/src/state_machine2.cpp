@@ -35,6 +35,8 @@ public: /* ros */
 	ros::Subscriber sub_has_reached_goal;
 	ros::Subscriber sub_has_reached_orientation;
 	ros::Subscriber sub_emergency_break;
+	
+	ros::Subscriber sub_detection;
 
 	ros::Time current_time;
     ros::Time arrival_time;
@@ -64,6 +66,11 @@ public: /* ros */
 		nextPose = 0;
 		stop_seconds = 2;
 		moving_back_seconds = 1;
+		object_detected = false;
+
+		coming_from_moving = false;
+		coming_from_rotating = false;
+
 		desired_distance_from_object = 0.12;
 
         num_objects = countObjects();
@@ -96,6 +103,8 @@ public: /* ros */
 		sub_has_reached_goal = nh.subscribe<std_msgs::Bool>("/has_reached_goal", 1, &StateMachine::hasReachedGoalCallBack, this);
 		sub_has_reached_orientation = nh.subscribe<std_msgs::Bool>("/has_reached_orientation", 1, &StateMachine::hasReachedOrientationCallBack, this);
 		sub_emergency_break = nh.subscribe<std_msgs::Bool>("/emergency_break", 1, &StateMachine::emergencyBreakCallBack, this);
+		sub_detection = nh.subscribe<std_msgs::Bool>("/findObject", 1, &StateMachine::detectionCallBack, this);
+
 		
 	};
 
@@ -114,6 +123,10 @@ public: /* ros */
 		ROS_INFO("In emergencyBreak Callback.");
 	}
 
+	void detectionCallBack(const std_msgs::Bool::ConstPtr& detection_msg) {
+		object_detected = detection_msg->data;
+		ROS_INFO("In detection Callback.");
+	}
 	
 
 	void run(){

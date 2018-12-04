@@ -106,8 +106,8 @@ class TargetClassification:
         cv2.putText(target, self.labels[self.classification_result], (10, 25), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 0, 255), 2)
         rospy.loginfo("index: %d",self.classification_result)
         rospy.loginfo("index: %f",results[self.classification_result])
-        cv2.imshow("target-sub", target)
-        cv2.waitKey(3)
+        # cv2.imshow("target-sub", target)
+        # cv2.waitKey(3)
         try:
             self.busy = 0
             if ((self.classification_result == 5) and (results[self.classification_result] > 0.50)):

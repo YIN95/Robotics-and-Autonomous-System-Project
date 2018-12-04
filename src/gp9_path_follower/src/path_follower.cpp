@@ -225,7 +225,8 @@ public:
 	void move() {
 
 		bool obstacle_in_the_way = obstacleCheck();
-		if (obstacle_in_the_way || battery_stopped) {
+		// if (obstacle_in_the_way || battery_stopped) {
+		if (obstacle_in_the_way) {
 			ROS_INFO("obstacle in the way");
 			stop();
 			std_msgs::Bool msg;
