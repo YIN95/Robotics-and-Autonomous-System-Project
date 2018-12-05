@@ -10,12 +10,6 @@
 #include <geometry_msgs/Quaternion.h>
 #include <sensor_msgs/LaserScan.h>
 
-/* 
-TODO list 
-
-1. Debug abort method when seeing obstacles with lidar.  
-2. Add support for stopping when seeing batteries, for this we need camera topic.
-*/
 
 class StraightLines{
 
@@ -131,7 +125,7 @@ public:
 
 	void batteryCallback(const geometry_msgs::Pose2D::ConstPtr& battery_pos) {
 		ROS_INFO("In callback of battery");
-		battery_stopped = true;	//TODO: switch to false again!!!somewhere
+		battery_stopped = true;
 	}
 
 	void brainStateCallBack(const std_msgs::Int32::ConstPtr& brain_msg) {
@@ -185,17 +179,9 @@ public:
 		pose_goal[2] = global_desired_pose_msg->theta;
 
 		ROS_INFO("Global Pose Callback");
-		ROS_INFO("Point: %f %f %f", pose_goal[0], pose_goal[1], pose_goal[2]);
 		newInfoAboutGoal = true;
 		has_reached_goal_msg.data = false;
 		previous_hasReachedGoal = has_reached_goal_msg.data;
-
-		// bool x_close = fabs(pose_previous[0] - pose_desired[0]) < 1e-6;
-		// bool y_close = fabs(pose_previous[1] - pose_desired[1]) < 1e-6;
-		// same_point = (x_close && y_close);
-		// bool angle_close = fabs(pose_desired[2] - pose_previous[2]) < 1e-6;
-		// other_angle = !angle_close;
-
 	}
 
 	void turnOnSpot() {
@@ -238,21 +224,13 @@ public:
 			moveToPoint();
 		}
 
-		// ROS_INFO("last checkpoint: %f, %f, %f", last_checkpoint[0], last_checkpoint[1], last_checkpoint[2]);
-		// ROS_INFO("v : %f", velocity_msg.linear.x);
-		// ROS_INFO("w : %f", velocity_msg.angular.z);
-		// ROS_INFO("close Enough: %d", close_enough_msg.data);
-
 		pub_velocity.publish(velocity_msg);
 		pub_close_enough.publish(close_enough_msg);
-		//ROS_INFO("New info? %d", newInfoAboutGoal);
-
+		
 		if(newInfoAboutGoal){
 		 	pub_has_reached_goal.publish(has_reached_goal_msg);
 	 	}
 		newInfoAboutGoal = false;
-		
-		// ROS_INFO("=============================================");
 	}
 
 	void moveToPoint() {
@@ -260,15 +238,12 @@ public:
 		if (!turn_flag) {
 
 			updateErrors();
-			// ROS_INFO("distance error: %f", distance);
 
 			if ((fabs(error_angle) > angle_threshold) && (distance > distance_threshold) ) {
-				// ROS_INFO("first turn");
 				rotate();
 			}
 
 			else if (distance > distance_threshold) {
-				// ROS_INFO("translation");
 				translate(distance);
 			}
 
@@ -280,8 +255,6 @@ public:
 	}
 
 	void rotate() {
-
-		//ROS_INFO("IN ROTATE!!!!!!!!!!!!!!!");
 		
 		double sign = error_angle / fabs(error_angle);
 
@@ -298,36 +271,23 @@ public:
             angle_travelled -= M_PI;
         }
 
-
-
-		//ROS_INFO("angle travelled: %f", angle_travelled);
-
 		bool just_started = fabs(error_angle) > slow_rads;
 		bool short_drive = (fabs(error_angle) < slow_rads && angle_travelled < (slow_rads + angle_threshold));
 
-		// To start slowly. w: w_min --> w_max, angle_travelled: 0 --> slow_rads.
 		if (just_started) {
-			//ROS_INFO("Slow start");
 			w = sign * (w_min + (w_max - w_min) * (angle_travelled / slow_rads));
 		}
 
-			// When just driving a short distance, drive slowly
 		else if (short_drive) {
-			//ROS_INFO("Short drive");
 			w = sign * w_min;
 		}
 
-			// To slow down in the end. w: w_max --> w_min, error_angle: slow_rads --> 0.
 		else {
-			//ROS_INFO("Slowing down");
 			w = sign * (w_max - (w_max - w_min) * (((slow_rads + angle_threshold) - fabs(error_angle)) / (slow_rads + angle_threshold)));
 		}
 
-		//ROS_INFO("error angle : %f", error_angle);
-
-		//ROS_INFO("w : %f", w);
 		velocity_msg.linear.x = 0;
-		velocity_msg.angular.z = sign * 1.2; // 1.2 is a okay value
+		velocity_msg.angular.z = sign * 1.2;
 	}
 
 	void translate(double distance) {
@@ -351,26 +311,18 @@ public:
 		double dy = last_checkpoint[1] - pose[1];
 		double distance_travelled = sqrt(pow(dx, 2) + pow(dy, 2));
 
-		// ROS_INFO("dist travelled: %f", distance_travelled);
-
 		bool just_started = distance > slow_dist;
 		bool short_drive = (distance < slow_dist && distance_travelled < slow_dist);
 
-		// To start slowly. v: v_min --> v_max, distance_travelled: 0 --> slow_dist.
-		if (just_started) { // IS THE IF STATEMENT CORRECT?
-			// ROS_INFO("Slow start");
+		if (just_started) {
 			v = v_min + (v_max - v_min) * (distance_travelled / slow_dist);
 		}
 
-			// When just driving a short distance, drive slowly
 		else if (short_drive) {
-			// ROS_INFO("Short drive");
 			v = v_min;
 		}
 
-			// To slow down in the end. v: v_max --> v_min, distance: slow_dist --> 0.
 		else {
-			// ROS_INFO("Slowing down");
 			v = v_max - (v_max - v_min) * ((slow_dist - distance) / slow_dist);
 		}
 
@@ -418,19 +370,15 @@ public:
 		velocity_msg.angular.z = 0;
 		resetErrors();
         close_enough_msg.data = true;
-		//ROS_INFO("Close Enough");
-
+	
 	}
 
 	void hasReachedGoal() {
 		double dist_to_goal = sqrt(pow(pose_goal[0] - pose[0], 2) + pow(pose_goal[1] - pose[1], 2));
-		// bool close_enough_to_goal = dist_to_goal < distance_threshold;
 
 		if((pose_goal[0] == pose_desired[0]) && (pose_goal[1] == pose_desired[1]))
-		// if (close_enough_to_goal)
 		{
 			has_reached_goal_msg.data = true;
-			//pub_has_reached_goal.publish(has_reached_goal_msg); //ADDED
 			ROS_INFO("hasReachedGoal");
 		}
 
@@ -445,7 +393,6 @@ public:
 	}
 
 	void stop() {
-		// TODO: publish to brain!
 		velocity_msg.linear.x = 0;
 		velocity_msg.angular.z = 0;
 		stopped = true;
@@ -476,7 +423,7 @@ public:
 		marker.scale.x = 0.5;
 		marker.scale.y = 0.1;
 		marker.scale.z = 0.1;
-		marker.color.a = 0.5; // Don't forget to set the alpha!
+		marker.color.a = 0.5;
 		marker.color.r = 1.0;
 		marker.color.g = 0;
 		marker.color.b = 1.0;

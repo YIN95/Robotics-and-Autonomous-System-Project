@@ -497,18 +497,6 @@ public:
         }
     }
 
-    double calcInnovation() {
-        double nu = 0;
-        for(int j = 0; j < n_measurements; j++) {
-            if(!isinf(measurements[j])) {
-                nu += pow(measurements[j]-z_hat[j], 2);
-                //ROS_INFO("DIFFERENCE INNOVATION MODEL AND MEASUREMENT: %f \n", measurements[j]-z_hat[j]);
-            }
-        }
-        nu = sqrt(nu);
-        return nu;
-    }
-
     void systematicResample() {
         double cumsum[n_particles];
         cumsum[0] = particles[3][0];

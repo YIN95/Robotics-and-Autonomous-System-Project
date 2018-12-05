@@ -32,9 +32,7 @@ class PathPublisher:
         start_x = rospy.get_param("robot/starting_position/x")
         start_y = rospy.get_param("robot/starting_position/y")
 
-        #self.graph = build_graph(self.path, self.robot_radius)
-        self.graph = build_graph(self.path_to_updated_map, self.robot_radius)
-
+        self.graph = build_graph(self.path, self.robot_radius)
         self.sub_pose = rospy.Subscriber('/pose', Pose2D, self._pose_callback)
         #self.sub_update_map = rospy.Subscriber('/update_map', Bool, self._update_map_callback)
         self.sub_global_desired_pose = rospy.Subscriber('/global_desired_pose', Pose2D,
@@ -69,10 +67,9 @@ class PathPublisher:
         just that we receive it means that we should update the map.
         """
         rospy.loginfo("Rebuilding the visibility graph")
-        # self.graph = build_graph(self.path, self.robot_radius)
         self.graph = build_graph(self.path_to_updated_map, self.robot_radius)   
         rospy.loginfo("Done building new graph")
-        # remap_done = Bool()
+
         self.remap_done = True
         self.pub_remap_done.publish(self.remap_done)
     
@@ -80,7 +77,7 @@ class PathPublisher:
         self.new_position = False
         rospy.loginfo("_find_path")
         vertex_path = []
-        # remove the first element in shortest path since its the starting position
+
         vertex_path = self.graph.shortest_path(self.position, self.desired_position)[1:]
         path = []
         for vertex in vertex_path:
@@ -92,7 +89,6 @@ class PathPublisher:
             print(vertex.__repr__())
         rospy.loginfo("vertex")
 
-        #self.graph.plot_path(path)
         try:
             if (vertex_path[-1] - self.desired_position).norm() > 1e-6:
                 pose.theta = self.desired_angle
@@ -130,16 +126,7 @@ if __name__ == '__main__':
     rate = rospy.Rate(control_frequency)
 
     pb = PathPublisher()
-
-    # while not rospy.is_shutdown():
-
-    #     if pb.new_position:
-    #         try:
-    #             pb.publish_path()
-    #         except ValueError:
-    #             rospy.loginfo("not working, put logic here")
-
-    #     rate.sleep()
+    
     while not rospy.is_shutdown():
 
 
@@ -148,7 +135,4 @@ if __name__ == '__main__':
             pb.publish_path()
             pb.remap_done = False
             
-
-
-
         rate.sleep()

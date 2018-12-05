@@ -116,7 +116,6 @@ public: /* ros */
 		sub_has_reached_goal = nh.subscribe<std_msgs::Bool>("/has_reached_goal", 1, &StateMachine::hasReachedGoalCallBack, this);
 		sub_has_reached_orientation = nh.subscribe<std_msgs::Bool>("/has_reached_orientation", 1, &StateMachine::hasReachedOrientationCallBack, this);
 		sub_emergency_break = nh.subscribe<std_msgs::Bool>("/emergency_break", 1, &StateMachine::emergencyBreakCallBack, this);
-		// sub_emergency_break_bt = nh.subscribe<geometry_msgs::Pose2D>("/findBattery", 1, &StateMachine::emergencyBreakCallBack_bt, this);
 		sub_detection = nh.subscribe<std_msgs::Bool>("/findObject", 1, &StateMachine::detectionCallBack, this);
 		sub_remap = nh.subscribe<std_msgs::Bool>("/remap", 1, &StateMachine::remapCallBack, this);
 
@@ -134,7 +133,6 @@ public: /* ros */
 
 	void emergencyBreakCallBack(const std_msgs::Bool::ConstPtr& emergencyBreak_msg) {
 		emergency_break = emergencyBreak_msg->data;
-		// remap_done = false;
 		std_msgs::Bool updateMap;
 		updateMap.data = true;
 		pub_updateMap.publish(updateMap);
@@ -147,15 +145,6 @@ public: /* ros */
 			takeNext = true;
 		}
 		ROS_INFO("In emergencyBreak Callback.");
-	}
-
-	void emergencyBreakCallBack_bt(const geometry_msgs::Pose2D::ConstPtr& emergencyBreak_msg) {
-		// emergency_break = true;
-		// std_msgs::Bool updateMap;
-		// updateMap.data = true;
-		// pub_updateMap.publish(updateMap);
-		// print_again = true;
-		ROS_INFO("In emergencyBreak Callback. battery ");
 	}
 
 	void detectionCallBack(const std_msgs::Bool::ConstPtr& detection_msg) {
@@ -194,7 +183,6 @@ public: /* ros */
 					global_pose[0] = pose_sequence[nextPose][0];
 					global_pose[1] = pose_sequence[nextPose][1];
 					global_pose[2] = pose_sequence[nextPose][2];
-					ROS_INFO("Global Desired Pose: \t%f, \t%f, \t%f", global_pose[0], global_pose[1], global_pose[2]);
 					
 					bool same_x = fabs(previous_pose[0] - global_pose[0]) < 1e-6;
 					bool same_y = fabs(previous_pose[1] - global_pose[1]) < 1e-6;
@@ -250,7 +238,6 @@ public: /* ros */
 				if(object_detected){
 					arrival_time = ros::Time::now();
 					coming_from_moving = true;
-					ROS_INFO("Stopping from moving");
 					currentState = STATE_STOP;
 					object_detected = false;
 				}
@@ -270,7 +257,7 @@ public: /* ros */
 				}
 				break;
 
-			case STATE_GO_HOME:	//Go Home
+			case STATE_GO_HOME:
 				ROS_INFO("GO HOME");
 				if(home == false){
 					home = true;
@@ -303,12 +290,11 @@ public: /* ros */
 					arrival_time = ros::Time::now();
 					coming_from_rotating = true;
 					currentState = STATE_STOP;
-					ROS_INFO("Stopping from rotating");
 					object_detected = false;
 				}
 				break;
 
-			case STATE_STOP:	//Stop
+			case STATE_STOP:
 				ROS_INFO("STOP");
 
 				current_time = ros::Time::now();
@@ -328,14 +314,14 @@ public: /* ros */
 				}
 				break;
 
-			case STATE_MOVING_BACK:	//Stop
+			case STATE_MOVING_BACK:
 				ROS_INFO("MOVING BACK");
 
 				current_time = ros::Time::now();
 				if ((current_time - arrival_time).toSec() > moving_back_seconds){
 					
 					velocity_msg.linear.x = 0;
-            		velocity_msg.angular.z = 0; // 1.2 is a okay value
+            		velocity_msg.angular.z = 0;
             		pub_velocity.publish(velocity_msg);
 					// if(remap_done){
 					// 	currentState = STATE_MOVING;
@@ -368,7 +354,7 @@ public: /* ros */
 				}
 				break;
 
-			case STATE_END:	//Stop
+			case STATE_END:
 				ROS_INFO("END");
 
 				velocity_msg.linear.x = 0;
@@ -380,8 +366,6 @@ public: /* ros */
 	}
 
 	void publishNewPose(){
-		// ROS_INFO("Global Desired Pose: \t%f, \t%f, \t%f", global_pose[0], global_pose[1], global_pose[2]);
-		// ROS_INFO("Previous Pose: \t%f, \t%f, \t%f", previous_pose[0], previous_pose[1], previous_pose[2]);
 	
 		bool same_x = fabs(previous_pose[0] - global_pose[0]) < 1e-6;;
 		bool same_y = fabs(previous_pose[1] - global_pose[1]) < 1e-6;;
@@ -398,9 +382,6 @@ public: /* ros */
 			previous_pose[2] = global_pose[2];
 			print_again = false;
 		}
-		ROS_INFO("Has Reached Goal? %d", hasReachedGoal);
-		ROS_INFO("Has Reached Orientation? %d", has_reached_orientation);
-		ROS_INFO("---------------------------------------------------------------------------------");
 	}
 
 	int getCurrentState(){
@@ -428,7 +409,7 @@ public: /* ros */
         return num_points;
     }
 
-	void readExplorePosition(){	// read the position we need to explore for phase 1
+	void readExplorePosition(){
 		std::fstream fin(exploration_file_path.c_str());
 		ROS_INFO("In reading file");
 		if (fin){
@@ -439,9 +420,6 @@ public: /* ros */
 				pose_sequence[point_count][1] = y;
 				pose_sequence[point_count][2] = 1.57;
 				pose_sequence[point_count][3] = 0;
-
-				ROS_INFO("[Explore Pose] x:%f, y:%f, theta:%f, flag:%f", pose_sequence[point_count][0], pose_sequence[point_count][1], pose_sequence[point_count][2], pose_sequence[point_count][3]);
-				
 				point_count += 1;
 			}
 		}
@@ -481,7 +459,6 @@ private:
 	bool has_reached_orientation;
 	bool emergency_break;
 	bool print_again;
-	// bool has_reached_grab;
 	bool open_grippers;
 	bool object_detected;
 	bool remap_done;

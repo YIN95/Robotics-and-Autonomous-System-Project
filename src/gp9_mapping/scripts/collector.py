@@ -40,7 +40,6 @@ class LaserCollector:
     def callback_laser(self, laser):
 
         if (rospy.get_rostime() - self.previous_write_time).to_sec() > self.seconds_between_writes:
-            # rospy.loginfo("Angular speed: %.2f" % self.angular_speed)
             turning = abs(self.angular_speed) > 0.5
             if not turning:
                 rospy.loginfo("writing measurements!")

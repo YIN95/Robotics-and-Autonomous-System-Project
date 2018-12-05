@@ -70,8 +70,6 @@ public: /* ros */
 		desired_distance_from_object = 0;
 
         num_objects = countObjects();
-		ROS_INFO("num of objects %d", num_objects);
-
 
 		global_pose = std::vector<double>(3, 0);
 		previous_pose = std::vector<double>(3, 0);
@@ -127,14 +125,14 @@ public: /* ros */
 
 	void run(){
 		switch(currentState){
-			case STATE_READY: //Needed to give time to the other nodes to listen to the topics
+			case STATE_READY:
                 msg.data = 0;
             	pub_grab.publish(msg);
 				readObjectPosition();
 				currentState = STATE_NEXT_POSE;
 				break;
 
-			case STATE_NEXT_POSE: //Take A Pose
+			case STATE_NEXT_POSE:
 
 				if(start){
 					std_msgs::String msg;
@@ -205,14 +203,8 @@ public: /* ros */
 				}
 				break;
 
-			case STATE_GO_HOME:	//Go Home
+			case STATE_GO_HOME:
 				ROS_INFO("GO HOME");
-				// global_pose[0] = 0.225;
-				// global_pose[1] = 0.225;
-				// global_pose[2] = 1.57;
-				// open_grippers = false;
-				// retrieving_object = true;
-				// currentState = STATE_MOVING;
 				if(home == false){
 					home = true;
 					global_pose[0] = gohome_x;
@@ -256,7 +248,7 @@ public: /* ros */
 				
 				break;
 
-			case STATE_STOP:	//Stop
+			case STATE_STOP:
 				ROS_INFO("STOP");
 
 				current_time = ros::Time::now();
@@ -287,14 +279,14 @@ public: /* ros */
 				}
 				break;
 
-			case STATE_MOVING_BACK:	//Stop
+			case STATE_MOVING_BACK:
 				ROS_INFO("MOVING BACK");
 
 				current_time = ros::Time::now();
 				if ((current_time - arrival_time).toSec() > moving_back_seconds){
 					print_again = true;
 					velocity_msg.linear.x = 0;
-            		velocity_msg.angular.z = 0; // 1.2 is a okay value
+            		velocity_msg.angular.z = 0;
             		pub_velocity.publish(velocity_msg);
 					currentState = STATE_MOVING;
 					if(go_back_to_release){
@@ -308,12 +300,12 @@ public: /* ros */
 					std::srand(std::time(0));
 					double flag = std::rand()%100/(double)101;
 					if (flag>0.3){
-						velocity_msg.angular.z = -0.3; // 1.2 is a okay value
+						velocity_msg.angular.z = -0.3;
 						velocity_msg.angular.z = -0.3;
 						pub_velocity.publish(velocity_msg);
 					}
 					else{
-						velocity_msg.angular.z = -0.3; // 1.2 is a okay value
+						velocity_msg.angular.z = -0.3;
 						velocity_msg.angular.z = 0.3;
 						pub_velocity.publish(velocity_msg);
 					}            		
@@ -325,7 +317,7 @@ public: /* ros */
         		msg.data = 1;
         		pub_grab.publish(msg);
 				velocity_msg.linear.x = 0;
-            	velocity_msg.angular.z = 0; // 1.2 is a okay value
+            	velocity_msg.angular.z = 0;
             	pub_velocity.publish(velocity_msg);
 				currentState = STATE_MOVING;
 				if(retrieving_object){
@@ -341,7 +333,7 @@ public: /* ros */
 				msg.data = 0;
             	pub_grab.publish(msg);
 				velocity_msg.linear.x = 0;
-            	velocity_msg.angular.z = 0; // 1.2 is a okay value
+            	velocity_msg.angular.z = 0;
             	pub_velocity.publish(velocity_msg);
 				currentState = STATE_GO_HOME;
 				if(retrieving_object){
@@ -351,7 +343,7 @@ public: /* ros */
         		
 				break;
 
-			case STATE_END:	//Stop
+			case STATE_END:
 				ROS_INFO("END");
 
 				velocity_msg.linear.x = 0;
@@ -367,7 +359,6 @@ public: /* ros */
 		bool same_y = fabs(previous_pose[1] - global_pose[1]) < 1e-6;
 		bool same_angle = fabs(previous_pose[2] - global_pose[2]) < 1e-6;
 		bool same_point = (same_x && same_y && same_angle);
-		ROS_INFO("print_again %d", print_again);
 		if((!same_point)||(print_again)){
 			if((global_pose[0] != 0) && (global_pose[1] != 0)){
 				ROS_INFO("PUBLISH point %f %f %f", global_pose[0], global_pose[1], global_pose[2]);
@@ -382,9 +373,6 @@ public: /* ros */
 			}
 			
 		}
-		//ROS_INFO("Has Reached Goal? %d", hasReachedGoal);
-		//ROS_INFO("Has Reached Orientation? %d", has_reached_orientation);
-		ROS_INFO("---------------------------------------------------------------------------------");
 	}
 
 	int getCurrentState(){
@@ -392,17 +380,12 @@ public: /* ros */
 	}
 
 	void objectPosition(int obj_count){ 
-		//To close the grippers at desired distance from object instead of the object position
 		
 		double dx = obj_pose_sequence[obj_count][0] - global_pose[0];
 		double dy = obj_pose_sequence[obj_count][1] - global_pose[1];
 		double dist = sqrt(pow(dx, 2) + pow(dy, 2));
 		double distance_x;
 		double distance_y;
-
-		ROS_INFO("distance: %f", dist - desired_distance_from_object);
-		ROS_INFO("global x: %f", global_pose[0]);
-		ROS_INFO("object x: %f", obj_pose_sequence[obj_count][0]);
 		distance_x = (dist - desired_distance_from_object) * cos(global_pose[2]);
 		distance_y = (dist - desired_distance_from_object) * sin(global_pose[2]);
 
@@ -424,7 +407,7 @@ public: /* ros */
         return 2*num_points;
     }
 
-	void readObjectPosition(){	// read the position of the object we detected in phase 1
+	void readObjectPosition(){
 		std::fstream fin("/home/ras19/catkin_ws/src/transforms/src/objposition.txt");
 
 		if (fin){
@@ -434,7 +417,6 @@ public: /* ros */
 
 			while(fin>>x>>y>>theta>>xo>>yo){
 				
-				// Robot pose when the object has been detected
 				pose_sequence[obj_count][0] = x;
 				pose_sequence[obj_count][1] = y;
 				pose_sequence[obj_count][2] = theta;
@@ -448,9 +430,7 @@ public: /* ros */
 				obj_pose_sequence[obj_count+1][0] = xo;
 				obj_pose_sequence[obj_count+1][1] = yo;
 
-				// ROS_INFO("[Object Pose] x:%f, y:%f, theta:%f, flag:%f", pose_sequence[obj_count][0], pose_sequence[obj_count][1], pose_sequence[obj_count][2], pose_sequence[obj_count][3]);
-                // ROS_INFO("counter: %d", obj_count);
-                obj_count += 2;
+				obj_count += 2;
 			}
 			
 		}

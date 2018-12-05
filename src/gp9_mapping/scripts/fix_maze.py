@@ -103,7 +103,3 @@ if __name__ == '__main__':
     points = read_maze(maze_path)
     fixed_points = transform(points, to_flip)
     write_maze(fixed_points, fixed_maze_path)
-
-
-
-

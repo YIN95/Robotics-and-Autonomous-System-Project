@@ -145,7 +145,6 @@ void Odometry::ismoving(double vx, double vy, double w){
     else{
         _ismoving = false;
     }
-    // _ismoving = true;
     
 }
 

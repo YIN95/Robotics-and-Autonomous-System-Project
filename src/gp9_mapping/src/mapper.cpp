@@ -89,7 +89,6 @@ class Point{
 
         void print() {
             std::cout << "Point: (" << x << ", " << y << ")" << '\n';
-            // ROS_INFO("Point: (%f, %f)", x, y);
         }
 
         double getX(){
@@ -175,7 +174,6 @@ class Segment{
 
         void print() {
             std::cout << "Segment: (" << p1.getX() << ", " << p1.getY() << ")" << "(" << p2.getX() << ", " << p2.getY() << ")" << '\n';
-            // ROS_INFO("Point: (%f, %f)", x, y);
         }
 
         Point getP1(){
@@ -330,7 +328,7 @@ class Measurements{
             }
         }
 
-        void readMeasurements() {
+        void readMeasurements() { //Method for reading from file insted that from topic, debug purposes
             std::fstream fin(pathToMeasurements.c_str());
             std::vector<bool> indicesToUse(360, false);
             std::vector<double> pose(3,0);
@@ -386,8 +384,6 @@ class Measurements{
             std::deque<Pose> currentPoses;
             currentMeasurements = measurements;
             currentPoses = poses;
-            // measurements.clear();
-            // poses.clear();
 
             std::deque<Point> measurementPositions;
             double dAngle = (3 * M_PI - M_PI) / numAngles;
@@ -568,7 +564,7 @@ void writeNewWalls(std::deque<Segment> &newWalls, std::string pathToUpdatedMap){
     const char* pathToMaze = pathToUpdatedMap.c_str();
     std::fstream myfile;
     int numNewWalls = newWalls.size();
-    myfile.open (pathToMaze, std::fstream::app); //std::fstream::trunc to delete and rewrite
+    myfile.open (pathToMaze, std::fstream::app);
     if (myfile.is_open())
     {
         for(int i = 0; i < numNewWalls; i ++){
@@ -617,7 +613,6 @@ int main(int argc, char** argv) {
     meas.nh.getParam("/maze/path", pathToMap);
     meas.nh.getParam("/maze/path_updated", pathToUpdatedMap);
 
-    bool previousEmergencyBreak = false;
 
 	while (meas.nh.ok()) {
 
@@ -626,28 +621,6 @@ int main(int argc, char** argv) {
         ros::Time currentMapTime;
         currentMapTime = ros::Time::now();
 
-        //Has to be done with the brain state 7
-
-        // bool emergencyBreak = meas.getEmergencyBreak();
-        // if(emergencyBreak!=previousEmergencyBreak){
-        //     ROS_INFO("Emergency Break - Replanning");
-        //     std::deque<Point> interestingPoints = meas.getInterestingPoints();
-        //     Mapper mapper = Mapper(inlierDistanceThreshold, numInliersThreshold);
-        //     std::deque<Segment> newWalls = mapper.sequentialRANSAC(interestingPoints, neighborDistanceThreshold, numNeighborsThreshold);
-        //     previousEmergencyBreak = emergencyBreak;
-        //     int numNewWalls = newWalls.size();
-        //     if(numNewWalls > 0){
-        //         ROS_INFO("Writing");
-        //         writeNewWalls(newWalls, pathToMap);
-        //         std_msgs::Bool updateMap;
-        //         updateMap.data = true;
-        //         pub_updateMap.publish(updateMap);
-        //         pathToMap = pathToUpdatedMap;
-
-        //     }
-        //     previousMapTime = ros::Time::now();
-
-        // }
         if((currentMapTime - previousMapTime).toSec() > secondsBetweenRemapping){
             ROS_INFO("MAPPER - Searching for new walls");
             std::deque<Point> interestingPoints = meas.getInterestingPoints();

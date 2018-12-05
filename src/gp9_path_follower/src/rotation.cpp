@@ -64,7 +64,6 @@ public:
         newInfoAboutGoal = true;
 		reached_orientation_msg.data = false;
 		previous_hasReachedOrientation = reached_orientation_msg.data;
-        ROS_INFO("ROTATION NODE globalDesiredPoseCallBack ");
 	}
 
     double degToRad(double degrees) {
@@ -87,25 +86,20 @@ public:
 
     void rotate() {
 
-        //reached_orientation_msg.data = false;
-
         double error_angle = getErrorAngle();
 		double sign = error_angle / fabs(error_angle);
 
         if (fabs(error_angle) > angle_threshold) {
-            ROS_INFO("Giving signal to motor - ROTATION NODE");
             velocity_msg.linear.x = 0;
-            velocity_msg.angular.z = sign * 1.2; // 1.2 is a okay value
+            velocity_msg.angular.z = sign * 1.2;
             pub_velocity.publish(velocity_msg);
         }
 
         else {
-            ROS_INFO("stopping, i.e. close enough  - ROTATION NODE");
             stop();
         }
 
         updateGoalInfo();
-        ROS_INFO("ROTATION NODE - newInfoAboutGoal %d", newInfoAboutGoal);
         if(newInfoAboutGoal){
 			pub_has_reached_orientation.publish(reached_orientation_msg);
 		}
@@ -130,7 +124,6 @@ public:
         pub_velocity.publish(velocity_msg);
         stopped = true;
         reached_orientation_msg.data = true;
-        ROS_INFO("ROTATION NODE - Has Stopped");
         
 	}
 
@@ -172,7 +165,6 @@ int main(int argc, char** argv) {
 		ros::spinOnce();
 		if (!rotation.has_stopped()) {
             if(rotation.getBrainState() == 5) {
-                // ROS_INFO("Going into rotation.rotate()!");
                 rotation.rotate();
             }
         
