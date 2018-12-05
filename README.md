@@ -2,7 +2,8 @@
 RAS-GROUP-9
 
 
-*The commands to run*
+## The commands to run  
+
 0. To be able to connect, be on the same wifi as the NUC with your computer  
 ssh ras19@192.168.1.18
 
