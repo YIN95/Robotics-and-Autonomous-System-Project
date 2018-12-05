@@ -66,28 +66,28 @@ public:
     int colorClassifier(int h, int s, int v, int b, int g, int r);
     void showresult(int txt);
     void showResult(int index, int obi);
-    int getDepth(int x, int y);
-    void pubPose(double x, double y, int type);
-    void listen_obj_map(double x, double y, int type);
-    bool check_pre_object(int temp);
-    int getTrueDepth(int depth);
-    Mat cropTarget(int x, int y);
-    void saveTrainingData(Mat target);
-    void publishClassificationTarget(Mat target);
-    void stateCallback(const std_msgs::Int32ConstPtr &msg);
-    void shapeCallback(const std_msgs::Int32ConstPtr &msg);
-    int check_now_object();
-    int check_now_object_color_shape();
-    void speakResult();
-    void showCresult();
-    bool check_pre_object_by_position(int temp, double x, double y);
-    void publishEvidence(String object_id, Mat image, double x, double y);
-    String getEvidenceID(int index);
-    void robotCallback(const geometry_msgs::Pose2D::ConstPtr &msg);
-    double calculateDiatance(double x1, double y1, double x2, double y2);
-    void stateMovingCallback(const std_msgs::Int32ConstPtr &msg);
-    int getDepth_onePoint(int x, int y);
-    bool detectBarrier(bool detect);
+    int getDepth(int x, int y); // get the currenet
+    void pubPose(double x, double y, int type); // publish the pose of robot (current)
+    void listen_obj_map(double x, double y, int type);  // check which object
+    bool check_pre_object(int temp);    // useless
+    int getTrueDepth(int depth);    // better depth
+    Mat cropTarget(int x, int y);   // crop a small image used for classification
+    void saveTrainingData(Mat target);  // useless
+    void publishClassificationTarget(Mat target);   // publish the classification result 
+    void stateCallback(const std_msgs::Int32ConstPtr &msg); // to know the current state in state machine
+    void shapeCallback(const std_msgs::Int32ConstPtr &msg); // to know the shape
+    int check_now_object(); // get the current object 
+    int check_now_object_color_shape(); // use less
+    void speakResult(); // speak the result with espeak
+    void showCresult(); // show the current result of object
+    bool check_pre_object_by_position(int temp, double x, double y);    // now useless
+    void publishEvidence(String object_id, Mat image, double x, double y);  // publish the evidence -- for rosbag
+    String getEvidenceID(int index);    // get the id of the object, used for evidence
+    void robotCallback(const geometry_msgs::Pose2D::ConstPtr &msg); // subscribe the coordinate of the robot
+    double calculateDiatance(double x1, double y1, double x2, double y2);   // calculate distance between two coordinate
+    void stateMovingCallback(const std_msgs::Int32ConstPtr &msg);   // check weather the robot is moving
+    int getDepth_onePoint(int x, int y);    // get the depth from one point
+    bool detectBarrier(bool detect);    // detect the barrier
 
 public:
     static const int img_rgb_height = 480;
@@ -110,21 +110,30 @@ public:
     Mat origin_frame;   // the origin rgb image
     Mat evidence_frame; // the image used for evidence
     Mat origin_frame_masked;    // the origin image with hsv mask
+
+    // used for coordinate transform
     geometry_msgs::PointStamped obj_tf_camera;
     geometry_msgs::PointStamped obj_tf_map;
     geometry_msgs::Pose2D pose_;
+
+    // the evidence we need to publish
     double evidence_x;  
     double evidence_y;
     String evidence_id;
+
+    // informaton of the current object
     int now_color;  
     int now_shape;
     int now_object;
+
+    // coordinate of the robot
     double robot_x;
     double robot_y;
     double robot_theta;
+
     ros::Time current_time;
     ros::Time arrival_time;
-    ros::Time current_time2;
+    ros::Time current_time2;    
     ros::Time arrival_time2;
 
     

@@ -11,13 +11,15 @@
 class Calibration{
 public:
     ros::NodeHandle nh;
-    ros::Subscriber sub_image_rgb;
-    ros::Subscriber sub_image_depth;
-    ros::Subscriber rgb_info_sub;
-    ros::Subscriber depth_info_sub;
+    ros::Subscriber sub_image_rgb;  // subscribe from the rgb image
+    ros::Subscriber sub_image_depth;    // subscribe from the depth image
+    ros::Subscriber rgb_info_sub;   // The information of bgr camera
+    ros::Subscriber depth_info_sub; // the information of depth cemera
 
 public:
-    static const double fx = 619.7237548828125;
+
+    // The parameters of the realsense camera
+    static const double fx = 619.7237548828125; 
     static const double fy = 619.7237548828125;
     static const double fx_inv = 1/619.7237548828125;
     static const double fy_inv = 1/619.7237548828125;
@@ -26,11 +28,13 @@ public:
     static const int image_height = 480;
     static const int image_width = 640;
 
+    // the parameter for rgb camera
     float f_x_rgb; 
     float f_y_rgb;
     float c_x_rgb;
     float c_y_rgb;
 
+    // the parameter for depth camera
     float f_x_depth;
     float f_y_depth;
     float c_x_depth;
@@ -38,9 +42,9 @@ public:
 
 public: 
     Calibration();
-    void imageRGBCallback(const sensor_msgs::ImageConstPtr &msg);
-    void imageDepthCallback(const sensor_msgs::ImageConstPtr &msg);
-    void RGBInfoCallback(const sensor_msgs::CameraInfo::ConstPtr &msg);
-    void depthInfoCallback(const sensor_msgs::CameraInfo::ConstPtr &msg);
-    void calcCoord();
+    void imageRGBCallback(const sensor_msgs::ImageConstPtr &msg);   // subscribe from the rgb image
+    void imageDepthCallback(const sensor_msgs::ImageConstPtr &msg); // subscribe from the depth image
+    void RGBInfoCallback(const sensor_msgs::CameraInfo::ConstPtr &msg); // The information of bgr camera
+    void depthInfoCallback(const sensor_msgs::CameraInfo::ConstPtr &msg);   // the information of depth cemera
+    void calcCoord();   // calculate the cooridate of objects
 };

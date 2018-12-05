@@ -1,5 +1,7 @@
 class ObjectColorShape{
+    
 public:
+    // the information of the object
     static const int COLOR_YELLOW = 1;
     static const int COLOR_GREEN = 2;
     static const int COLOR_LIGHT_GREEN = 3;
