@@ -343,8 +343,8 @@ public:
 		double w = PW + IW + DW;
 
 		double v;
-		double v_max = 0.35;
-		double v_min = 0.2;
+		double v_max = 0.45;
+		double v_min = 0.25;
 		double slow_dist = 0.15;
 
 		double dx = last_checkpoint[0] - pose[0];
@@ -380,7 +380,7 @@ public:
 
 	bool obstacleCheck() {
 		double lidar_dist;
-		for (int deg = 135; deg < 225; deg += every_lidar_value) {
+		for (int deg = 138; deg < 222; deg += every_lidar_value) {
 			lidar_dist = laser_distances[deg];
 			if (lidar_dist < min_distance_to_obstacle) {
 				return true;

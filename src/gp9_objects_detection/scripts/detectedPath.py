@@ -24,10 +24,13 @@ class Collector:
         self.subscriber_pose = rospy.Subscriber("/pose", Pose2D, self.callback_pose)
         self.pub_newtarget_pose = rospy.Publisher('/newtarget_pose', Pose2D, queue_size=1)
 
-        self.current_pose = Pose(0.225, 0.225, 0)
-        # self.current_pose = Pose(rospy.get_param("robot/starting_position/x"), rospy.get_param("robot/starting_position/"), 0)
+        # TODO: ask wenjie if its ok?
+        start_x = rospy.get_param("/robot/starting_position/x")
+        start_y = rospy.get_param("/robot/starting_position/y")
+        start_theta = rospy.get_param("/robot/starting_position/theta")
+        self.current_pose = Pose(start_x, start_y, start_theta)
 
-        self.sizex = rospy.get_param("/maze/sizeX")
+        self.sizex = rospy.get_param("/maze/sizeX") # TODO: read the file instead.
         self.sizey = rospy.get_param("/maze/sizeY")
         self.D = 25
         self.R = 23

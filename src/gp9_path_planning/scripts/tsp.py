@@ -84,8 +84,13 @@ def tsp(path_to_map, robot_radius, grid):
         result.append(valuebest)
     print(valuebest)
     ShortestPath = []
+    flag = 0
     for index in solutionbest:
-        ShortestPath.append(list(A[index]))
+        if (flag<1):
+            flag = False
+            flag += 1
+        else:
+            ShortestPath.append(list(A[index]))
         
     return A, solutionbest, ShortestPath
 
@@ -101,15 +106,15 @@ def visualize(Index, Path):
     # plt.show()
 
 if __name__ == '__main__':
-    path_to_map = '/home/ras19/catkin_ws/src/gp9_path_planning/maps/maze2018.txt'
+    path_to_map = '/home/ras19/catkin_ws/src/gp9_path_planning/maps/updated_maze.txt'
     robot_radius = 0.16
-    grid = [2.3, 4.7, 6, 12]
+    grid = [2.4, 2.4, 6, 6]
     A, ShortestIndex, ShortestPath = tsp(path_to_map, robot_radius, grid)
     print("shortest path index:")
     print(ShortestIndex)
     print("shortest path:")
     print(ShortestPath)
     np.savetxt('ShortestPath.txt', ShortestPath, fmt='%f')
-    visualize(ShortestIndex, ShortestPath)
+    # visualize(ShortestIndex, ShortestPath)
 
     

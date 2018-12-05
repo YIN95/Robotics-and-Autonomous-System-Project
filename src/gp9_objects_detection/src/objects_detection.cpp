@@ -127,8 +127,8 @@ bool ObjectDetection::detectBarrier(bool detect){
             }
         }
     }
-    pose_tobattery.x = robot_x + height*cos(robot_theta)*0.001;
-    pose_tobattery.y = robot_y + height*sin(robot_theta)*0.001;
+    pose_tobattery.x = robot_x + 0.5*cos(robot_theta);
+    pose_tobattery.y = robot_y + 0.5*sin(robot_theta);
     pose_tobattery.theta = robot_theta;
     ROS_INFO("|||||MinHeight: %d", height);
     if (detect){
@@ -177,8 +177,8 @@ bool ObjectDetection::detectBarrier(bool detect){
         if ((height == 999)){
             current_time2 = ros::Time::now();
             if ((current_time2 - arrival_time2).toSec() > 10){
-                pose_tobattery.x = robot_x + 0.15*cos(robot_theta);
-                pose_tobattery.y = robot_y + 0.15*sin(robot_theta);
+                pose_tobattery.x = robot_x + 0.4*cos(robot_theta);
+                pose_tobattery.y = robot_y + 0.4*sin(robot_theta);
                 ROS_INFO("[WARNING] Obstacle");
                 std_msgs::String msg;
                 msg.data = "battery";
@@ -318,7 +318,10 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                             std_msgs::String msg;
                             msg.data = "I see an object";
                             pub_speak.publish(msg);
+<<<<<<< HEAD
                             
+=======
+>>>>>>> 1205
                             speakResult();
                             evidence_frame = frame_target;
                             listen_obj_map(pose.x, pose.y, now_object);
@@ -846,12 +849,13 @@ bool ObjectDetection::check_pre_object_by_position(int temp, double x, double y)
 int ObjectDetection::getTrueDepth(int depth){
     double TD;
     int height = 125;
-    TD = sqrt(depth*depth - height*height);
+    // TD = sqrt(depth*depth - height*height);
     // TD = depth;
     if(TD == 0){
 
         TD = std::min(sin(65/180)*depth ,sqrt(depth*depth - height*height));
     }
+    TD = 250;
     ROS_INFO("TTTTTTTTTTTTTTTTTTT, %f", TD+105);
     TD = std::max(int(TD), 0);
     return int(TD);

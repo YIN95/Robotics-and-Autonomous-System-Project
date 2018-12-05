@@ -61,6 +61,10 @@ public:
 	void globalDesiredPoseCallBack(const geometry_msgs::Pose2D::ConstPtr& global_desired_pose_msg) {
 		desired_angle = global_desired_pose_msg->theta;
         stopped = false;
+        newInfoAboutGoal = true;
+		reached_orientation_msg.data = false;
+		previous_hasReachedOrientation = reached_orientation_msg.data;
+        ROS_INFO("ROTATION NODE globalDesiredPoseCallBack ");
 	}
 
     double degToRad(double degrees) {
@@ -83,7 +87,7 @@ public:
 
     void rotate() {
 
-        reached_orientation_msg.data = false;
+        //reached_orientation_msg.data = false;
 
         double error_angle = getErrorAngle();
 		double sign = error_angle / fabs(error_angle);
@@ -96,11 +100,12 @@ public:
         }
 
         else {
-            ROS_INFO("stopping, i.e. close enough  - GRAB NODE");
+            ROS_INFO("stopping, i.e. close enough  - ROTATION NODE");
             stop();
         }
 
         updateGoalInfo();
+        ROS_INFO("ROTATION NODE - newInfoAboutGoal %d", newInfoAboutGoal);
         if(newInfoAboutGoal){
 			pub_has_reached_orientation.publish(reached_orientation_msg);
 		}
@@ -108,6 +113,7 @@ public:
 	}
 
     void updateGoalInfo() {
+        
 		if(reached_orientation_msg.data != previous_hasReachedOrientation){
 			newInfoAboutGoal = true;
 		}
@@ -124,6 +130,7 @@ public:
         pub_velocity.publish(velocity_msg);
         stopped = true;
         reached_orientation_msg.data = true;
+        ROS_INFO("ROTATION NODE - Has Stopped");
         
 	}
 

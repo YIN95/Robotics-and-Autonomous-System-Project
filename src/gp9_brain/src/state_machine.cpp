@@ -31,21 +31,29 @@ public: /* ros */
 	ros::Publisher pub_globalDesiredPose;
 	ros::Publisher pub_velocity;
 	ros::Publisher pub_speak;
+	ros::Publisher pub_timeover;
+	ros::Publisher pub_updateMap;
 
 	ros::Subscriber sub_has_reached_goal;
 	ros::Subscriber sub_has_reached_orientation;
 	ros::Subscriber sub_emergency_break;
 	ros::Subscriber sub_emergency_break_bt;
-
 	ros::Subscriber sub_detection;
+	ros::Subscriber sub_remap;
 
 	ros::Time current_time;
     ros::Time arrival_time;
 	ros::Time start_time;
 
+	ros::Time start_time;
+
+	ros::Time trial_time;
+	ros::Time current_emergency_time;
+
+
 	bool start = true;
 	bool home = false;
-
+	bool timeover = false;
 
 	StateMachine(){
 
@@ -65,8 +73,12 @@ public: /* ros */
 		has_reached_orientation = false;
 		emergency_break = false;
 
+		max_num_emergency_breaks = 5;
+		emergency_breaks_counter = 0;
+		seconds_between_emergency_breaks = 20;
+
 		print_again = false;
-		moving_back_seconds = 1;
+		moving_back_seconds = 2;
 		object_detected = false;
 
 		coming_from_moving = false;
@@ -74,6 +86,9 @@ public: /* ros */
 
 		nextPose = 0;
 		num_points = countObjects();
+		remap_done = false;
+
+		takeNext = false;
 		
 		ROS_INFO("num points: %d", num_points);
 
@@ -94,15 +109,18 @@ public: /* ros */
 		previous_pose[2] = start_theta;
 
 		pub_currentState = nh.advertise<std_msgs::Int32>("/brain_state", 1);
+		pub_timeover = nh.advertise<std_msgs::Bool>("/timeover", 1);
 		pub_globalDesiredPose = nh.advertise<geometry_msgs::Pose2D>("/global_desired_pose", 1);
 		pub_velocity = nh.advertise<geometry_msgs::Twist>("/motor_controller/velocity", 1);
 		pub_speak = nh.advertise<std_msgs::String>("/espeak/string", 30);
+		pub_updateMap = nh.advertise<std_msgs::Bool>("/update_map", 1);
 
 		sub_has_reached_goal = nh.subscribe<std_msgs::Bool>("/has_reached_goal", 1, &StateMachine::hasReachedGoalCallBack, this);
 		sub_has_reached_orientation = nh.subscribe<std_msgs::Bool>("/has_reached_orientation", 1, &StateMachine::hasReachedOrientationCallBack, this);
 		sub_emergency_break = nh.subscribe<std_msgs::Bool>("/emergency_break", 1, &StateMachine::emergencyBreakCallBack, this);
 		// sub_emergency_break_bt = nh.subscribe<geometry_msgs::Pose2D>("/findBattery", 1, &StateMachine::emergencyBreakCallBack_bt, this);
 		sub_detection = nh.subscribe<std_msgs::Bool>("/findObject", 1, &StateMachine::detectionCallBack, this);
+		sub_remap = nh.subscribe<std_msgs::Bool>("/remap", 1, &StateMachine::remapCallBack, this);
 
 	} 
 
@@ -118,17 +136,38 @@ public: /* ros */
 
 	void emergencyBreakCallBack(const std_msgs::Bool::ConstPtr& emergencyBreak_msg) {
 		emergency_break = emergencyBreak_msg->data;
+		// remap_done = false;
+		std_msgs::Bool updateMap;
+		updateMap.data = true;
+		pub_updateMap.publish(updateMap);
+		current_emergency_time = ros::Time::now();
+		if (emergency_breaks_counter == 0){
+			trial_time = ros::Time::now();
+		}
+		emergency_breaks_counter += 1;
+		if((emergency_breaks_counter > max_num_emergency_breaks) && ((current_emergency_time - trial_time).toSec() > seconds_between_emergency_breaks)){
+			takeNext = true;
+		}
 		ROS_INFO("In emergencyBreak Callback.");
 	}
 
 	void emergencyBreakCallBack_bt(const geometry_msgs::Pose2D::ConstPtr& emergencyBreak_msg) {
-		emergency_break = true;
+		// emergency_break = true;
+		// std_msgs::Bool updateMap;
+		// updateMap.data = true;
+		// pub_updateMap.publish(updateMap);
+		// print_again = true;
 		ROS_INFO("In emergencyBreak Callback. battery ");
 	}
 
 	void detectionCallBack(const std_msgs::Bool::ConstPtr& detection_msg) {
 		object_detected = detection_msg->data;
 		ROS_INFO("In detection Callback.");
+	}
+
+	void remapCallBack(const std_msgs::Bool::ConstPtr& remap_msg) {
+		remap_done = remap_msg->data;
+		ROS_INFO("In remap Callback.");
 	}
 
 
@@ -157,7 +196,24 @@ public: /* ros */
 					global_pose[0] = pose_sequence[nextPose][0];
 					global_pose[1] = pose_sequence[nextPose][1];
 					global_pose[2] = pose_sequence[nextPose][2];
+					ROS_INFO("Global Desired Pose: \t%f, \t%f, \t%f", global_pose[0], global_pose[1], global_pose[2]);
 					
+					bool same_x = fabs(previous_pose[0] - global_pose[0]) < 1e-6;
+					bool same_y = fabs(previous_pose[1] - global_pose[1]) < 1e-6;
+					if (same_x && same_y){
+						currentState = STATE_ROTATING;
+					}
+					else{
+						currentState = STATE_MOVING;
+					}
+					nextPose += 1;
+				}
+				else if(nextPose == num_points){
+					ROS_INFO("Taking home position");
+					global_pose[0] = start_x;
+					global_pose[1] = start_y;
+					global_pose[2] = M_PI/2;
+
 					bool same_x = fabs(previous_pose[0] - global_pose[0]) < 1e-6;
 					bool same_y = fabs(previous_pose[1] - global_pose[1]) < 1e-6;
 					if (same_x && same_y){
@@ -200,8 +256,18 @@ public: /* ros */
 					currentState = STATE_STOP;
 					object_detected = false;
 				}
+
 				current_time = ros::Time::now();
-				if ((current_time - start_time).toSec() > 310){
+	
+				if ((current_time - start_time).toSec() > 300){
+					timeover = true;
+					std_msgs::String msg;
+					msg.data = "time over";
+					pub_speak.publish(msg);
+
+					std_msgs::Bool msg_timeover;
+					msg_timeover.data = true;
+					pub_timeover.publish(msg_timeover);
 					currentState = STATE_END;
 				}
 				break;
@@ -269,24 +335,36 @@ public: /* ros */
 
 				current_time = ros::Time::now();
 				if ((current_time - arrival_time).toSec() > moving_back_seconds){
-					print_again = true;
+					
 					velocity_msg.linear.x = 0;
             		velocity_msg.angular.z = 0; // 1.2 is a okay value
             		pub_velocity.publish(velocity_msg);
-					currentState = STATE_MOVING;
+					// if(remap_done){
+					// 	currentState = STATE_MOVING;
+					// 	remap_done = false;
+					// 	print_again = true;
+					// }
+					if(takeNext){
+						ROS_INFO("Pose not reachable, take next.");
+						currentState = STATE_NEXT_POSE;
+						takeNext = false;
+					}
+					else{
+						currentState = STATE_MOVING;
+						print_again = true;
+					}
+					
 				}
 				else{
 					velocity_msg.linear.x = -0.2;
 					std::srand(std::time(0));
 					double flag = std::rand()%100/(double)101;
-					if (flag>0.3){
-						velocity_msg.angular.z = -0.3; // 1.2 is a okay value
-						velocity_msg.angular.z = -0.3;
+					if (flag>0.2){
+						velocity_msg.angular.z = -0.2;
 						pub_velocity.publish(velocity_msg);
 					}
 					else{
-						velocity_msg.angular.z = -0.3; // 1.2 is a okay value
-						velocity_msg.angular.z = 0.3;
+						velocity_msg.angular.z = 0.2;
 						pub_velocity.publish(velocity_msg);
 					}            		
 				}
@@ -372,7 +450,7 @@ public: /* ros */
 		
 	}
 
-
+ 
 private:
 	int currentState;
 
@@ -381,6 +459,10 @@ private:
 
 	int stop_seconds;
 	int moving_back_seconds;
+
+	int max_num_emergency_breaks;
+	int emergency_breaks_counter;
+	int seconds_between_emergency_breaks;
 
 	std::string exploration_file_path;
 	geometry_msgs::Pose2D global_desired_pose;
@@ -404,6 +486,9 @@ private:
 	// bool has_reached_grab;
 	bool open_grippers;
 	bool object_detected;
+	bool remap_done;
+
+	bool takeNext;
 
 	bool coming_from_moving;
 	bool coming_from_rotating;
@@ -427,7 +512,9 @@ int main(int argc, char** argv)
 		st.pub_currentState.publish(currentState_msg);
 		st.publishNewPose();
 		st.run();
-
+		if(st.timeover){
+			break;
+		}
 		rate.sleep();
 	}
 	return 0;
