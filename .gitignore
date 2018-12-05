@@ -5,3 +5,4 @@ build/
 src/transforms/src/objposition.txt
 .vscode/
 install/
+bagfiles/
