@@ -32,11 +32,11 @@ class PathPublisher:
         start_x = rospy.get_param("robot/starting_position/x")
         start_y = rospy.get_param("robot/starting_position/y")
 
-        self.graph = build_graph(self.path, self.robot_radius)
-        #self.graph = build_graph(self.path_to_updated_map, self.robot_radius)
+        #self.graph = build_graph(self.path, self.robot_radius)
+        self.graph = build_graph(self.path_to_updated_map, self.robot_radius)
 
         self.sub_pose = rospy.Subscriber('/pose', Pose2D, self._pose_callback)
-        self.sub_update_map = rospy.Subscriber('/update_map', Bool, self._update_map_callback)
+        #self.sub_update_map = rospy.Subscriber('/update_map', Bool, self._update_map_callback)
         self.sub_global_desired_pose = rospy.Subscriber('/global_desired_pose', Pose2D,
                                                    self._global_desired_pose_callback)
         self.pub_global_desired_pose = rospy.Publisher('/global_desired_pose', 
@@ -143,7 +143,8 @@ if __name__ == '__main__':
     while not rospy.is_shutdown():
 
 
-        if pb.new_position or pb.remap_done:
+        #if pb.new_position or pb.remap_done:
+        if pb.new_position:
             pb.publish_path()
             pb.remap_done = False
             

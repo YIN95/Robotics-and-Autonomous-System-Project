@@ -46,6 +46,9 @@ public: /* ros */
 
 	ros::Time start_time;
 
+	ros::Time trial_time;
+	ros::Time current_emergency_time;
+
 
 	bool start = true;
 	bool home = false;
@@ -69,6 +72,10 @@ public: /* ros */
 		has_reached_orientation = false;
 		emergency_break = false;
 
+		max_num_emergency_breaks = 5;
+		emergency_breaks_counter = 0;
+		seconds_between_emergency_breaks = 20;
+
 		print_again = false;
 		moving_back_seconds = 2;
 		object_detected = false;
@@ -79,6 +86,8 @@ public: /* ros */
 		nextPose = 0;
 		num_points = countObjects();
 		remap_done = false;
+
+		takeNext = false;
 		
 		ROS_INFO("num points: %d", num_points);
 
@@ -130,6 +139,14 @@ public: /* ros */
 		std_msgs::Bool updateMap;
 		updateMap.data = true;
 		pub_updateMap.publish(updateMap);
+		current_emergency_time = ros::Time::now();
+		if (emergency_breaks_counter == 0){
+			trial_time = ros::Time::now();
+		}
+		emergency_breaks_counter += 1;
+		if((emergency_breaks_counter > max_num_emergency_breaks) && ((current_emergency_time - trial_time).toSec() > seconds_between_emergency_breaks)){
+			takeNext = true;
+		}
 		ROS_INFO("In emergencyBreak Callback.");
 	}
 
@@ -321,9 +338,18 @@ public: /* ros */
 					velocity_msg.linear.x = 0;
             		velocity_msg.angular.z = 0; // 1.2 is a okay value
             		pub_velocity.publish(velocity_msg);
-					if(remap_done){
+					// if(remap_done){
+					// 	currentState = STATE_MOVING;
+					// 	remap_done = false;
+					// 	print_again = true;
+					// }
+					if(takeNext){
+						ROS_INFO("Pose not reachable, take next.");
+						currentState = STATE_NEXT_POSE;
+						takeNext = false;
+					}
+					else{
 						currentState = STATE_MOVING;
-						remap_done = false;
 						print_again = true;
 					}
 					
@@ -433,6 +459,10 @@ private:
 	int stop_seconds;
 	int moving_back_seconds;
 
+	int max_num_emergency_breaks;
+	int emergency_breaks_counter;
+	int seconds_between_emergency_breaks;
+
 	std::string exploration_file_path;
 	geometry_msgs::Pose2D global_desired_pose;
 	std_msgs::Int32 grab_msg;
@@ -456,6 +486,8 @@ private:
 	bool open_grippers;
 	bool object_detected;
 	bool remap_done;
+
+	bool takeNext;
 
 	bool coming_from_moving;
 	bool coming_from_rotating;

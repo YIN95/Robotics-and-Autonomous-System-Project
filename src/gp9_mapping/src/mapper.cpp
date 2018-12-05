@@ -600,7 +600,7 @@ int main(int argc, char** argv) {
 
     ros::Publisher pub_updateMap;
 
-    int secondsBetweenRemapping = 30;
+    int secondsBetweenRemapping = 60;
 
 
     double inlierDistanceThreshold = 0.04;
@@ -628,39 +628,41 @@ int main(int argc, char** argv) {
 
         //Has to be done with the brain state 7
 
-        bool emergencyBreak = meas.getEmergencyBreak();
-        if(emergencyBreak!=previousEmergencyBreak){
-            ROS_INFO("Emergency Break - Replanning");
-            std::deque<Point> interestingPoints = meas.getInterestingPoints();
-            Mapper mapper = Mapper(inlierDistanceThreshold, numInliersThreshold);
-            std::deque<Segment> newWalls = mapper.sequentialRANSAC(interestingPoints, neighborDistanceThreshold, numNeighborsThreshold);
-            previousEmergencyBreak = emergencyBreak;
-            int numNewWalls = newWalls.size();
-            if(numNewWalls > 0){
-                ROS_INFO("Writing");
-                writeNewWalls(newWalls, pathToMap);
-                std_msgs::Bool updateMap;
-                updateMap.data = true;
-                pub_updateMap.publish(updateMap);
-                pathToMap = pathToUpdatedMap;
+        // bool emergencyBreak = meas.getEmergencyBreak();
+        // if(emergencyBreak!=previousEmergencyBreak){
+        //     ROS_INFO("Emergency Break - Replanning");
+        //     std::deque<Point> interestingPoints = meas.getInterestingPoints();
+        //     Mapper mapper = Mapper(inlierDistanceThreshold, numInliersThreshold);
+        //     std::deque<Segment> newWalls = mapper.sequentialRANSAC(interestingPoints, neighborDistanceThreshold, numNeighborsThreshold);
+        //     previousEmergencyBreak = emergencyBreak;
+        //     int numNewWalls = newWalls.size();
+        //     if(numNewWalls > 0){
+        //         ROS_INFO("Writing");
+        //         writeNewWalls(newWalls, pathToMap);
+        //         std_msgs::Bool updateMap;
+        //         updateMap.data = true;
+        //         pub_updateMap.publish(updateMap);
+        //         pathToMap = pathToUpdatedMap;
 
-            }
-            previousMapTime = ros::Time::now();
+        //     }
+        //     previousMapTime = ros::Time::now();
 
-        }
+        // }
         if((currentMapTime - previousMapTime).toSec() > secondsBetweenRemapping){
+            ROS_INFO("MAPPER - Searching for new walls");
             std::deque<Point> interestingPoints = meas.getInterestingPoints();
             Mapper mapper = Mapper(inlierDistanceThreshold, numInliersThreshold);
             std::deque<Segment> newWalls = mapper.sequentialRANSAC(interestingPoints, neighborDistanceThreshold, numNeighborsThreshold);
             int numNewWalls = newWalls.size();
             if(numNewWalls > 0){
-                ROS_INFO("Some Walls");
+                ROS_INFO("MAPPER - Writing New Walls");
                 writeNewWalls(newWalls, pathToMap);
                 std_msgs::Bool updateMap;
                 updateMap.data = true;
                 pub_updateMap.publish(updateMap);
                 pathToMap = pathToUpdatedMap;
             }
+            ROS_INFO("MAPPER - End of remapping");
             previousMapTime = ros::Time::now();
         }
 
