@@ -6,3 +6,9 @@ src/transforms/src/objposition.txt
 .vscode/
 install/
 bagfiles/
+.rosinstall
+.rosinstall.bak
+CMakeLists.txt.bak
+*.bak
+*.user
+wstool
