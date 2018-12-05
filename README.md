@@ -5,7 +5,9 @@ RAS-GROUP-9
 ## The commands to run  
 
 0. To be able to connect, be on the same wifi as the NUC with your computer  
+''' c++
 ssh ras19@192.168.1.18
+'''
 
 1. First, roscore and source
 ``` c++
