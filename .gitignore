@@ -4,3 +4,4 @@ build/
 *.pyc
 src/transforms/src/objposition.txt
 .vscode/
+install/

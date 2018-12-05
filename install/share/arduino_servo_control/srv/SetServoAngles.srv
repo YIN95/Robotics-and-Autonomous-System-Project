@@ -1,5 +1,0 @@
-# request
-int64 angle_servo_0  # angle in degrees 0 - 180
-int64 angle_servo_1  # angle in degrees 0 - 180
----
-bool success  # True if Arduino is connected, else False
