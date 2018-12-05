@@ -45,8 +45,6 @@ public: /* ros */
     ros::Time arrival_time;
 	ros::Time start_time;
 
-	ros::Time start_time;
-
 	ros::Time trial_time;
 	ros::Time current_emergency_time;
 

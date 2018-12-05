@@ -318,10 +318,6 @@ void ObjectDetection::detectAndDisplay(cv_bridge::CvImagePtr ptr)
                             std_msgs::String msg;
                             msg.data = "I see an object";
                             pub_speak.publish(msg);
-<<<<<<< HEAD
-                            
-=======
->>>>>>> 1205
                             speakResult();
                             evidence_frame = frame_target;
                             listen_obj_map(pose.x, pose.y, now_object);
